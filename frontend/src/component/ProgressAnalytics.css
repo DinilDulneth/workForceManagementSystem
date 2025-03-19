@@ -1,0 +1,83 @@
+.form-control {
+  background-color: #f8f9fa;
+  transition: all 0.3s ease-in-out;
+  margin: 0px 0px 40px 0px;
+}
+
+.form-control:focus {
+  background-color: #ffffff;
+  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.1);
+  border-color: #86b7fe !important;
+}
+
+.form-control::placeholder {
+  color: #6c757d;
+  opacity: 0.9;
+}
+
+.search_c {
+  max-width: 700px; /* Optional: controls the width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper::before {
+  content: "\1F50D";
+  font-family: "Arial", sans-serif;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d; /* Matches text-muted */
+  pointer-events: none;
+}
+
+.form-control {
+  padding-left: 40px !important; /* Makes room for the icon */
+}
+.moreInfoEmp_custom.d-block {
+  display: block;
+  width: 1070px;
+  z-index: 10000;
+}
+.moreInfoEmp_custom.d-block::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(234, 241, 255, 0.5); /* Semi-transparent gray backdrop */
+  z-index: -1;
+  border-radius: 10px;
+  background-color: #ffffff;
+}
+.moreInfoEmp_custom {
+  display: none;
+  position: fixed;
+  z-index: 99;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+  width: 900px;
+  max-width: 90%;
+  top: 50%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+}
+.user-card_custom {
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  column-gap: 130px;
+  max-height: 80vh; /* Limit height to 80% of viewport height */
+  overflow-y: auto;
+}

@@ -1,0 +1,443 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js";
+import "./ProgressAnalytics.css";
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+export default function ProgressAnalytics() {
+  const [expandedCard, setExpandedCard] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [progressData, setProgressData] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [workingH, setworkingHData] = useState({});
+  const [showWorkingHours, setShowWorkingHours] = useState(false);
+
+  useEffect(() => {
+    getEmployee();
+  }, []);
+
+  function getEmployee() {
+    axios
+      .get("http://localhost:8070/employee/getEmp")
+      .then((res) => {
+        console.log(res.data);
+        setEmployees(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching employees:", err);
+      });
+  }
+
+  function getDayToDayProgress(id) {
+    axios
+      .get(`http://localhost:8070/task/overallProgressEachDayByID/${id}`)
+      .then((res) => {
+        console.log(res.data.progress);
+        setProgressData((prevData) => ({
+          ...prevData,
+          [id]: res.data.progress
+        }));
+      })
+      .catch((err) => {
+        console.error("Error fetching progress data:", err);
+      });
+  }
+
+  function getEmployeeWorkingHours(eid) {
+    axios
+      .get(`http://localhost:8070/workingH/getByEmpID/${eid}`)
+      .then((res) => {
+        console.log(res.data.workingH);
+        setworkingHData((prevData) => ({
+          ...prevData,
+          [eid]: res.data.workingH
+        }));
+      })
+      .catch((err) => {
+        console.error("Error fetching workingH data:", err);
+      });
+  }
+
+  const toggleCard = (id) => {
+    if (expandedCard === id) {
+      setExpandedCard(null); // Collapse the card
+    } else {
+      setExpandedCard(id); // Expand the card
+      getDayToDayProgress(id); // Fetch progress data when expanding the card
+    }
+  };
+
+  const toggleWorkingHours = (id) => {
+    setShowWorkingHours(!showWorkingHours);
+    getEmployeeWorkingHours(id);
+  };
+
+  // Function to prepare chart data from progressData
+  const prepareChartData = (progress) => {
+    if (!progress || Object.keys(progress).length === 0) {
+      return {
+        labels: [],
+        datasets: []
+      };
+    }
+
+    const labels = Object.keys(progress); // Dates
+    const data = Object.values(progress); // Progress values
+
+    // Format dates for better readability (optional, assuming date keys like "2023-10-01")
+    const formattedLabels = labels.map((date) =>
+      new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+      })
+    );
+
+    return {
+      labels: formattedLabels,
+      datasets: [
+        {
+          label: "Daily Progress",
+          data: data,
+          fill: true, // Fill area under the line for visual impact
+          backgroundColor: "rgba(75, 192, 192, 0.2)", // Softer fill color
+          borderColor: "rgba(75, 192, 192, 1)", // Stronger line color
+          borderWidth: 2, // Thicker line
+          pointBackgroundColor: "rgba(75, 192, 192, 1)", // Points on the line
+          pointBorderColor: "#fff", // White border around points
+          pointHoverBackgroundColor: "#fff", // Hover effect
+          pointHoverBorderColor: "rgba(75, 192, 192, 1)",
+          pointRadius: 4, // Larger points for visibility
+          pointHoverRadius: 6, // Larger points on hover
+          tension: 0.2, // Smoother curve
+          borderColor: "rgb(0, 123, 194)"
+        }
+      ]
+    };
+  };
+
+  // Function to prepare chart data from workingH
+  const prepareWorkingHoursChartData = (workingH) => {
+    if (!workingH || Object.keys(workingH).length === 0) {
+      return {
+        labels: [],
+        datasets: []
+      };
+    }
+
+    const labels = Object.keys(workingH); // Dates
+    const data = Object.values(workingH); // Working hours values
+
+    // Format dates for better readability (optional, assuming date keys like "2023-10-01")
+    const formattedLabels = labels.map((date) =>
+      new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+      })
+    );
+
+    return {
+      labels: formattedLabels,
+      datasets: [
+        {
+          label: "Daily Working Hours",
+          data: data,
+          fill: true, // Fill area under the line for visual impact
+          backgroundColor: "rgba(153, 102, 255, 0.2)", // Softer fill color
+          borderColor: "rgba(153, 102, 255, 1)", // Stronger line color
+          borderWidth: 2, // Thicker line
+          pointBackgroundColor: "rgba(153, 102, 255, 1)", // Points on the line
+          pointBorderColor: "#fff", // White border around points
+          pointHoverBackgroundColor: "#fff", // Hover effect
+          pointHoverBorderColor: "rgba(153, 102, 255, 1)",
+          pointRadius: 4, // Larger points for visibility
+          pointHoverRadius: 6, // Larger points on hover
+          tension: 0.2, // Smoother curve
+          borderColor: "rgb(153, 102, 255)"
+        }
+      ]
+    };
+  };
+
+  // Chart options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // Allows better control over height
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          font: {
+            size: 14
+          },
+          color: "#333" // Darker legend text
+        }
+      },
+      title: {
+        display: true,
+        text: "Day-to-Day Performance",
+        font: {
+          size: 18,
+          weight: "bold"
+        },
+        color: "#333",
+        padding: {
+          top: 5,
+          bottom: 10
+        }
+      },
+      tooltip: {
+        enabled: true,
+        mode: "index", // Show all data points at the hovered x-value
+        intersect: false, // Tooltip triggers even if not directly over a point
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        titleFont: {
+          size: 14
+        },
+        bodyFont: {
+          size: 12
+        },
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed.y;
+            return `${context.dataset.label}: ${value}%`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: (context) => {
+          const data = context.chart.data.datasets[0].data;
+          const maxValue = Math.max(...data);
+        },
+        ticks: {
+          stepSize: 20,
+          callback: (value) => `${value}`,
+          color: "#666" // Darker tick labels
+        },
+        title: {
+          display: true,
+          text: "Progress",
+          font: {
+            size: 14,
+            weight: "bold"
+          },
+          color: "#333"
+        },
+        grid: {
+          color: "rgba(0, 0, 0, 0.1)"
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Date",
+          font: {
+            size: 14,
+            weight: "bold"
+          },
+          color: "#333"
+        },
+        ticks: {
+          color: "#666",
+          maxRotation: 35, // Rotate labels if too many dates
+          minRotation: 35
+        },
+        grid: {
+          display: false // Remove vertical grid lines for cleaner look
+        }
+      }
+    },
+    animation: {
+      duration: 1000, // Smooth entry animation
+      easing: "easeOutQuart"
+    }
+  };
+
+  // Filter employees based on search term
+  const filteredEmployees = employees.filter(
+    (employee) =>
+      (employee.name &&
+        employee.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (employee.position &&
+        employee.position.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (employee.status &&
+        employee.status.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  return (
+    <>
+      <div className="container py-6 main-block">
+        <h2 className="headerName mb-5">Team Progress</h2>
+        <div className="mb-4 position-relative search_c">
+          <div className="search-wrapper">
+            <input
+              type="text"
+              className="form-control shadow-sm border-0 rounded-pill py-3 px-4 shadow-lg p-3 mb-5 bg-body-tertiary rounded"
+              placeholder="Search employees by name, position, or status"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="row row-cols-1 row-cols-md-3 g-4">
+          {filteredEmployees.map((employee) => (
+            <React.Fragment key={employee._id}>
+              <div
+                className={`col employeedetails ${
+                  expandedCard === employee._id ? "d-none" : ""
+                }`}
+              >
+                <div
+                  className={`employee-card ${
+                    expandedCard === employee._id ? "d-none" : ""
+                  }`}
+                >
+                  <div className="card-header">
+                    <h6 className="mb-0 p-0">{employee.name}</h6>
+                  </div>
+                  <div className="employee-img-container">
+                    <img
+                      src={employee.image || "../../media/image/user_img.jpg"}
+                      className="employee-img"
+                      alt={employee.name}
+                    />
+                  </div>
+                  <div className="card-body">
+                    <p className="card-text mb-2">
+                      <i className="fas fa-user-tie info-icon"></i>
+                      <strong>Role:</strong> {employee.position}
+                    </p>
+                    <p className="card-text mb-2">
+                      <i className="fas fa-envelope info-icon"></i>
+                      <strong>Email:</strong> {employee.email}
+                    </p>
+                    <p className="card-text">
+                      <i className="fas fa-circle-notch info-icon"></i>
+                      <strong>Status:</strong>{" "}
+                      <span
+                        className={`status-dot ${
+                          employee.status === "Active" ? "" : "status-offline"
+                        }`}
+                      ></span>{" "}
+                      {employee.status}
+                    </p>
+                  </div>
+                  <div className="card-footer text-center border-0">
+                    <button
+                      className="btn btn-secondary btn-sm d-flex align-items-center gap-1"
+                      onClick={() => toggleCard(employee._id)}
+                    >
+                      <i
+                        className={`bi ${
+                          expandedCard === employee._id
+                            ? "bi-chevron-up"
+                            : "bi-eye"
+                        }`}
+                      ></i>
+                      {expandedCard === employee._id
+                        ? "Collapse"
+                        : "View Progress"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              {expandedCard === employee._id && (
+                <div className="col-12">
+                  <div className="moreInfoEmpContainer">
+                    <div className="moreInfoEmp_custom d-block">
+                      <div className="maininfobox">
+                        <div className="card-headerMore">
+                          <h6 className="mb-0 p-0">{employee.name}</h6>
+                        </div>
+                        <div className="user-card_custom">
+                          <div>
+                            <img
+                              src={"../../media/image/user_img.jpg"}
+                              alt="User Avatar"
+                              className="rounded-circle user-avatar"
+                            />
+                            <h5 className="mb-2 ml-2">{employee.name}</h5>
+                            <h6 className="mb-3 ml-2">{employee.position}</h6>
+                          </div>
+                          <div>
+                            {progressData[employee._id] &&
+                            Object.keys(progressData[employee._id]).length >
+                              0 ? (
+                              <div style={{ height: "450px", width: "780px" }}>
+                                <Line
+                                  data={prepareChartData(
+                                    progressData[employee._id]
+                                  )}
+                                  options={chartOptions}
+                                />
+                              </div>
+                            ) : (
+                              <p>No progress data available yet.</p>
+                            )}
+                          </div>
+                          <button
+                            className="btn btn-secondary btn-sm d-flex align-items-center gap-1 mt-3"
+                            onClick={() => toggleWorkingHours(employee._id)}
+                          >
+                            <i className="bi bi-clock"></i> View Working Hours
+                          </button>
+                          {showWorkingHours &&
+                            workingH[employee._id] &&
+                            Object.keys(workingH[employee._id]).length > 0 && (
+                              <div
+                                style={{
+                                  height: "450px",
+                                  width: "780px",
+                                  marginTop: "20px"
+                                }}
+                              >
+                                <Line
+                                  data={prepareWorkingHoursChartData(
+                                    workingH[employee._id]
+                                  )}
+                                  options={chartOptions}
+                                />
+                              </div>
+                            )}
+                        </div>
+                        <button
+                          className="btn btn-secondary btn-sm d-flex align-items-center gap-1 mt-0 m-3"
+                          onClick={() => toggleCard(employee._id)}
+                        >
+                          <i className="bi bi-arrow-left"></i> Back
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
