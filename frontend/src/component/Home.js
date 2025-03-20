@@ -6,12 +6,15 @@ import happy3 from "../assets/images/4.jpg";
 import happy4 from "../assets/images/5.jpg";
 import "../styles/home.css";
 import { Container, Row, Col } from "reactstrap";
-import StatsRow from "../components/StatsRow.js";
-import ImageSlider from "../components/ImageSlider.js";
+import StatsRow from "../component/StatsRow.js";
+import ImageSlider from "../component/ImageSlider.js";
+import Header from "./Header/Header.js";
+import Footer from "./Footer/Footer.js";
 
 export default function Home() {
   return (
     <>
+    <Header/>
       <ImageSlider/>
       {/* Home Section */}
       <section className="home-section">
@@ -45,6 +48,8 @@ export default function Home() {
       <a href="/UserLogin">Login</a>
       <br />
       <a href="/Register">Register</a>
+      <Footer/>
     </>
+
   );
 }
