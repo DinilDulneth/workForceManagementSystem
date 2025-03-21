@@ -1,0 +1,51 @@
+:root {
+    --primary-orange: #ff7043;
+    --primary-orange-dark: #e64a19;
+    --secondary-grey: #455a64;
+    --light-grey: #eceff1;
+    --white: #ffffff;
+    --text-dark: #263238;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-custom {
+    background-color: var(--primary-orange) !important;
+    box-shadow: var(--shadow);
+}
+
+.btn-custom-primary {
+    background-color: var(--primary-orange);
+    border-color: var(--primary-orange);
+    color: var(--white);
+}
+
+.btn-custom-primary:hover {
+    background-color: var(--primary-orange-dark);
+    border-color: var(--primary-orange-dark);
+    color: var(--white);
+}
+
+.card-custom {
+    border: none;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+}
+
+.card-header-custom {
+    background-color: var(--white);
+    border-bottom: 2px solid var(--light-grey);
+    padding: 1.5rem;
+}
+
+.sidebar {
+    background-color: var(--white);
+    box-shadow: var(--shadow);
+    height: 100vh;
+    position: fixed;
+    width: 250px;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 2rem;
+}
