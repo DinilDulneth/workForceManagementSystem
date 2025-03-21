@@ -1,7 +1,6 @@
 import React from "react";
 import { Container, Row, Button } from "reactstrap";
 import { NavLink, Link } from "react-router-dom";
-import "./header.css";
 import logo from "../../assets/images/logo1.png";
 
 const nav_links = [
@@ -21,27 +20,58 @@ const nav_links = [
 
 const Header = () => {
   return (
-    <header className="header">
+    <header
+      style={{
+        width: "100%",
+        background: "#fff",
+        padding: "15px 30px",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+      }}
+    >
       <Container>
         <Row>
           <div
-            className="nav__wrapper d-flex align-items-center 
-        justify-content-between"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
             {/* logo*/}
-            <img src={logo} alt="" />
+            <img
+              src={logo}
+              alt=""
+              style={{
+                maxWidth: "140px",
+              }}
+            />
             {/* logo end*/}
 
             {/* menu start*/}
-            <div className="navigation">
-              <ul className="menu d-flex align-items-center gap-5">
+            <div style={{ display: "flex", justifyContent: "center", flex: 1 }}>
+              <ul
+                style={{
+                  listStyle: "none",
+                  display: "flex",
+                  gap: "30px",
+                  margin: 0,
+                  padding: 0,
+                }}
+              >
                 {nav_links.map((item, index) => (
-                  <li className="nav__item" key={index}>
+                  <li key={index}>
                     <NavLink
                       to={item.path}
-                      className={(navClass) =>
-                        navClass.isActive ? "active__link" : ""
-                      }
+                      style={({ isActive }) => ({
+                        textDecoration: "none",
+                        color: isActive ? "#ff6600" : "#333",
+                        fontSize: "16px",
+                        fontWeight: isActive ? "bold" : "500",
+                        transition: "color 0.3s ease-in-out",
+                      })}
                     >
                       {item.display}
                     </NavLink>
@@ -51,18 +81,72 @@ const Header = () => {
             </div>
 
             {/* menu end*/}
-            <div className="nav__right d-flex align-items-center gap-4 ">
-              <div className="nav__btns d-flex align-items-center gap-4">
-                <Button className="btn secondary__btn">
-                  <Link to="/UserLogin">Login</Link>{" "}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "15px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "15px",
+                }}
+              >
+                <Button
+                  style={{
+                    border: "none",
+                    padding: "8px 20px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                    background: "#f0f0f0",
+                    color: "#333",
+                    transition: "all 0.3s ease-in-out",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#ddd")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "#f0f0f0")
+                  }
+                >
+                  <Link to="/UserLogin" style={{ color: "#333" }}>
+                    Login
+                  </Link>
                 </Button>
 
-                <Button className="btn primary__btn">
-                  <Link to="/Register">Register</Link>{" "}
+                <Button
+                  style={{
+                    border: "none",
+                    padding: "8px 20px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                    background: "#ff6600",
+                    color: "white",
+                    transition: "all 0.3s ease-in-out",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "#e55a00")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "#ff6600")
+                  }
+                >
+                  <Link to="/Register" style={{ color: "white" }}>
+                    Register
+                  </Link>
                 </Button>
               </div>
-              <span className="mobile__menu">
-                <i class="ri-menu-line"></i>
+              <span
+                style={{
+                  display: "none",
+                }}
+              >
+                <i className="ri-menu-line"></i>
               </span>
             </div>
           </div>

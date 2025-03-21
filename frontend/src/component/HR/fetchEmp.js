@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./fetchemp.css";
 
 export default function FetchEmp() {
   const [employees, setEmployees] = useState([]);
@@ -35,8 +34,6 @@ export default function FetchEmp() {
       .catch((err) => {
         console.error("Error fetching employees:", err);
         setError("Could not connect to the server. Using sample data instead.");
-        // Use fallback data when API fails
-        //setEmployees(fallbackEmployees)
         setLoading(false);
       });
   }
@@ -53,19 +50,53 @@ export default function FetchEmp() {
 
   if (loading) {
     return (
-      <div className="container mt-5 text-center">
-        <p>Employees data</p>
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          marginTop: "5rem",
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "28px",
+            fontWeight: 500,
+            textAlign: "center",
+            marginBottom: "30px",
+            color: "#333",
+          }}
+        >
+          Employees data
+        </p>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <p className="mt-3">Loading employee data...</p>
+        <p style={{ marginTop: "3rem" }}>Loading employee data...</p>
       </div>
     );
   }
 
   return (
-    <div className="container mt-5 mb-5">
-      <p>Employees data</p>
+    <div
+      style={{
+        maxWidth: "1200px",
+        margin: "0 auto",
+        marginTop: "5rem",
+        marginBottom: "5rem",
+      }}
+    >
+      <p
+        style={{
+          fontSize: "28px",
+          fontWeight: 500,
+          textAlign: "center",
+          marginBottom: "30px",
+          color: "#333",
+        }}
+      >
+        Employees data
+      </p>
 
       {error && (
         <div
@@ -79,7 +110,7 @@ export default function FetchEmp() {
             data-bs-dismiss="alert"
             aria-label="Close"
           ></button>
-          <div className="mt-2">
+          <div style={{ marginTop: "2rem" }}>
             <button className="btn btn-sm btn-primary" onClick={handleRetry}>
               Retry Connection
             </button>
@@ -90,46 +121,149 @@ export default function FetchEmp() {
       <div className="row mb-5">
         {employees.map((employee) => (
           <div className="col-md-4 mb-4" key={employee._id}>
-            <div className="employee-card">
-              <div className="card">
-                <div className="card-header text-white">
+            <div
+              className="employee-card"
+              style={{
+                transition: "all 0.3s ease",
+                height: "100%",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-5px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
+            >
+              <div
+                className="card"
+                style={{
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  height: "100%",
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
+                }}
+              >
+                <div
+                  className="card-header text-white"
+                  style={{
+                    backgroundColor: "#ff7043",
+                    padding: "15px",
+                    fontWeight: "bold",
+                    borderBottom: "none",
+                  }}
+                >
                   <h6 className="mb-0">{employee.name}</h6>
                 </div>
-                <div className="card-body">
+                <div
+                  className="card-body"
+                  style={{
+                    padding: "20px",
+                    backgroundColor: "#fff",
+                  }}
+                >
                   <div className="row">
                     <div className="col-md-12">
-                      <p>
-                        <strong>Position:</strong> {employee.position}
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Position:
+                        </strong>{" "}
+                        {employee.position}
                       </p>
-                      <p>
-                        <strong>Department:</strong> {employee.department}
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Department:
+                        </strong>{" "}
+                        {employee.department}
                       </p>
-                      <p>
-                        <strong>Phone:</strong> {employee.phone}
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Phone:
+                        </strong>{" "}
+                        {employee.phone}
                       </p>
-                      <p>
-                        <strong>Salary:</strong> $
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Salary:
+                        </strong>{" "}
+                        $
                         {employee.salary
                           ? employee.salary.toLocaleString()
                           : "N/A"}
                       </p>
-                      <p>
-                        <strong>Joined:</strong>{" "}
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Joined:
+                        </strong>{" "}
                         {employee.dateOfJoining
                           ? new Date(
                               employee.dateOfJoining
                             ).toLocaleDateString()
                           : "N/A"}
                       </p>
-                      <p>
-                        <strong>Email:</strong> {employee.email}
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Email:
+                        </strong>{" "}
+                        {employee.email}
                       </p>
-                      <p>
-                        <strong>Status:</strong>{" "}
+                      <p style={{ marginBottom: "8px", fontSize: "14px" }}>
+                        <strong
+                          style={{
+                            fontWeight: 600,
+                            display: "inline-block",
+                            width: "85px",
+                          }}
+                        >
+                          Status:
+                        </strong>{" "}
                         <span
                           className={`status-indicator ${getStatusClass(
                             employee.availability
                           )}`}
+                          style={{
+                            display: "inline-block",
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            marginRight: "5px",
+                          }}
                         ></span>
                         {employee.availability === "1" ||
                         employee.availability === 1
