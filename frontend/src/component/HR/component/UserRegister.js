@@ -7,13 +7,13 @@ import {
   Form,
   FormGroup,
   Button,
-  Input,
+  Input
 } from "reactstrap";
 import { Link } from "react-router-dom";
-import "../../styles/login.css";
+import "../../../styles/login.css";
 
-import registerImg from "../../assets/images/3.jpg";
-import userIcon from "../../assets/images/2.jpg";
+import registerImg from "../../../assets/images/3.jpg";
+import userIcon from "../../../assets/images/2.jpg";
 
 export default function EmployeeRegister() {
   const [submitted, setsubmitted] = useState(false);
@@ -38,7 +38,7 @@ export default function EmployeeRegister() {
       salary: salary,
       dateOfJoining: dateOfJoining,
       availability: availability,
-      position: position,
+      position: position
     };
     axios
       .post(`http://localhost:8070/registration/addEmp`, newEmployee)

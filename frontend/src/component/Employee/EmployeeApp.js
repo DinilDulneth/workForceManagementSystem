@@ -1,8 +1,9 @@
 import { Routes, Route } from "react-router-dom";
-import ResignationF from "./ResignationF";
-import ResignationU from "./ResignationU";
-import ResignationV from "./ResignationV";
-import ResignationD from "./ResignationD";
+import ResignationF from "./component/ResignationF";
+import ResignationU from "./component/ResignationU";
+import ResignationV from "./component/ResignationV";
+import ResignationD from "./component/ResignationD";
+import EmployeeDashboard from "./component/EmployeeDashboard";
 
 export default function EmployeeApp() {
   return (
@@ -12,6 +13,7 @@ export default function EmployeeApp() {
         <Route path="/ResignationU/:id" element={<ResignationU />} />
         <Route path="/ResignationV" element={<ResignationV />} />
         <Route path="/ResignationD" element={<ResignationD />} />
+        <Route path="/" element={<EmployeeDashboard />} />
       </Routes>
     </>
   );
