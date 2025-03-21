@@ -44,10 +44,7 @@ export default function Home() {
       <StatsRow />
   
 
-      <br />
-      <a href="/UserLogin">Login</a>
-      <br />
-      <a href="/Register">Register</a>
+
       <Footer/>
     </>
 
