@@ -48,6 +48,19 @@ router.route("/getHRByID/:id").get(async (req, res) => {
   }
 });
 
+// Get an HR by email
+router.route("/getHRByEmail/:email").get(async (req, res) => {
+  try {
+    const hr = await HR.findOne({ email: req.params.email });
+    if (!hr) {
+      return res.status(404).send();
+    }
+    res.status(200).send(hr);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 // Update an HR by ID
 router.patch("/updateHR/:id", async (req, res) => {
   try {

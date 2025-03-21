@@ -54,16 +54,26 @@ router.route("/getEmpByID/:id").get(async (req, res) => {
   }
 });
 
+// Get an Employee by email
+router.route("/getEmployeeByEmail/:email").get(async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ email: req.params.email });
+    if (!employee) {
+      return res.status(404).send();
+    }
+    res.status(200).send(employee);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 // Update an employee by ID
 router.route("/updateEmp/:id").put(async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndUpdate(
-      req.params.id, req.body,
-      {
+    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
-    }
-  );
+      runValidators: true
+    });
     if (!employee) {
       return res.status(404).send();
     }
@@ -74,7 +84,7 @@ router.route("/updateEmp/:id").put(async (req, res) => {
 });
 
 // Delete an employee by ID
-router.route("/deleteEmp/:id").delete( async (req, res) => {
+router.route("/deleteEmp/:id").delete(async (req, res) => {
   try {
     const employee = await Employee.findByIdAndDelete(req.params.id);
     if (!employee) {

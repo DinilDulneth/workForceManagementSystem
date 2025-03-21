@@ -50,6 +50,19 @@ router.route("/getManagerByID/:id").get(async (req, res) => {
   }
 });
 
+// Get an Manager by email
+router.route("/getManagerByEmail/:email").get(async (req, res) => {
+  try {
+    const manager = await Manager.findOne({ email: req.params.email });
+    if (!manager) {
+      return res.status(404).send();
+    }
+    res.status(200).send(manager);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 // Update a Manager by ID
 router.patch("/updateManager/:id", async (req, res) => {
   try {
