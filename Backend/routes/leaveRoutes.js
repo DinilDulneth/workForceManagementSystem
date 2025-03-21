@@ -64,6 +64,22 @@ router.route("/update/:id").put(async (req, res) => {
     }
 });
 
+// Update leave status
+router.route("/status/:id").put(async (req, res) => {
+    try {
+        const leave = await Leave.findById(req.params.id);
+        if (!leave) {
+            return res.status(404).json({ error: "Leave request not found" });
+        }
+
+        leave.status = req.body.status;
+        await leave.save();
+        res.json({ message: "Leave status updated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Delete leave request by ID
 router.route("/delete/:id").delete((req, res) => {
     Leave.findByIdAndDelete(req.params.id)

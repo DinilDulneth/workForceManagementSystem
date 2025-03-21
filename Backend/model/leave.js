@@ -21,9 +21,14 @@ const leaveSchema = new Schema({
     medicalCertificate: {
         type: String,
         required: false
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
     }
 }, {
-    timestamps: true // Add timestamps
+    timestamps: true
 });
 
 const Leave = mongoose.model("Leave", leaveSchema);

@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { FaEdit, FaTrash, FaSpinner, FaCheck, FaTimes } from 'react-icons/fa';
 
 // Add axios default configuration
 axios.defaults.baseURL = 'http://localhost:8070';
@@ -69,6 +70,16 @@ export default function LeaveRequest() {
         }
     };
 
+    const handleStatusChange = async (id, status) => {
+        try {
+            await axios.put(`/leave/status/${id}`, { status });
+            toast.success(`Leave request ${status}`);
+            fetchLeaves();
+        } catch (error) {
+            toast.error("Failed to update leave status");
+        }
+    };
+
     const initialValues = {
         id: "",
         department: "",
@@ -104,14 +115,27 @@ export default function LeaveRequest() {
 
     return (
         <>
-            <Toaster position="top-right" />
-            <div className="card mb-4">
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    style: {
+                        borderRadius: '10px',
+                        background: '#333',
+                        color: '#fff',
+                    },
+                }}
+            />
+            <div className="leave-card mb-4">
                 <div className="card-header">
-                    <h4 className="mb-0">
-                        {isEditing ? "Edit Leave Request" : "Submit Leave Request"}
+                    <h4 className="mb-0 d-flex align-items-center">
+                        {isEditing ? (
+                            <><FaEdit className="me-2" /> Edit Leave Request</>
+                        ) : (
+                            <>New Leave Request</>
+                        )}
                     </h4>
                 </div>
-                <div className="card-body">
+                <div className="leave-form-container">
                     <Formik
                         innerRef={formikRef}
                         initialValues={initialValues}
@@ -120,7 +144,7 @@ export default function LeaveRequest() {
                     >
                         {({ isSubmitting, errors, touched }) => (
                             <Form>
-                                <div className="row g-3">
+                                <div className="row g-4">
                                     <div className="col-md-6">
                                         <div className="form-group">
                                             <label className="form-label">Employee ID</label>
@@ -128,6 +152,7 @@ export default function LeaveRequest() {
                                                 type="number"
                                                 name="id"
                                                 className={`form-control ${errors.id && touched.id ? 'is-invalid' : ''}`}
+                                                placeholder="Enter employee ID"
                                             />
                                             <ErrorMessage
                                                 name="id"
@@ -191,27 +216,38 @@ export default function LeaveRequest() {
                                     </div>
                                 </div>
 
-                                <div className="mt-4 text-end">
-                                    {isEditing && (
+                                <div className="col-12">
+                                    <div className="d-flex justify-content-end gap-3">
+                                        {isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsEditing(false);
+                                                    setEditId(null);
+                                                    formikRef.current?.resetForm();
+                                                }}
+                                                className="btn btn-leave-secondary"
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
                                         <button
-                                            type="button"
-                                            onClick={() => {
-                                                setIsEditing(false);
-                                                setEditId(null);
-                                                formikRef.current?.resetForm();
-                                            }}
-                                            className="btn btn-secondary me-2"
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                            className="btn btn-leave-primary"
                                         >
-                                            Cancel
+                                            {isSubmitting ? (
+                                                <>
+                                                    <FaSpinner className="loading-spinner" />
+                                                    Processing...
+                                                </>
+                                            ) : isEditing ? (
+                                                'Update Request'
+                                            ) : (
+                                                'Submit Request'
+                                            )}
                                         </button>
-                                    )}
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="btn btn-primary"
-                                    >
-                                        {isSubmitting ? 'Processing...' : isEditing ? 'Update Request' : 'Submit Request'}
-                                    </button>
+                                    </div>
                                 </div>
                             </Form>
                         )}
@@ -219,42 +255,87 @@ export default function LeaveRequest() {
                 </div>
             </div>
 
-            <div className="card">
-                <div className="card-header">
+            <div className="leave-card">
+                <div className="card-header d-flex justify-content-between align-items-center">
                     <h4 className="mb-0">Leave Requests</h4>
+                    <span className="badge bg-primary rounded-pill">
+                        {leaves.length} Requests
+                    </span>
                 </div>
                 <div className="card-body">
                     <div className="table-responsive">
-                        <table className="table table-striped">
+                        <table className="table leave-table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Department</th>
                                     <th>Leave Type</th>
                                     <th>Date</th>
-                                    <th>Actions</th>
+                                    <th>Status</th>
+                                    <th className="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {leaves.map((leave) => (
                                     <tr key={leave._id}>
-                                        <td>{leave.id}</td>
-                                        <td>{leave.department}</td>
-                                        <td>{leave.leavetype}</td>
-                                        <td>{new Date(leave.date).toLocaleDateString()}</td>
                                         <td>
-                                            <button
-                                                onClick={() => handleEdit(leave)}
-                                                className="btn btn-sm btn-primary me-2"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(leave._id)}
-                                                className="btn btn-sm btn-danger"
-                                            >
-                                                Delete
-                                            </button>
+                                            <span className="fw-bold">#{leave.id}</span>
+                                        </td>
+                                        <td>{leave.department}</td>
+                                        <td>
+                                            <span className={`badge badge-leave-status bg-${leave.leavetype === 'Sick Leave' ? 'danger' :
+                                                leave.leavetype === 'Casual Leave' ? 'warning' :
+                                                    'success'
+                                                }`}>
+                                                {leave.leavetype}
+                                            </span>
+                                        </td>
+                                        <td>{new Date(leave.date).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        })}</td>
+                                        <td>
+                                            <span className={`badge bg-${leave.status === 'approved' ? 'success' :
+                                                    leave.status === 'rejected' ? 'danger' :
+                                                        'warning'
+                                                }`}>
+                                                {leave.status || 'pending'}
+                                            </span>
+                                        </td>
+                                        <td className="text-end">
+                                            <div className="btn-group">
+                                                {!leave.status && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleStatusChange(leave._id, 'approved')}
+                                                            className="btn btn-sm btn-success me-2"
+                                                            title="Approve"
+                                                        >
+                                                            <FaCheck /> Accept
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleStatusChange(leave._id, 'rejected')}
+                                                            className="btn btn-sm btn-danger me-2"
+                                                            title="Reject"
+                                                        >
+                                                            <FaTimes /> Reject
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <button
+                                                    onClick={() => handleEdit(leave)}
+                                                    className="btn btn-sm btn-leave-secondary me-2"
+                                                >
+                                                    <FaEdit /> Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(leave._id)}
+                                                    className="btn btn-sm btn-danger"
+                                                >
+                                                    <FaTrash /> Delete
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
