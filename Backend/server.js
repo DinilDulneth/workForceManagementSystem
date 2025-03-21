@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 8070;
 app.use(
   cors({
     origin: "http://localhost:3000",
-    credentials: true
+    credentials: true,
   })
 );
 app.use(bodyParser.json());
@@ -20,7 +20,7 @@ const URL = process.env.MONGODB_URL;
 
 mongoose.connect(URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
 const connection = mongoose.connection;
@@ -48,6 +48,12 @@ app.use("/api/auth", authRoutes);
 
 const dashboardRoutes = require("./routes/dashboardRoutes");
 app.use("/api/dashboard", dashboardRoutes);
+
+const empResignation = require("./routes/eResignation");
+app.use("/resignation", empResignation); // this is the link name
+
+const empRegistration = require("./routes/employeeRoutes");
+app.use("/registration", empRegistration); // this is the link name
 
 app.listen(PORT, () => {
   console.log(`Server is up and running on port number: ${PORT}`);
