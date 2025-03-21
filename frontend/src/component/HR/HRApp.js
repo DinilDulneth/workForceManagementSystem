@@ -1,5 +1,12 @@
-import React from "react";
+import { Routes, Route } from "react-router-dom";
+import FetchEmp from "./fetchEmp";
 
 export default function HRApp() {
-  return <div>HRDashboard</div>;
+  return (
+    <>
+      <Routes>
+        <Route path="/FetchEmp" element={<FetchEmp />} />
+      </Routes>
+    </>
+  );
 }

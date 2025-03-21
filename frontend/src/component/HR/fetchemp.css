@@ -1,0 +1,72 @@
+.employee-card {
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+  
+  .employee-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .employee-card .card {
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .employee-card .card-header {
+    background-color: #ff7043 !important;
+    padding: 15px;
+    font-weight: bold;
+    border-bottom: none;
+  }
+  
+  .employee-card .card-body {
+    padding: 20px;
+    background-color: #fff;
+  }
+  
+  .employee-card p {
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .employee-card strong {
+    font-weight: 600;
+    display: inline-block;
+    width: 85px;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .container > p {
+    font-size: 28px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  /* Status indicator */
+  .status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  
+  .status-active {
+    background-color: #4caf50;
+  }
+  
+  .status-inactive {
+    background-color: #f44336;
+  }
+  
+  

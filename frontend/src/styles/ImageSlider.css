@@ -1,0 +1,235 @@
+.slider-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .slider-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #000;
+  }
+  
+  .slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .slides-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+  }
+  
+  .slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+  }
+  
+  .arrow:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .left-arrow {
+    left: 20px;
+  }
+  
+  .right-arrow {
+    right: 20px;
+  }
+  
+  .indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  
+  .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .indicator.active {
+    background-color: white;
+    transform: scale(1.2);
+  }
+  
+  .controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .control-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.7);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  .control-btn:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .thumbnails-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    overflow-x: auto;
+    padding: 10px 0;
+    scrollbar-width: thin;
+  }
+  
+  .thumbnails-container::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .thumbnails-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .thumbnails-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  
+  .thumbnails-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  
+  .thumbnail {
+    flex: 0 0 80px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+  
+  .thumbnail:hover {
+    opacity: 0.8;
+  }
+  
+  .thumbnail.active {
+    opacity: 1;
+    border-color: #3498db;
+  }
+  
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .slider-container {
+      height: 350px;
+    }
+  
+    .arrow {
+      width: 40px;
+      height: 40px;
+    }
+  
+    .thumbnail {
+      flex: 0 0 60px;
+      height: 45px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .slider-container {
+      height: 250px;
+    }
+  
+    .arrow {
+      width: 36px;
+      height: 36px;
+    }
+  
+    .indicators {
+      bottom: 10px;
+    }
+  
+    .indicator {
+      width: 8px;
+      height: 8px;
+    }
+  
+    .controls {
+      bottom: 10px;
+      right: 10px;
+    }
+  
+    .control-btn {
+      width: 30px;
+      height: 30px;
+    }
+  
+    .thumbnail {
+      flex: 0 0 50px;
+      height: 40px;
+    }
+  }
+  
+  
