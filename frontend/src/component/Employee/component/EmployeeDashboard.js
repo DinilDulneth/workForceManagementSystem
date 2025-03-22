@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import LeaveRequest from "./LeaveRequest";
 import {
   FaHome,
   FaCalendarAlt,
@@ -273,23 +272,67 @@ export default function EmployeeDashboard() {
           </div>
           <div className="nav flex-column">
             <Link
-              to="/EmployeeDashboard/employee"
+              to="#"
               className="nav-link d-flex align-items-center text-secondary mb-2"
             >
               <FaHome className="me-2" /> Dashboard
             </Link>
-            <Link
-              to="/EmployeeDashboard/employee/leaves"
+            {/* <Link
+              to="/EmployeeDashboard/leaves"
               className="nav-link d-flex align-items-center text-secondary mb-2"
             >
               <FaCalendarAlt className="me-2" /> Leave Management
-            </Link>
+            </Link> */}
             <Link
-              to="/manager/leaves"
+              to="/EmployeeDashboard/ResignationF"
               className="nav-link d-flex align-items-center text-secondary mb-2"
             >
-              <FaUserCircle className="me-2" /> Manager View
+              <FaUserCircle className="me-2" /> Resignation Form
             </Link>
+
+            <Link
+              to="/EmployeeDashboard/ResignationV"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> Resignation View
+            </Link>
+            <Link
+              to="/EmployeeDashboard/ResignationD"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> Resignation Delete
+            </Link>
+            <Link
+              to="/EmployeeDashboard/addInquiry"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> add Inquiry
+            </Link>
+            <Link
+              to="/EmployeeDashboard/LeaveRequest"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> Leave Request
+            </Link>
+            <Link
+              to="/EmployeeDashboard/FetchFeedback"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> Fetch Feedback
+            </Link>
+            <Link
+              to="/EmployeeDashboard/Fetchinquiry"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> Fetch inquiry
+            </Link>
+            <Link
+              to="/EmployeeDashboard/addInquiry"
+              className="nav-link d-flex align-items-center text-secondary mb-2"
+            >
+              <FaUserCircle className="me-2" /> add Inquiry
+            </Link>
+
             <a
               href="#"
               className="nav-link d-flex align-items-center text-secondary"
@@ -365,7 +408,6 @@ export default function EmployeeDashboard() {
                   </button>
                 </div>
               </div>
-              <LeaveRequest />
             </div>
           </div>
         </div>
