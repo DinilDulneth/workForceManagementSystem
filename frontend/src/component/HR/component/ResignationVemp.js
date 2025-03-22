@@ -17,7 +17,8 @@ export default function FetchResignations() {
     setLoading(true);
     setError(null);
 
-    axios.get(`http://localhost:8070/resignation/getempRes`, { timeout: 5000 })
+    axios
+      .get(`http://localhost:8070/resignation/getempRes`, { timeout: 5000 })
       .then((res) => {
         setResignations(res.data);
         setLoading(false);
@@ -35,7 +36,9 @@ export default function FetchResignations() {
       .delete(`http://localhost:8070/resignation/deleteempRes/${id}`)
       .then(() => {
         alert("Resignation deleted successfully");
-        setResignations(resignations.filter((resignation) => resignation._id !== id)); // Update UI
+        setResignations(
+          resignations.filter((resignation) => resignation._id !== id)
+        ); // Update UI
       })
       .catch((err) => {
         alert(err.message);
@@ -64,9 +67,17 @@ export default function FetchResignations() {
       <h2 className="mb-4">Resignation Records</h2>
 
       {error && (
-        <div className="alert alert-warning alert-dismissible fade show" role="alert">
+        <div
+          className="alert alert-warning alert-dismissible fade show"
+          role="alert"
+        >
           <strong>Note:</strong> {error}
-          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
           <div className="mt-2">
             <button className="btn btn-sm btn-primary" onClick={handleRetry}>
               Retry Connection
@@ -96,7 +107,11 @@ export default function FetchResignations() {
                   <td>
                     <button
                       className="btn btn-primary btn-sm me-2"
-                      onClick={() => navigate(`/update/${resignation._id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/HRDashboard/UpdateResignation/${resignation._id}`
+                        )
+                      }
                     >
                       Edit
                     </button>
@@ -111,7 +126,9 @@ export default function FetchResignations() {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="text-center">No resignation records found.</td>
+                <td colSpan="4" className="text-center">
+                  No resignation records found.
+                </td>
               </tr>
             )}
           </tbody>

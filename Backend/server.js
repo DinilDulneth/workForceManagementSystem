@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 8070;
 app.use(
   cors({
     origin: "http://localhost:3000",
-    credentials: true,
+    credentials: true
   })
 );
 app.use(bodyParser.json());
@@ -20,7 +20,7 @@ const URL = process.env.MONGODB_URL;
 
 mongoose.connect(URL, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 });
 
 const connection = mongoose.connection;
@@ -43,6 +43,9 @@ app.use("/hr", hrRoutes); // this is the link name
 const managerRoutes = require("./routes/managerRoutes");
 app.use("/manager", managerRoutes); // this is the link name
 
+const leaveRoutes = require("./routes/leaveRoutes");
+app.use("/leave", leaveRoutes);
+
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
@@ -54,6 +57,18 @@ app.use("/resignation", empResignation); // this is the link name
 
 const empRegistration = require("./routes/employeeRoutes");
 app.use("/registration", empRegistration); // this is the link name
+
+const AnnouncementRouter = require("./routes/announcementRoute");
+app.use("/api/announcement", AnnouncementRouter); // this is the link name
+
+const FeedbackRouter = require("./routes/feedbackRoute");
+app.use("/api/feedback", FeedbackRouter); // this is the link name
+
+const inquiryRouter = require("./routes/inquiryRoute");
+app.use("/api/inquiry", inquiryRouter); // this is the link name
+
+const salaryRoutes = require("./routes/salaryRoutes");
+app.use("/salary", salaryRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is up and running on port number: ${PORT}`);

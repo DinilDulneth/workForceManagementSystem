@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -88,28 +90,105 @@ const UserLogin = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <div style={styles.authWrapper}>
+      <div style={styles.authGlassCard}>
+        <h2 style={styles.header}>Welcome to WorkSync</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.inputGroup}>
+            <FontAwesomeIcon icon={faEnvelope} style={styles.icon} />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={styles.input}
+              placeholder="Email Address"
+              required
+            />
+          </div>
+          <div style={styles.inputGroup}>
+            <FontAwesomeIcon icon={faLock} style={styles.icon} />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={styles.input}
+              placeholder="Password"
+              required
+            />
+          </div>
+          <button type="submit" style={styles.button}>
+            Login
+          </button>
+        </form>
       </div>
-      <div>
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button type="submit">Login</button>
-    </form>
+    </div>
   );
+};
+
+const styles = {
+  authWrapper: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    margin: 0,
+    backgroundColor: "##ff6600",
+    fontFamily: "Arial, sans-serif"
+  },
+  authGlassCard: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    maxWidth: "400px",
+    padding: "20px",
+    backgroundColor: "#fff",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    borderRadius: "10px"
+  },
+  header: {
+    color: "#333",
+    marginBottom: "20px"
+  },
+  form: {
+    width: "100%"
+  },
+  inputGroup: {
+    position: "relative",
+    marginBottom: "15px"
+  },
+  icon: {
+    position: "absolute",
+    top: "50%",
+    left: "10px",
+    transform: "translateY(-50%)",
+    color: "#007bff"
+  },
+  input: {
+    width: "100%",
+    padding: "10px 10px 10px 40px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    outline: "none",
+    transition: "border-color 0.3s"
+  },
+  inputFocus: {
+    borderColor: "#ff5722"
+  },
+  button: {
+    width: "100%",
+    padding: "10px",
+    backgroundColor: "#ff5722",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    transition: "background-color 0.3s"
+  },
+  buttonHover: {
+    backgroundColor: "#ff5722"
+  }
 };
 
 export default UserLogin;

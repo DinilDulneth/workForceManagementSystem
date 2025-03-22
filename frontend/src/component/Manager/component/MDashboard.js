@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import "./MDashboard.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -8,6 +9,29 @@ import Chart from "chart.js/auto";
 export default function MDashboard() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const location = useLocation();
+
+  const decodeToken = (token) => {
+    try {
+      if (!token) {
+        throw new Error("No token provided");
+      }
+      const decodedToken = jwtDecode(token);
+      // Adjust these based on your actual token payload structure
+      const userId = decodedToken.sub || decodedToken.email;
+      const userName = decodedToken.name || decodedToken.email;
+      return { userId, userName };
+    } catch (error) {
+      console.error("Failed to decode token:", error.message);
+      return null;
+    }
+  };
+  // Get values from localStorage
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("email");
+  const name = localStorage.getItem("Name"); // If your backend provides this
+  const role = localStorage.getItem("role");
+  const ID = localStorage.getItem("ID");
+  const userInfo = decodeToken(token);
 
   // Toggle sidebar state
   const toggleSidebar = () => {
@@ -26,7 +50,7 @@ export default function MDashboard() {
       <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
         <div className="container-fluid">
           <Link className="navbar-brand fw-bold" to="/ManagerDashboard/">
-            Dashboard
+            WorkSync
           </Link>
           <button
             className="navbar-toggler"
@@ -44,12 +68,15 @@ export default function MDashboard() {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <span className="me-2">User Name</span>
+                <span className="me-2">{name}</span>
                 <img
                   src="https://via.placeholder.com/30"
-                  alt="User Avatar"
+                  alt=""
                   className="rounded-circle"
                 />
+              </a>
+              <a href="/UserLogin" className="">
+                Logout
               </a>
               <ul className="dropdown-menu dropdown-menu-end">
                 <li>
@@ -136,6 +163,20 @@ export default function MDashboard() {
             >
               <i className="bi bi-card-checklist me-2"></i>
               <span>Manage Task</span>
+            </Link>
+          </li>
+
+          <li className="nav-item">
+            <Link
+              className={`nav-link ${
+                location.pathname === "/ManagerDashboard/leavesAp"
+                  ? "active"
+                  : ""
+              }`}
+              to="/ManagerDashboard/leavesAp"
+            >
+              <i className="bi bi-check-circle me-2"></i>
+              <span>Leave Approval</span>
             </Link>
           </li>
           <li className="nav-item">

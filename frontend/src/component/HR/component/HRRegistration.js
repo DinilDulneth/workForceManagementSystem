@@ -7,56 +7,47 @@ import {
   Form,
   FormGroup,
   Button,
-  Input
+  Input,
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
 
-export default function EmployeeRegister() {
-  const [submitted, setsubmitted] = useState(false);
-  const [name, setname] = useState("");
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
-  const [department, setdepartment] = useState("");
-  const [phone, setphone] = useState("");
-  const [salary, setsalary] = useState("");
-  const [dateOfJoining, setdateOfJoining] = useState("");
-  const [availability, setavailability] = useState("");
-  const [position, setposition] = useState("");
+export default function HRRegistration() {
+  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState("");
+  const [department, setDepartment] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [dateOfJoining, setDateOfJoining] = useState("");
 
-  function setEmployee(e) {
+  function setHR(e) {
     e.preventDefault();
-    const newEmployee = {
-      name: name,
-      email: email,
-      password: password,
-      department: department,
-      phone: phone,
-      salary: salary,
-      dateOfJoining: dateOfJoining,
-      availability: availability,
-      position: position
+    const newHR = {
+      name,
+      department,
+      email,
+      phone,
+      password,
+      dateOfJoining,
     };
     axios
-      .post(`http://localhost:8070/registration/addEmp`, newEmployee)
+      .post(`http://localhost:8070/hrRoutes/addHR`, newHR)
       .then((res) => {
-        alert("Employee Registered Successfully!✅");
-        setsubmitted(true);
-        setname("");
-        setemail("");
-        setpassword("");
-        setdepartment("");
-        setphone("");
-        setsalary("");
-        setdateOfJoining("");
-        setavailability("");
-        setposition("");
+        alert("HR Registered Successfully!✅");
+        setSubmitted(true);
+        setName("");
+        setDepartment("");
+        setEmail("");
+        setPhone("");
+        setPassword("");
+        setDateOfJoining("");
       })
       .catch((err) => {
-        alert("Error registering employee: " + err.message);
+        alert("Error registering HR: " + err.message);
       });
-    console.log(newEmployee);
+    console.log(newHR);
   }
 
   return (
@@ -66,7 +57,7 @@ export default function EmployeeRegister() {
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
       }}
     >
       <Container>
@@ -80,7 +71,7 @@ export default function EmployeeRegister() {
                 overflow: "hidden",
                 display: "flex",
                 width: "100%",
-                maxWidth: "900px"
+                maxWidth: "900px",
               }}
               className="d-flex justify-content-between"
             >
@@ -88,7 +79,7 @@ export default function EmployeeRegister() {
                 style={{
                   width: "50%",
                   display: "none",
-                  backgroundColor: "#e6e6e6"
+                  backgroundColor: "#e6e6e6",
                 }}
                 className="login__img"
               >
@@ -98,7 +89,7 @@ export default function EmployeeRegister() {
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover"
+                    objectFit: "cover",
                   }}
                 />
               </div>
@@ -110,7 +101,7 @@ export default function EmployeeRegister() {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center"
+                  justifyContent: "center",
                 }}
                 className="login__form"
               >
@@ -121,7 +112,7 @@ export default function EmployeeRegister() {
                     marginBottom: "20px",
                     borderRadius: "50%",
                     overflow: "hidden",
-                    border: "3px solid #333"
+                    border: "3px solid #333",
                   }}
                   className="user"
                 >
@@ -131,19 +122,19 @@ export default function EmployeeRegister() {
                     style={{
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover"
+                      objectFit: "cover",
                     }}
                   />
                 </div>
                 <h2 style={{ marginBottom: "20px", color: "#333" }}>
-                  Register Employee
+                  Register HR
                 </h2>
 
                 {submitted ? (
                   <div
                     style={{
                       textAlign: "center",
-                      padding: "2rem 1rem"
+                      padding: "2rem 1rem",
                     }}
                     className="success-message"
                   >
@@ -158,7 +149,7 @@ export default function EmployeeRegister() {
                         alignItems: "center",
                         justifyContent: "center",
                         fontSize: "2rem",
-                        margin: "0 auto 1.5rem"
+                        margin: "0 auto 1.5rem",
                       }}
                       className="success-icon"
                     >
@@ -168,17 +159,17 @@ export default function EmployeeRegister() {
                       style={{
                         color: "#474747",
                         fontSize: "1.5rem",
-                        marginBottom: "1rem"
+                        marginBottom: "1rem",
                       }}
                     >
-                      Employee Registered
+                      HR Registered
                     </h3>
                     <p style={{ color: "#8f9491", fontSize: "1rem" }}>
-                      The employee has been successfully registered.
+                      The HR has been successfully registered.
                     </p>
                   </div>
                 ) : (
-                  <Form onSubmit={setEmployee} style={{ width: "100%" }}>
+                  <Form onSubmit={setHR} style={{ width: "100%" }}>
                     <FormGroup>
                       <Input
                         type="text"
@@ -186,7 +177,7 @@ export default function EmployeeRegister() {
                         required
                         id="name"
                         value={name}
-                        onChange={(e) => setname(e.target.value)}
+                        onChange={(e) => setName(e.target.value)}
                         style={{
                           width: "100%",
                           padding: "12px",
@@ -194,51 +185,7 @@ export default function EmployeeRegister() {
                           borderRadius: "5px",
                           border: "1px solid #ccc",
                           outline: "none",
-                          transition: "border-color 0.3s"
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = "#333")}
-                        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-                      />
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Input
-                        type="email"
-                        placeholder="Email"
-                        required
-                        id="email"
-                        value={email}
-                        onChange={(e) => setemail(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "12px",
-                          marginBottom: "15px",
-                          borderRadius: "5px",
-                          border: "1px solid #ccc",
-                          outline: "none",
-                          transition: "border-color 0.3s"
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = "#333")}
-                        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-                      />
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Input
-                        type="text"
-                        placeholder="password"
-                        required
-                        id="password"
-                        value={password}
-                        onChange={(e) => setpassword(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "12px",
-                          marginBottom: "15px",
-                          borderRadius: "5px",
-                          border: "1px solid #ccc",
-                          outline: "none",
-                          transition: "border-color 0.3s"
+                          transition: "border-color 0.3s",
                         }}
                         onFocus={(e) => (e.target.style.borderColor = "#333")}
                         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
@@ -252,7 +199,7 @@ export default function EmployeeRegister() {
                         required
                         id="department"
                         value={department}
-                        onChange={(e) => setdepartment(e.target.value)}
+                        onChange={(e) => setDepartment(e.target.value)}
                         style={{
                           width: "100%",
                           padding: "12px",
@@ -260,7 +207,29 @@ export default function EmployeeRegister() {
                           borderRadius: "5px",
                           border: "1px solid #ccc",
                           outline: "none",
-                          transition: "border-color 0.3s"
+                          transition: "border-color 0.3s",
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = "#333")}
+                        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
+                      />
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Input
+                        type="email"
+                        placeholder="Email"
+                        required
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          marginBottom: "15px",
+                          borderRadius: "5px",
+                          border: "1px solid #ccc",
+                          outline: "none",
+                          transition: "border-color 0.3s",
                         }}
                         onFocus={(e) => (e.target.style.borderColor = "#333")}
                         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
@@ -274,7 +243,7 @@ export default function EmployeeRegister() {
                         required
                         id="phone"
                         value={phone}
-                        onChange={(e) => setphone(e.target.value)}
+                        onChange={(e) => setPhone(e.target.value)}
                         style={{
                           width: "100%",
                           padding: "12px",
@@ -282,7 +251,7 @@ export default function EmployeeRegister() {
                           borderRadius: "5px",
                           border: "1px solid #ccc",
                           outline: "none",
-                          transition: "border-color 0.3s"
+                          transition: "border-color 0.3s",
                         }}
                         onFocus={(e) => (e.target.style.borderColor = "#333")}
                         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
@@ -291,12 +260,12 @@ export default function EmployeeRegister() {
 
                     <FormGroup>
                       <Input
-                        type="number"
-                        placeholder="Salary"
+                        type="password"
+                        placeholder="Password"
                         required
-                        id="salary"
-                        value={salary}
-                        onChange={(e) => setsalary(e.target.value)}
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         style={{
                           width: "100%",
                           padding: "12px",
@@ -304,7 +273,7 @@ export default function EmployeeRegister() {
                           borderRadius: "5px",
                           border: "1px solid #ccc",
                           outline: "none",
-                          transition: "border-color 0.3s"
+                          transition: "border-color 0.3s",
                         }}
                         onFocus={(e) => (e.target.style.borderColor = "#333")}
                         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
@@ -318,7 +287,7 @@ export default function EmployeeRegister() {
                         required
                         id="dateOfJoining"
                         value={dateOfJoining}
-                        onChange={(e) => setdateOfJoining(e.target.value)}
+                        onChange={(e) => setDateOfJoining(e.target.value)}
                         style={{
                           width: "100%",
                           padding: "12px",
@@ -326,50 +295,7 @@ export default function EmployeeRegister() {
                           borderRadius: "5px",
                           border: "1px solid #ccc",
                           outline: "none",
-                          transition: "border-color 0.3s"
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = "#333")}
-                        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-                      />
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Input
-                        type="text"
-                        placeholder="Availability"
-                        required
-                        id="availability"
-                        value={availability}
-                        onChange={(e) => setavailability(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "12px",
-                          marginBottom: "15px",
-                          borderRadius: "5px",
-                          border: "1px solid #ccc",
-                          outline: "none",
-                          transition: "border-color 0.3s"
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = "#333")}
-                        onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Input
-                        type="text"
-                        placeholder="position"
-                        required
-                        id="position"
-                        value={position}
-                        onChange={(e) => setposition(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "12px",
-                          marginBottom: "15px",
-                          borderRadius: "5px",
-                          border: "1px solid #ccc",
-                          outline: "none",
-                          transition: "border-color 0.3s"
+                          transition: "border-color 0.3s",
                         }}
                         onFocus={(e) => (e.target.style.borderColor = "#333")}
                         onBlur={(e) => (e.target.style.borderColor = "#ccc")}
@@ -380,7 +306,7 @@ export default function EmployeeRegister() {
                       style={{
                         display: "flex",
                         gap: "1rem",
-                        marginTop: "1rem"
+                        marginTop: "1rem",
                       }}
                     >
                       <Button
@@ -392,7 +318,7 @@ export default function EmployeeRegister() {
                           border: "none",
                           borderRadius: "5px",
                           cursor: "pointer",
-                          transition: "background-color 0.3s"
+                          transition: "background-color 0.3s",
                         }}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.backgroundColor = "#555")
@@ -402,7 +328,7 @@ export default function EmployeeRegister() {
                         }
                         type="submit"
                       >
-                        Register Employee
+                        Register HR
                       </Button>
                       <Button
                         style={{
@@ -413,7 +339,7 @@ export default function EmployeeRegister() {
                           border: "1px solid #ccc",
                           borderRadius: "5px",
                           cursor: "pointer",
-                          transition: "background-color 0.3s"
+                          transition: "background-color 0.3s",
                         }}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.backgroundColor = "#f5f5f5")
@@ -422,7 +348,7 @@ export default function EmployeeRegister() {
                           (e.currentTarget.style.backgroundColor = "#fff")
                         }
                         type="button"
-                        onClick={() => setsubmitted(false)}
+                        onClick={() => setSubmitted(false)}
                       >
                         Cancel
                       </Button>
@@ -437,7 +363,7 @@ export default function EmployeeRegister() {
                     style={{
                       color: "#007bff",
                       textDecoration: "none",
-                      fontWeight: "bold"
+                      fontWeight: "bold",
                     }}
                   >
                     Login

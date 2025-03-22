@@ -6,6 +6,7 @@ import DashboardOverView from "./component/dashboardOverview";
 import ProgressAnalytics from "./component/ProgressAnalytics";
 import ManageTask from "./component/ManageTask";
 import EmployeeProgress from "./component/EmployeeProgress";
+import LeaveApproval from "./component/LeaveApproval";
 
 function ManagerApp() {
   return (
@@ -17,6 +18,7 @@ function ManagerApp() {
         <Route path="/analytics" element={<ProgressAnalytics />} />
         <Route path="/manageTask" element={<ManageTask />} />
         <Route path="/progress/:id" element={<EmployeeProgress />} />
+        <Route path="/leavesAp" element={<LeaveApproval />} />
       </Routes>
     </>
   );
