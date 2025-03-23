@@ -5,7 +5,7 @@ import logo from "../../assets/images/logo1.png";
 
 const nav_links = [
   {
-    path: "/home",
+    path: "/#",
     display: "Home"
   },
   {

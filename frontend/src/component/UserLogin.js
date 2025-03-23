@@ -7,6 +7,7 @@ import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
 const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -46,53 +47,52 @@ const UserLogin = () => {
           break;
       }
     } catch (error) {
+      setError("Login failed. Please check your credentials and try again.");
       console.error("Login failed", error);
     }
   };
 
-  function getHrID(email) {
-    axios
-      .get(`http://localhost:8070/hr/getHRByEmail/${email}`)
-      .then((res) => {
-        console.log(res.data);
-        localStorage.setItem("ID", res.data._id);
-        localStorage.setItem("Name", res.data.name);
-      })
-      .catch((err) => {
-        console.error("Error fetching HR:", err);
-      });
-  }
+  const getHrID = async (email) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/hr/getHRByEmail/${email}`
+      );
+      localStorage.setItem("ID", res.data._id);
+      localStorage.setItem("Name", res.data.name);
+    } catch (err) {
+      console.error("Error fetching HR:", err);
+    }
+  };
 
-  function getManagerID(email) {
-    axios
-      .get(`http://localhost:8070/manager/getManagerByEmail/${email}`)
-      .then((res) => {
-        console.log(res.data);
-        localStorage.setItem("ID", res.data._id);
-        localStorage.setItem("Name", res.data.name);
-      })
-      .catch((err) => {
-        console.error("Error fetching manager:", err);
-      });
-  }
+  const getManagerID = async (email) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/manager/getManagerByEmail/${email}`
+      );
+      localStorage.setItem("ID", res.data._id);
+      localStorage.setItem("Name", res.data.name);
+    } catch (err) {
+      console.error("Error fetching manager:", err);
+    }
+  };
 
-  function getEmployeeID(email) {
-    axios
-      .get(`http://localhost:8070/employee/getEmployeeByEmail/${email}`)
-      .then((res) => {
-        console.log(res.data);
-        localStorage.setItem("ID", res.data._id);
-        localStorage.setItem("Name", res.data.name);
-      })
-      .catch((err) => {
-        console.error("Error fetching Employee:", err);
-      });
-  }
+  const getEmployeeID = async (email) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/employee/getEmployeeByEmail/${email}`
+      );
+      localStorage.setItem("ID", res.data._id);
+      localStorage.setItem("Name", res.data.name);
+    } catch (err) {
+      console.error("Error fetching Employee:", err);
+    }
+  };
 
   return (
     <div style={styles.authWrapper}>
       <div style={styles.authGlassCard}>
         <h2 style={styles.header}>Welcome to WorkSync</h2>
+        {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
             <FontAwesomeIcon icon={faEnvelope} style={styles.icon} />
@@ -132,7 +132,7 @@ const styles = {
     alignItems: "center",
     height: "100vh",
     margin: 0,
-    backgroundColor: "##ff6600",
+    backgroundColor: "#ff6600",
     fontFamily: "Arial, sans-serif"
   },
   authGlassCard: {
@@ -187,7 +187,11 @@ const styles = {
     transition: "background-color 0.3s"
   },
   buttonHover: {
-    backgroundColor: "#ff5722"
+    backgroundColor: "#e64a19"
+  },
+  error: {
+    color: "red",
+    marginBottom: "10px"
   }
 };
 

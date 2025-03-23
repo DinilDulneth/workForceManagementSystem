@@ -115,11 +115,11 @@ export default function LeaveApproval() {
                 }
 
                 .alert-success {
-                    border-left-color: #198754;
+                    border-left-color:rgb(120, 234, 26);
                 }
 
                 .alert-danger {
-                    border-left-color: #dc3545;
+                    border-left-color:rgb(28, 15, 81);
                 }
 
                 .table td {
@@ -234,7 +234,7 @@ export default function LeaveApproval() {
                       <span
                         className={`badge bg-${
                           request.status === "approved"
-                            ? "success"
+                            ? "primary"
                             : request.status === "rejected"
                             ? "danger"
                             : "warning"
