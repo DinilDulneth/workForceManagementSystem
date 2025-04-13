@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 import ResignationF from "./component/ResignationF";
 import ResignationU from "./component/ResignationU";
 import ResignationV from "./component/ResignationV";
@@ -10,10 +11,57 @@ import AddInquiry from "./component/addInquiry";
 import FetchFeedback from "./component/fetchFeedback";
 import Fetchinquiry from "./component/fetchinquiry";
 import Ine from "react-bootstrap";
+import DashboardTemp from "../DashboardTemp";
+
+const Links = [
+  // { link: "#", name: "Dashboard", icon: "FaHome" },
+  {
+    link: "/EmployeeDashboard/ResignationF",
+    name: "Resignation Form",
+    icon: "FaUserCircle"
+  },
+  {
+    link: "/EmployeeDashboard/ResignationV",
+    name: "Resignation View",
+    icon: "FaUserCircle"
+  },
+  {
+    link: "/EmployeeDashboard/ResignationD",
+    name: "Resignation Delete",
+    icon: "FaUserCircle"
+  },
+  // {
+  //   link: "/EmployeeDashboard/addInquiry",
+  //   name: "Add Inquiry",
+  //   icon: "FaUserCircle"
+  // },
+  {
+    link: "/EmployeeDashboard/LeaveRequest",
+    name: "Leave Request",
+    icon: "FaUserCircle"
+  },
+  {
+    link: "/EmployeeDashboard/FetchFeedback",
+    name: "Fetch Feedback",
+    icon: "FaUserCircle"
+  },
+  {
+    link: "/EmployeeDashboard/Fetchinquiry",
+    name: "Fetch Inquiry",
+    icon: "FaUserCircle"
+  },
+  {
+    link: "/EmployeeDashboard/addInquiry",
+    name: "Add Inquiry",
+    icon: "FaUserCircle"
+  },
+  { link: "#", name: "Settings", icon: "FaCog" }
+];
 
 export default function EmployeeApp() {
   return (
     <>
+      <DashboardTemp ArrLinkList={Links} />
       <Routes>
         <Route path="/" element={<EmployeeDashboard />} />
         <Route path="/ResignationF" element={<ResignationF />} />

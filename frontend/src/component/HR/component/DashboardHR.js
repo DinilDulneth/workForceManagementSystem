@@ -10,7 +10,7 @@ export default function DashboardHR() {
       }}
     >
       {/* Sidebar */}
-      <div
+      {/* <div
         style={{
           width: "250px",
           backgroundColor: "#474747",
@@ -69,7 +69,7 @@ export default function DashboardHR() {
             Sign Out
           </a>
         </nav>
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <div style={{ flex: 1, padding: "20px", backgroundColor: "#ffffff" }}>

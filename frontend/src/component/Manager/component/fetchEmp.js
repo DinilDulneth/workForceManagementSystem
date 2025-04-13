@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import defaultProfilePic from "../../../assets/images/user_img.jpg";
 import "./fetchEmp.css"; // Assuming you'll put the custom CSS in a separate file
 
 export default function FetchEmp() {
@@ -225,7 +226,7 @@ export default function FetchEmp() {
                   </div>
                   <div className="employee-img-container">
                     <img
-                      src={employee.image || "../../media/image/user_img.jpg"}
+                      src={employee.image || defaultProfilePic}
                       className="employee-img"
                       alt={employee.name}
                     />

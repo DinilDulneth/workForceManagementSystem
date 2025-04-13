@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import "./MDashboard.css";
+import "./Manager/component/MDashboard.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import defaultProfilePic from "../../../assets/images/user_img.jpg";
+import defaultProfilePic from "../assets/images/user_img.jpg";
 import Chart, { Colors } from "chart.js/auto";
 
-export default function MDashboard() {
+export default function DashboardTemp({ ArrLinkList }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const location = useLocation();
 
@@ -133,7 +133,20 @@ export default function MDashboard() {
               <span className="menuIcon">Menu</span>
             </div>
           </li>
-          <li className="nav-item">
+          {ArrLinkList.map((item, index) => (
+            <li className="nav-item" key={index}>
+              <Link
+                className={`nav-link ${
+                  location.pathname === item.link ? "active" : ""
+                }`}
+                to={item.link}
+              >
+                <i className={`bi ${item.icon} me-2`}></i>
+                <span>{item.name}</span>
+              </Link>
+            </li>
+          ))}
+          {/* <li className="nav-item">
             <Link
               className={`nav-link ${
                 location.pathname === "/ManagerDashboard/" ||
@@ -146,69 +159,7 @@ export default function MDashboard() {
               <i className="bi bi-house-door me-2"></i>
               <span>Dashboard</span>
             </Link>
-          </li>
-          <li className="nav-item">
-            <Link
-              className={`nav-link ${
-                location.pathname === "/ManagerDashboard/analytics"
-                  ? "active"
-                  : ""
-              }`}
-              to="/ManagerDashboard/analytics"
-            >
-              <i className="bi bi-bar-chart me-2"></i>
-              <span>Progress Analytics</span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link
-              className={`nav-link ${
-                location.pathname === "/ManagerDashboard/empAll" ? "active" : ""
-              }`}
-              to="/ManagerDashboard/empAll"
-            >
-              <i className="bi bi-people me-2"></i>
-              <span>Handling Employees</span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link
-              className={`nav-link ${
-                location.pathname === "/ManagerDashboard/manageTask"
-                  ? "active"
-                  : ""
-              }`}
-              to="/ManagerDashboard/manageTask"
-            >
-              <i className="bi bi-card-checklist me-2"></i>
-              <span>Manage Task</span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link
-              className={`nav-link ${
-                location.pathname === "/ManagerDashboard/leavesAp"
-                  ? "active"
-                  : ""
-              }`}
-              to="/ManagerDashboard/leavesAp"
-            >
-              <i className="bi bi-check-circle me-2"></i>
-              <span>Leave Approval</span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link
-              className={`nav-link ${
-                location.pathname === "/settings" ? "active" : ""
-              }`}
-              to="/ManagerDashboard/settings"
-            >
-              <i className="bi bi-gear me-2"></i>
-              <span>Settings</span>
-            </Link>
-          </li>
-
+          </li> */}
           {/* Bottom Section with Icons Only */}
           <div className="mt-auto">
             <div
