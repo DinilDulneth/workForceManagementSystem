@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import defaultProfilePic from "../../../assets/images/user_img.jpg";
-import "./fetchEmp.css"; // Assuming you'll put the custom CSS in a separate file
+import "./fetchEmp.css";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function FetchEmp() {
   const [employees, setEmployees] = useState([]);
@@ -17,6 +19,51 @@ export default function FetchEmp() {
   const [editingTaskId, setEditingTaskId] = useState(null); // Track which task is being edited
   const [editedTask, setEditedTask] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+
+  const downloadTasksAsPDF = () => {
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(18);
+    doc.text("Tasks List", 10, 10);
+
+    // Table
+    const tableColumn = [
+      "Task No.",
+      "Task Name",
+      "Description",
+      "Status",
+      "Deadline",
+      "Start Date",
+      "End Date",
+      "Priority"
+    ];
+    const tableRows = [];
+
+    tasks.forEach((task, index) => {
+      const taskData = [
+        index + 1,
+        task.tName,
+        task.description,
+        getTaskStatusLabel(task.status),
+        new Date(task.deadLine).toLocaleDateString(),
+        new Date(task.startDate).toLocaleDateString(),
+        task.endDate ? new Date(task.endDate).toLocaleDateString() : "N/A",
+        task.priority
+      ];
+      tableRows.push(taskData);
+    });
+
+    // Add table to the PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20
+    });
+
+    // Save the PDF
+    doc.save("Recent_Tasks_List.pdf");
+  };
 
   const getTaskStatusLabel = (status) => {
     switch (status) {
@@ -481,7 +528,15 @@ export default function FetchEmp() {
                                   </tr>
                                 )}
                               </tbody>
+                              <button
+                                className="btn btn-primary btn-sm mb-3 mt-4"
+                                onClick={downloadTasksAsPDF}
+                                style={{ width: "120px" }}
+                              >
+                                Download PDF
+                              </button>
                             </table>
+
                             <span
                               className="fw-bold text-muted small"
                               style={{ fontSize: "16px" }}
