@@ -8,6 +8,8 @@ import ManageTask from "./component/ManageTask";
 import EmployeeProgress from "./component/EmployeeProgress";
 import LeaveApproval from "./component/LeaveApproval";
 import DashboardTemp from "../../component/DashboardTemp";
+import { Calendar } from "react-big-calendar";
+import MyCalendar from "../Calender";
 
 const links = [
   { link: "/ManagerDashboard", name: "Dashboard", icon: "bi-house-door" },
@@ -45,6 +47,7 @@ function ManagerApp() {
         <Route path="/manageTask" element={<ManageTask />} />
         <Route path="/progress/:id" element={<EmployeeProgress />} />
         <Route path="/leavesAp" element={<LeaveApproval />} />
+        <Route path="/MyCalendar" element={<MyCalendar />} />
       </Routes>
     </>
   );

@@ -193,7 +193,7 @@ export default function DashboardTemp({ ArrLinkList }) {
                 className={`nav-link ${
                   location.pathname === "/calendar" ? "active" : ""
                 }`}
-                to="/calendar"
+                to="/ManagerDashboard/MyCalendar"
                 title="Calendar"
               >
                 <i className="bi bi-calendar"></i>
