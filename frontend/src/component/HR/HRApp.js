@@ -10,7 +10,7 @@ import AddSalary from "./component/addSalary";
 import UpdateSalary from "./component/updateSalary";
 import FetchHR from "./component/fetchHR";
 import FetchManager from "./component/fetchManager";
-import HRResignation from "./component/HRRegistration";
+import HRRegistration from "./component/HRRegistration";
 import ManagerRegistration from "./component/ManagerRegistration";
 import RegistrationDemo from "./component/ResignationDemp";
 import RegistrationUemo from "./component/ResignationUemp";
@@ -93,7 +93,7 @@ export default function HRApp() {
         <Route path="/fetchManager" element={<FetchManager />} />
         <Route path="/ResignationVemp" element={<ResignationVemp />} />
         <Route path="/UserRegister" element={<UserRegister />} />
-        <Route path="/HRResignation" element={<HRResignation />} />
+        <Route path="/HRRegistration" element={<HRRegistration />} />
         <Route path="/ManagerRegistration" element={<ManagerRegistration />} />
         <Route path="/RegistrationDemo" element={<RegistrationDemo />} />
         <Route path="/RegistrationUemo" element={<RegistrationUemo />} />
