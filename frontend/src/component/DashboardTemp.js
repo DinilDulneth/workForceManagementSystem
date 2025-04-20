@@ -1,52 +1,75 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import "./Manager/component/MDashboard.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import defaultProfilePic from "../assets/images/user_img.jpg";
-import Chart, { Colors } from "chart.js/auto";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DashboardTemp({ ArrLinkList }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const location = useLocation();
 
-  const decodeToken = (token) => {
-    try {
-      if (!token) {
-        throw new Error("No token provided");
-      }
-      const decodedToken = jwtDecode(token);
-      // Adjust these based on your actual token payload structure
-      const userId = decodedToken.sub || decodedToken.email;
-      const userName = decodedToken.name || decodedToken.email;
-      return { userId, userName };
-    } catch (error) {
-      console.error("Failed to decode token:", error.message);
-      return null;
-    }
-  };
-  // Get values from localStorage
-  const token = localStorage.getItem("token");
+  // Retrieve user data from localStorage
   const email = localStorage.getItem("email");
-  const name = localStorage.getItem("Name"); // If your backend provides this
+  const name = localStorage.getItem("Name");
   const role = localStorage.getItem("role");
   const ID = localStorage.getItem("ID");
-  const userInfo = decodeToken(token);
+
+  useEffect(() => {
+    // Check if the user is authenticated
+    if (!email || !name) {
+      toast.error("Unauthorized access! Please log in to continue...", {
+        position: "top-right",
+        autoClose: 1000
+      });
+
+      setTimeout(() => {
+        window.location.href = "/UserLogin";
+      }, 3000);
+    } else {
+      // Show success notification after login
+      toast.success(`Welcome back, ${name}!`, {
+        position: "top-right",
+        autoClose: 3000
+      });
+    }
+  }, [email, name]);
+
+  // Use the custom authentication hook
+  // const isAuthenticated = useAuth(email, name);
 
   // Toggle sidebar state
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
+  // Handle Logout
+  const handleLogout = (e) => {
+    e.preventDefault();
 
-  // Initialize Chart.js
-  useEffect(() => {
-    const ctx = document.getElementById("revenueChart")?.getContext("2d");
-    if (!ctx) return;
-  }, []);
-  const profilePic = "/frontend/media/image/user_img.jpg";
+    // Clear user data and token
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("Name");
+    localStorage.removeItem("role");
+    localStorage.removeItem("ID");
+
+    // Show logout notification
+    toast.info("You have been logged out.", {
+      position: "top-right",
+      autoClose: 1000
+    });
+
+    // Redirect to login page
+    setTimeout(() => {
+      window.location.href = "/UserLogin";
+    }, 2000);
+  };
+
   return (
     <>
+      <ToastContainer /> {/* ToastContainer for notifications */}
       {/* Header */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
         <div className="container-fluid">
@@ -84,7 +107,7 @@ export default function DashboardTemp({ ArrLinkList }) {
                 style={{ width: "10px", height: "10px" }}
               ></span>
             </div>
-            <div className="dropdown">
+            {/* <div className="dropdown">
               <span className="me-2">{name}</span>
               <a
                 href="/UserLogin"
@@ -92,32 +115,21 @@ export default function DashboardTemp({ ArrLinkList }) {
               >
                 <i className="bi bi-box-arrow-right me-2"></i> Logout
               </a>
+            </div> */}
 
-              {/* <ul className="dropdown-menu dropdown-menu-end">
-                <li>
-                  <Link className="dropdown-item" to="/profile">
-                    Profile
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/settings">
-                    Settings
-                  </Link>
-                </li>
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <Link className="dropdown-item text-danger" to="/logout">
-                    Logout
-                  </Link>
-                </li>
-              </ul> */}
+            <div className="dropdown">
+              <span className="me-2">{name}</span>
+              <a
+                href="#"
+                onClick={handleLogout}
+                className="dropdown-item text-danger d-flex align-items-center"
+              >
+                <i className="bi bi-box-arrow-right me-2"></i> Logout
+              </a>
             </div>
           </div>
         </div>
       </nav>
-
       {/* Sidebar */}
       <div
         className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}
@@ -146,20 +158,6 @@ export default function DashboardTemp({ ArrLinkList }) {
               </Link>
             </li>
           ))}
-          {/* <li className="nav-item">
-            <Link
-              className={`nav-link ${
-                location.pathname === "/ManagerDashboard/" ||
-                location.pathname === "/ManagerDashboard"
-                  ? "active"
-                  : ""
-              }`}
-              to="/ManagerDashboard/"
-            >
-              <i className="bi bi-house-door me-2"></i>
-              <span>Dashboard</span>
-            </Link>
-          </li> */}
           {/* Bottom Section with Icons Only */}
           <div className="mt-auto">
             <div

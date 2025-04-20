@@ -5,15 +5,24 @@ import defaultProfilePic from "../../../assets/images/user_img.jpg";
 import "./fetchEmp.css";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 export default function FetchEmp() {
+  // Retrieve user data from localStorage
+  const email = localStorage.getItem("email");
+  const name = localStorage.getItem("Name");
+  const role = localStorage.getItem("role");
+  const MID = localStorage.getItem("ID");
+
   const [employees, setEmployees] = useState([]);
   const [expandedCard, setExpandedCard] = useState(null); // Track which card is expanded
   const [tasks, setTasks] = useState([]);
   const [tName, setName] = useState("");
   const [description, setdescription] = useState("");
   const [empID, setempID] = useState("");
-  const [assignedBy, setassignedBy] = useState("1");
+  const [assignedBy, setassignedBy] = useState(MID);
   const [deadLine, setdeadLine] = useState("");
   const [priority, setpriority] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null); // Track which task is being edited
@@ -21,6 +30,12 @@ export default function FetchEmp() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const downloadTasksAsPDF = () => {
+    // Show a toast notification for starting the download
+    toast.info("Preparing your PDF...", {
+      position: "top-right",
+      autoClose: 2000
+    });
+
     const doc = new jsPDF();
 
     // Title
@@ -63,6 +78,12 @@ export default function FetchEmp() {
 
     // Save the PDF
     doc.save("Recent_Tasks_List.pdf");
+
+    // Show a toast notification for successful download
+    toast.success("PDF downloaded successfully!", {
+      position: "top-right",
+      autoClose: 2000
+    });
   };
 
   const getTaskStatusLabel = (status) => {
@@ -151,14 +172,15 @@ export default function FetchEmp() {
       tName,
       description,
       empID: id,
-      assignedBy: "1",
+      assignedBy: MID,
       deadLine,
       priority
     };
+
     axios
       .post("http://localhost:8070/task/add", newTask)
       .then((res) => {
-        alert("Task Added Successfully!✅");
+        Swal.fire("Success!", "Task Added Successfully! ✅", "success");
         setName("");
         setdescription("");
         setdeadLine("");
@@ -167,7 +189,7 @@ export default function FetchEmp() {
         getTask(id);
       })
       .catch((err) => {
-        alert("Error adding Task:" + err.message);
+        Swal.fire("Error!", "Error adding Task: " + err.message, "error");
       });
     console.log(newTask);
   }
@@ -198,24 +220,50 @@ export default function FetchEmp() {
     axios
       .put(`http://localhost:8070/task/update/${tid}`, updateTask)
       .then(() => {
-        alert("Task Updated Successfully! ✅");
+        Swal.fire("Updated!", "Task has been updated successfully.", "success");
         setEditingTaskId(null);
         getTask(eid); // Ensure this fetches the latest data
       })
       .catch((err) => {
-        alert("Error updating task: " + err.message);
+        Swal.fire(
+          "Error!",
+          "Failed to update the task: " + err.message,
+          "error"
+        );
       });
   }
+
   function deleteTask(tid, eid) {
-    axios
-      .delete(`http://localhost:8070/task/deleteFromDatabase/${tid}`)
-      .then(() => {
-        alert("Task deleted successfully");
-        getTask(eid);
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
+    Swal.fire({
+      title: "Warning!",
+      text: "Are you sure you want to delete this task? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`http://localhost:8070/task/deleteFromDatabase/${tid}`)
+          .then(() => {
+            Swal.fire(
+              "Deleted!",
+              "Task has been deleted successfully.",
+              "success"
+            );
+            getTask(eid); // Refresh the task list
+          })
+          .catch((err) => {
+            Swal.fire(
+              "Error!",
+              "Failed to delete the task: " + err.message,
+              "error"
+            );
+          });
+      }
+    });
   }
 
   const toggleCard = (id) => {

@@ -8,6 +8,7 @@ import Chart from "chart.js/auto";
 import "./dashboardOverview.css";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function DashboardOverView() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -20,6 +21,12 @@ export default function DashboardOverView() {
   const [selectedStatus, setSelectedStatus] = useState("");
 
   const downloadTasksAsPDF = () => {
+    // Show a toast notification for starting the download
+    toast.info("Preparing your PDF...", {
+      position: "top-right",
+      autoClose: 2000
+    });
+
     const doc = new jsPDF();
 
     // Title
@@ -64,6 +71,12 @@ export default function DashboardOverView() {
 
     // Save the PDF
     doc.save("Recent_Tasks_List.pdf");
+
+    // Show a toast notification for successful download
+    toast.success("PDF downloaded successfully!", {
+      position: "top-right",
+      autoClose: 2000
+    });
   };
 
   const toggleSidebar = () => {
