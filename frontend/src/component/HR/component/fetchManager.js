@@ -16,7 +16,7 @@ export default function FetchManager() {
     setError(null);
 
     // Try to fetch from API with timeout
-    const fetchPromise = axios.get("http://localhost:8070/Mregistration/getManager", {
+    const fetchPromise = axios.get("http://localhost:8070/manager/getManager", {
       timeout: 5000, // 5 second timeout
     });
 
