@@ -30,267 +30,189 @@ export default function ResignationF() {
   }
 
   return (
-    <div
-      style={{
-        maxWidth: "600px",
-        width: "100%",
-        margin: "100px 0 0 auto",
-        marginRight: "400px",
-        padding: "2.5rem",
-        backgroundColor: "#ffffff",
-        borderRadius: "10px",
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      {submitted ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "2rem 1rem",
-          }}
-        >
-          <div
-            style={{
-              width: "70px",
-              height: "70px",
-              backgroundColor: "#2ecc71",
-              color: "white",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "2rem",
-              margin: "0 auto 1.5rem",
-            }}
-          >
-            ✓
+    <div style={styles.mainContent}>
+      <div style={styles.formContainer}>
+        {submitted ? (
+          <div style={styles.successContainer}>
+            <div style={styles.successIcon}>✓</div>
+            <h3 style={{ color: "#474747", fontSize: "1.5rem", marginBottom: "1rem" }}>
+              Resignation Submitted
+            </h3>
+            <p style={{ color: "#8f9491", fontSize: "1rem" }}>
+              Your resignation has been successfully submitted.
+            </p>
           </div>
-          <h3
-            style={{
-              color: "#474747",
-              fontSize: "1.5rem",
-              marginBottom: "1rem",
-            }}
-          >
-            Resignation Submitted
-          </h3>
-          <p
-            style={{
-              color: "#8f9491",
-              fontSize: "1rem",
-            }}
-          >
-            Your resignation has been successfully submitted.
-          </p>
-        </div>
-      ) : (
-        <>
-          <h2
-            style={{
-              color: "#000000",
-              textAlign: "center",
-              marginBottom: "2rem",
-              fontSize: "1.8rem",
-              position: "relative",
-              paddingBottom: "0.75rem",
-            }}
-          >
-            Employee Resignation
-            <span
-              style={{
-                content: '""',
-                position: "absolute",
-                bottom: 0,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "80px",
-                height: "3px",
-                backgroundColor: "#fc6625",
-              }}
-            ></span>
-          </h2>
-          <form
-            onSubmit={setResignation}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1.5rem",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-                animation: "fadeIn 0.4s ease forwards",
-                opacity: 0,
-                animationDelay: "0.1s",
-              }}
-            >
-              <label
-                htmlFor="lastWorkingDate"
-                style={{
-                  color: "#474747",
-                  fontWeight: 500,
-                  fontSize: "0.95rem",
-                  display: "block",
-                }}
-              >
-                Last Working Date:
-                <span
-                  style={{
-                    content: '"*"',
-                    color: "#fc6625",
-                    marginLeft: "4px",
-                  }}
-                ></span>
-              </label>
-              <input
-                type="date"
-                id="lastWorkingDate"
-                name="lastWorkingDate"
-                value={endDate}
-                onChange={(e) => setendDate(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "0.75rem 1rem",
-                  border: "1px solid #8f9491",
-                  borderRadius: "6px",
-                  fontSize: "1rem",
-                  color: "#474747",
-                  backgroundColor: "#ffffff",
-                  transition: "all 0.3s ease",
-                }}
-              />
-            </div>
+        ) : (
+          <>
+            <h2 style={styles.header}>
+              Employee Resignation
+              <span style={styles.headerUnderline}></span>
+            </h2>
+            <form onSubmit={setResignation}>
+              <div style={styles.formGroup}>
+                <label htmlFor="lastWorkingDate" style={styles.label}>
+                  Last Working Date:
+                  <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+                </label>
+                <input
+                  type="date"
+                  id="lastWorkingDate"
+                  value={endDate}
+                  onChange={(e) => setendDate(e.target.value)}
+                  required
+                  style={styles.input}
+                />
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-                animation: "fadeIn 0.4s ease forwards",
-                opacity: 0,
-                animationDelay: "0.2s",
-              }}
-            >
-              <label
-                htmlFor="reason"
-                style={{
-                  color: "#474747",
-                  fontWeight: 500,
-                  fontSize: "0.95rem",
-                  display: "block",
-                }}
-              >
-                Reason for Resignation:
-                <span
-                  style={{
-                    content: '"*"',
-                    color: "#fc6625",
-                    marginLeft: "4px",
-                  }}
-                ></span>
-              </label>
-              <textarea
-                id="reason"
-                name="reason"
-                placeholder="Please provide your reason for resignation"
-                value={reason}
-                onChange={(e) => setreason(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "0.75rem 1rem",
-                  border: "1px solid #8f9491",
-                  borderRadius: "6px",
-                  fontSize: "1rem",
-                  color: "#474747",
-                  backgroundColor: "#ffffff",
-                  transition: "all 0.3s ease",
-                  minHeight: "120px",
-                  resize: "vertical",
-                  fontFamily: "inherit",
-                  lineHeight: 1.5,
-                }}
-              ></textarea>
-            </div>
+              <div style={styles.formGroup}>
+                <label htmlFor="reason" style={styles.label}>
+                  Reason for Resignation:
+                  <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+                </label>
+                <textarea
+                  id="reason"
+                  value={reason}
+                  onChange={(e) => setreason(e.target.value)}
+                  placeholder="Please provide your reason for resignation"
+                  required
+                  style={{ ...styles.input, ...styles.textarea }}
+                />
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "1rem",
-                marginTop: "1rem",
-              }}
-            >
-              <button
-                type="submit"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  flex: 1,
-                  backgroundColor: "#fc6625",
-                  color: "#ffffff",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#e55a1c")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#fc6625")
-                }
-              >
-                Submit Resignation
-              </button>
-              <button
-                type="button"
-                onClick={() => setsubmitted(false)}
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  flex: 1,
-                  backgroundColor: "#ffffff",
-                  color: "#474747",
-                  border: "1px solid #8f9491",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f5f5f5")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#ffffff")
-                }
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </>
-      )}
+              <div style={styles.buttonGroup}>
+                <button
+                  type="submit"
+                  style={styles.submitButton}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e55a1c")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fc6625")}
+                >
+                  Submit Resignation
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setsubmitted(false)}
+                  style={styles.cancelButton}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-const fadeIn = `
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+const styles = {
+  mainContent: {
+    marginLeft: "250px",
+    marginTop: "70px",
+    padding: "25px",
+    minHeight: "calc(100vh - 70px)",
+    maxWidth: "calc(100vw - 250px)",
+    backgroundColor: "#f8f9fa",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start"
+  },
+  formContainer: {
+    width: "600px",
+    backgroundColor: "#ffffff",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    padding: "2.5rem",
+    marginTop: "20px"
+  },
+  header: {
+    color: "#2c3e50",
+    textAlign: "center",
+    marginBottom: "2rem",
+    fontSize: "1.8rem",
+    position: "relative",
+    paddingBottom: "0.75rem"
+  },
+  headerUnderline: {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "80px",
+    height: "3px",
+    backgroundColor: "#fc6625"
+  },
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    marginBottom: "1.5rem"
+  },
+  label: {
+    color: "#474747",
+    fontWeight: 500,
+    fontSize: "0.95rem"
+  },
+  input: {
+    width: "100%",
+    padding: "0.75rem 1rem",
+    border: "1px solid #8f9491",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    color: "#474747",
+    transition: "all 0.3s ease"
+  },
+  textarea: {
+    minHeight: "120px",
+    resize: "vertical",
+    fontFamily: "inherit",
+    lineHeight: 1.5
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "1rem",
+    marginTop: "2rem"
+  },
+  submitButton: {
+    flex: 1,
+    padding: "0.75rem 1.5rem",
+    backgroundColor: "#fc6625",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.3s ease"
+  },
+  cancelButton: {
+    flex: 1,
+    padding: "0.75rem 1.5rem",
+    backgroundColor: "#ffffff",
+    color: "#474747",
+    border: "1px solid #8f9491",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.3s ease"
+  },
+  successContainer: {
+    textAlign: "center",
+    padding: "2rem 1rem"
+  },
+  successIcon: {
+    width: "70px",
+    height: "70px",
+    backgroundColor: "#2ecc71",
+    color: "white",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "2rem",
+    margin: "0 auto 1.5rem"
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-`;
-
-document.head.insertAdjacentHTML("beforeend", `<style>${fadeIn}</style>`);
+};

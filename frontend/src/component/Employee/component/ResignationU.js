@@ -38,7 +38,7 @@ export default function UpdateResignation() {
       )
       .then(() => {
         alert("Resignation Updated Successfully! ✅");
-        navigate("/allResignations");
+        navigate("/EmployeeDashboard/ResignationV");
       })
       .catch((err) => {
         alert("Error updating resignation: " + err.message);
@@ -54,45 +54,157 @@ export default function UpdateResignation() {
   }
 
   return (
-    <div className="container mt-4">
-      <h2>Update Resignation</h2>
-      <form onSubmit={updateResignationData}>
-        <div className="form-group">
-          <label>Employee ID</label>
-          <input
-            type="text"
-            className="form-control"
-            name="empId"
-            value={resignation.empId}
-            readOnly
-          />
-        </div>
+    <div style={styles.mainContent}>
+      <div style={styles.formContainer}>
+        <h2 style={styles.header}>
+          Update Resignation
+          <span style={styles.headerUnderline}></span>
+        </h2>
 
-        <div className="form-group">
-          <label>Reason for Resignation</label>
-          <textarea
-            className="form-control"
-            name="Reason"
-            value={resignation.Reason}
-            onChange={handleChange}
-          ></textarea>
-        </div>
+        <form onSubmit={updateResignationData}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Employee ID
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <input
+              type="text"
+              name="empId"
+              value={resignation.empId}
+              readOnly
+              style={{ ...styles.input, ...styles.readOnlyInput }}
+            />
+          </div>
 
-        <div className="form-group">
-          <label>End Date</label>
-          <input
-            type="date"
-            className="form-control"
-            name="endDate"
-            value={resignation.endDate}
-            onChange={handleChange}
-          />
-        </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Reason for Resignation
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <textarea
+              name="Reason"
+              value={resignation.Reason}
+              onChange={handleChange}
+              style={{ ...styles.input, ...styles.textarea }}
+            />
+          </div>
 
-        <button type="submit" className="btn btn-success">
-          Update
-        </button>
-      </form>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              End Date
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <input
+              type="date"
+              name="endDate"
+              value={resignation.endDate}
+              onChange={handleChange}
+              style={styles.input}
+            />
+          </div>
+
+          <div style={styles.buttonGroup}>
+            <button
+              type="submit"
+              style={styles.updateButton}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#e55a1c")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#fc6625")
+              }
+            >
+              Update Resignation
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
+
+const styles = {
+  mainContent: {
+    marginLeft: "250px",
+    marginTop: "70px",
+    padding: "25px",
+    minHeight: "calc(100vh - 70px)",
+    maxWidth: "calc(100vw - 250px)",
+    backgroundColor: "#f8f9fa",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  formContainer: {
+    width: "600px",
+    backgroundColor: "#ffffff",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    padding: "2.5rem",
+    marginTop: "20px",
+  },
+  header: {
+    color: "#2c3e50",
+    textAlign: "center",
+    marginBottom: "2rem",
+    fontSize: "1.8rem",
+    position: "relative",
+    paddingBottom: "0.75rem",
+  },
+  headerUnderline: {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "80px",
+    height: "3px",
+    backgroundColor: "#fc6625",
+  },
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+    marginBottom: "1.5rem",
+  },
+  label: {
+    color: "#474747",
+    fontWeight: 500,
+    fontSize: "0.95rem",
+  },
+  input: {
+    width: "100%",
+    padding: "0.75rem 1rem",
+    border: "1px solid #8f9491",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    color: "#474747",
+    transition: "all 0.3s ease",
+    backgroundColor: "#f8f9fa",
+  },
+  readOnlyInput: {
+    backgroundColor: "#e9ecef",
+    cursor: "not-allowed",
+  },
+  textarea: {
+    minHeight: "120px",
+    resize: "vertical",
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "1rem",
+    marginTop: "2rem",
+  },
+  updateButton: {
+    flex: 1,
+    padding: "0.75rem 1.5rem",
+    backgroundColor: "#fc6625",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
+};
