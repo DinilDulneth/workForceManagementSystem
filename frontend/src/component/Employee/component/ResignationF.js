@@ -34,7 +34,8 @@ export default function ResignationF() {
       style={{
         maxWidth: "600px",
         width: "100%",
-        margin: "0 auto",
+        margin: "100px 0 0 auto",
+        marginRight: "400px",
         padding: "2.5rem",
         backgroundColor: "#ffffff",
         borderRadius: "10px",
