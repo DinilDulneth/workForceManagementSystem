@@ -1,24 +1,36 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function AddSalary() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState({
     name: "",
     employeeId: "",
     paidHours: "",
     grossPay: "",
-    statutoryPay:"",
+    statutoryPay: "",
     deductions: "",
     netPay: "",
     status: "Pending",
   });
 
-  function addSalaryData(e) {
-    e.preventDefault();
+  const formFields = [
+    { label: "Name", name: "name", type: "text", placeholder: "Enter Name" },
+    { label: "Employee ID", name: "employeeId", type: "text", placeholder: "Enter Employee ID" },
+    { label: "Paid Hours", name: "paidHours", type: "number", placeholder: "Paid Hours" },
+    { label: "Statutory Pay", name: "statutoryPay", type: "text", placeholder: "Enter Statutory Pay" },
+    { label: "Gross Pay", name: "grossPay", type: "number", placeholder: "Gross Pay" },
+    { label: "Deductions", name: "deductions", type: "number", placeholder: "Deductions" },
+    { label: "Net Pay", name: "netPay", type: "number", placeholder: "Net Pay" }
+  ];
 
-    // Convert numeric fields to numbers
+  async function addSalaryData(e) {
+    e.preventDefault();
+    setLoading(true);
+
     const salaryData = {
       ...salary,
       paidHours: Number(salary.paidHours) || 0,
@@ -27,191 +39,184 @@ export default function AddSalary() {
       netPay: Number(salary.netPay) || 0,
     };
 
-    console.log("Submitting Salary Data:", salaryData); // Debugging
-
-    axios
-      .post("http://localhost:8070/salary/add", salaryData)
-      .then(() => {
-        alert("Salary Added Successfully! ✅");
-        navigate("/fetchSalary");
-      })
-      .catch((err) => {
-        console.error("Error:", err.response?.data || err.message);
-        alert("Error adding salary: " + (err.response?.data?.message || err.message));
-      });
+    try {
+      await axios.post("http://localhost:8070/salary/add", salaryData);
+      alert("Salary Added Successfully! ✅");
+      navigate("/fetchSalary");
+    } catch (err) {
+      console.error("Error:", err.response?.data || err.message);
+      alert("Error adding salary: " + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setSalary({
-      ...salary,
+    setSalary(prev => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   }
 
   return (
-    <form
-      className="container mt-4"
-      onSubmit={addSalaryData}
-      style={{
-        maxWidth: "600px",
-        padding: "2rem",
-        borderRadius: "8px",
-        background: "#ffffff",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <h2 style={{ color: "#ff7043", fontWeight: "bold" }}>Add Salary</h2>
+    <div style={styles.pageContainer}>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <div style={styles.cardHeader}>
+            <h2 style={styles.title}>Add Salary</h2>
+          </div>
+          
+          <div style={styles.cardBody}>
+            <form onSubmit={addSalaryData}>
+              {formFields.map((field) => (
+                <div key={field.name} style={styles.formGroup}>
+                  <label style={styles.label}>{field.label}</label>
+                  <input
+                    type={field.type}
+                    className="form-control"
+                    placeholder={field.placeholder}
+                    name={field.name}
+                    value={salary[field.name]}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
+              ))}
 
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Name</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter Name"
-          name="name"
-          value={salary.name}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
-      </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Status</label>
+                <select
+                  className="form-control"
+                  name="status"
+                  value={salary.status}
+                  onChange={handleChange}
+                  style={styles.input}
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Paid">Paid</option>
+                </select>
+              </div>
 
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Employee ID</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter Employee ID"
-          name="employeeId"
-          value={salary.employeeId}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
+              <div style={styles.buttonGroup}>
+                <button
+                  type="submit"
+                  style={styles.submitButton}
+                  disabled={loading}
+                >
+                  {loading ? "Adding..." : "Add Salary"}
+                </button>
+                <button
+                  type="button"
+                  style={styles.cancelButton}
+                  onClick={() => navigate("/fetchSalary")}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Paid Hours</label>
-        <input
-          type="number"
-          className="form-control"
-          placeholder="Paid Hours"
-          name="paidHours"
-          value={salary.paidHours}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
-      </div>
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>statutoryPay</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter statutoryPay"
-          name="statutoryPay"
-          value={salary.statutoryPay}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
-      </div>
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Gross Pay</label>
-        <input
-          type="number"
-          className="form-control"
-          placeholder="Gross Pay"
-          name="grossPay"
-          value={salary.grossPay}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
-      </div>
-
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Deductions</label>
-        <input
-          type="number"
-          className="form-control"
-          placeholder="Deductions"
-          name="deductions"
-          value={salary.deductions}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
-      </div>
-
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Net Pay</label>
-        <input
-          type="number"
-          className="form-control"
-          placeholder="Net Pay"
-          name="netPay"
-          value={salary.netPay}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        />
-      </div>
-
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: "600", color: "#455a64" }}>Status</label>
-        <select
-          className="form-control"
-          name="salaryStatus"
-          value={salary.status}
-          onChange={handleChange}
-          style={{
-            borderRadius: "8px",
-            padding: "0.75rem 1rem",
-            border: "2px solid #e0e0e0",
-          }}
-        >
-          <option value="Pending">Pending</option>
-          <option value="Paid">Paid</option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        className="btn"
-        style={{
-          backgroundColor: "#ff7043",
-          color: "#ffffff",
-          border: "none",
-          padding: "0.75rem 1.5rem",
-          borderRadius: "8px",
-          fontWeight: "600",
-        }}
-      >
-        Add
-      </button>
-    </form>
+    </div>
   );
 }
+
+const styles = {
+  pageContainer: {
+    marginLeft: "250px",
+    padding: "20px",
+    transition: "margin-left 0.3s ease",
+    width: "calc(100% - 250px)",
+    minHeight: "calc(100vh - 60px)",
+    backgroundColor: "#f5f5f5",
+    marginTop: "60px"
+  },
+  container: {
+    maxWidth: "800px",
+    margin: "0 auto",
+    padding: "20px"
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
+    overflow: "hidden"
+  },
+  cardHeader: {
+    backgroundColor: "#ff7043",
+    padding: "20px",
+    color: "#fff"
+  },
+  title: {
+    margin: 0,
+    fontSize: "24px",
+    fontWeight: "500"
+  },
+  cardBody: {
+    padding: "30px"
+  },
+  formGroup: {
+    marginBottom: "20px"
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
+    color: "#455a64",
+    fontWeight: "600"
+  },
+  input: {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "8px",
+    border: "2px solid #e0e0e0",
+    fontSize: "14px",
+    transition: "border-color 0.3s ease",
+    "&:focus": {
+      borderColor: "#ff7043",
+      outline: "none"
+    }
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "10px",
+    marginTop: "30px"
+  },
+  submitButton: {
+    flex: "1",
+    padding: "12px",
+    backgroundColor: "#ff7043",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: "#f4511e"
+    },
+    "&:disabled": {
+      backgroundColor: "#cccccc",
+      cursor: "not-allowed"
+    }
+  },
+  cancelButton: {
+    flex: "1",
+    padding: "12px",
+    backgroundColor: "#fff",
+    color: "#455a64",
+    border: "2px solid #e0e0e0",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      backgroundColor: "#f5f5f5"
+    },
+    "&:disabled": {
+      backgroundColor: "#f5f5f5",
+      cursor: "not-allowed"
+    }
+  }
+};
