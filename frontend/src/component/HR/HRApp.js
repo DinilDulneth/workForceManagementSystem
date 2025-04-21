@@ -51,21 +51,8 @@ export default function HRApp() {
       name: "HR Records",
       icon: "bi-clipboard-data"
     },
-    {
-      link: "/HRDashboard/RegistrationDemo",
-      name: "Delete Employee Account",
-      icon: "bi-trash"
-    },
-    {
-      link: "/HRDashboard/RegistrationUemo",
-      name: "Edit Employee Account",
-      icon: "bi-pencil-square"
-    },
-    {
-      link: "/HRDashboard/RegistrationVemo",
-      name: "View Employee Account",
-      icon: "bi-eye"
-    },
+
+
     {
       link: "/HRDashboard/addSalary",
       name: "Add Salary",

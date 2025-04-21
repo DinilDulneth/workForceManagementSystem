@@ -4,6 +4,9 @@ import { Container, Row, Col, Form, FormGroup, Button, Input } from "reactstrap"
 import { Link } from "react-router-dom";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
+import logo from "../../../assets/images/logo1.png";
+
+
 
 export default function ManagerRegistration() {
   const [submitted, setSubmitted] = useState(false);
@@ -13,6 +16,38 @@ export default function ManagerRegistration() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [dateOfJoining, setDateOfJoining] = useState("");
+
+
+
+  const generateEmailContent = (managerData) => {
+    const subject = "Welcome to WorkSync - Manager Account Credentials";
+    const body = `
+Dear ${managerData.name},
+
+Welcome to WorkSync! We're pleased to have you join our management team.
+
+Your login credentials are as follows:
+Email: ${managerData.email}
+Password: ${managerData.password}
+
+Department: ${managerData.department}
+Start Date: ${new Date(managerData.dateOfJoining).toLocaleDateString()}
+
+Please change your password after your first login at: http://localhost:3000/login
+
+For any questions, please contact the HR department.
+
+
+Best regards,
+HR Team
+WorkSync
+`;
+
+    return {
+      subject: encodeURIComponent(subject),
+      body: encodeURIComponent(body)
+    };
+  };
 
   const formFields = [
     { type: 'text', id: 'name', placeholder: 'Name', value: name, onChange: setName },
@@ -36,6 +71,10 @@ export default function ManagerRegistration() {
     axios
       .post(`http://localhost:8070/manager/addManager`, newManager)
       .then((res) => {
+
+        const emailContent = generateEmailContent(newManager);
+        window.location.href = `mailto:${newManager.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+        
         alert("Manager Registered Successfully!✅");
         setSubmitted(true);
         setName("");

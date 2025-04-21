@@ -15,6 +15,7 @@ import userIcon from "../../../assets/images/2.jpg";
 
 export default function EmployeeRegister() {
   const [submitted, setsubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
@@ -24,6 +25,35 @@ export default function EmployeeRegister() {
   const [dateOfJoining, setdateOfJoining] = useState("");
   const [availability, setavailability] = useState("");
   const [position, setposition] = useState("");
+
+  const generateEmailContent = (employeeData) => {
+    const subject = "Welcome to WorkSync - Your Account Credentials";
+    const body = `
+Dear ${employeeData.name},
+
+Welcome to WorkSync! We're excited to have you join our team.
+
+Your login credentials are as follows:
+Email: ${employeeData.email}
+Password: ${employeeData.password}
+
+Department: ${employeeData.department}
+Position: ${employeeData.position}
+Start Date: ${new Date(employeeData.dateOfJoining).toLocaleDateString()}
+
+Please change your password after your first login at: http://localhost:3000/login
+
+For any questions, please contact your HR department.
+
+Best regards,
+HR Team
+WorkSync`;
+
+    return {
+      subject: encodeURIComponent(subject),
+      body: encodeURIComponent(body)
+    };
+  };
 
   const formFields = [
     { type: 'text', id: 'name', placeholder: 'Name', value: name, onChange: setname },
@@ -37,38 +67,64 @@ export default function EmployeeRegister() {
     { type: 'text', id: 'position', placeholder: 'Position', value: position, onChange: setposition }
   ];
 
-  function setEmployee(e) {
+  const clearForm = () => {
+    setname("");
+    setemail("");
+    setpassword("");
+    setdepartment("");
+    setphone("");
+    setsalary("");
+    setdateOfJoining("");
+    setavailability("");
+    setposition("");
+  };
+
+  async function setEmployee(e) {
     e.preventDefault();
+
+    if (!name || !email || !password || !department || !position) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    setIsLoading(true);
+
     const newEmployee = {
-      name: name,
-      email: email,
-      password: password,
-      department: department,
-      phone: phone,
-      salary: salary,
-      dateOfJoining: dateOfJoining,
-      availability: availability,
-      position: position
+      name,
+      email,
+      password,
+      department,
+      phone,
+      salary,
+      dateOfJoining,
+      availability,
+      position
     };
-    axios
-      .post(`http://localhost:8070/registration/addEmp`, newEmployee)
-      .then((res) => {
-        alert("Employee Registered Successfully!✅");
-        setsubmitted(true);
-        setname("");
-        setemail("");
-        setpassword("");
-        setdepartment("");
-        setphone("");
-        setsalary("");
-        setdateOfJoining("");
-        setavailability("");
-        setposition("");
-      })
-      .catch((err) => {
-        alert("Error registering employee: " + err.message);
-      });
-    console.log(newEmployee);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8070/registration/addEmp`,
+        newEmployee
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        try {
+          const emailContent = generateEmailContent(newEmployee);
+          window.location.href = `mailto:${newEmployee.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+          alert("Employee Registered Successfully!✅");
+          setsubmitted(true);
+          clearForm();
+        } catch (emailError) {
+          console.error("Error generating email:", emailError);
+          alert("Employee registered but there was an error sending the email.");
+        }
+      }
+    } catch (err) {
+      alert("Error registering employee: " + err.message);
+      console.error("Registration error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -93,8 +149,14 @@ export default function EmployeeRegister() {
                     <div style={styles.checkmark}>✓</div>
                     <h3 style={styles.successTitle}>Employee Registered</h3>
                     <p style={styles.successText}>
-                      The employee has been successfully registered.
+                      The employee has been successfully registered and an email has been sent with their credentials.
                     </p>
+                    <Button 
+                      style={styles.submitButton}
+                      onClick={() => setsubmitted(false)}
+                    >
+                      Register Another Employee
+                    </Button>
                   </div>
                 ) : (
                   <Form onSubmit={setEmployee} style={styles.form}>
@@ -115,26 +177,24 @@ export default function EmployeeRegister() {
                     ))}
 
                     <div style={styles.buttonGroup}>
-                      <Button type="submit" style={styles.submitButton}>
-                        Register Employee
+                      <Button 
+                        type="submit" 
+                        style={styles.submitButton}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Registering..." : "Register Employee"}
                       </Button>
                       <Button
                         type="button"
                         style={styles.cancelButton}
-                        onClick={() => setsubmitted(false)}
+                        onClick={() => window.history.back()}
+                        disabled={isLoading}
                       >
                         Cancel
                       </Button>
                     </div>
                   </Form>
                 )}
-
-                {/* <p style={styles.loginPrompt}>
-                  Already have an account?{" "}
-                  <Link to="/UserLogin" style={styles.loginLink}>
-                    Login
-                  </Link>
-                </p> */}
               </div>
             </div>
           </Col>
@@ -222,7 +282,14 @@ const styles = {
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-    transition: "background-color 0.3s"
+    transition: "background-color 0.3s",
+    "&:hover": {
+      backgroundColor: "#555"
+    },
+    "&:disabled": {
+      backgroundColor: "#999",
+      cursor: "not-allowed"
+    }
   },
   cancelButton: {
     width: "100%",
@@ -232,7 +299,14 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "5px",
     cursor: "pointer",
-    transition: "background-color 0.3s"
+    transition: "background-color 0.3s",
+    "&:hover": {
+      backgroundColor: "#f5f5f5"
+    },
+    "&:disabled": {
+      backgroundColor: "#eee",
+      cursor: "not-allowed"
+    }
   },
   successMessage: {
     textAlign: "center",
@@ -257,15 +331,7 @@ const styles = {
   },
   successText: {
     color: "#8f9491",
-    fontSize: "1rem"
-  },
-  loginPrompt: {
-    marginTop: "15px",
-    color: "#666"
-  },
-  loginLink: {
-    color: "#007bff",
-    textDecoration: "none",
-    fontWeight: "bold"
+    fontSize: "1rem",
+    marginBottom: "1.5rem"
   }
 };

@@ -22,6 +22,34 @@ export default function HRRegistration() {
   const [password, setPassword] = useState("");
   const [dateOfJoining, setDateOfJoining] = useState("");
 
+  const generateEmailContent = (hrData) => {
+    const subject = "Welcome to WorkSync - HR Account Credentials";
+    const body = `
+Dear ${hrData.name},
+
+Welcome to WorkSync! We're pleased to have you join our HR team.
+
+Your login credentials are as follows:
+Email: ${hrData.email}
+Password: ${hrData.password}
+
+Department: ${hrData.department}
+Start Date: ${new Date(hrData.dateOfJoining).toLocaleDateString()}
+
+Please change your password after your first login at: http://localhost:3000/login
+
+For any questions, please contact the System Administrator.
+
+Best regards,
+Admin Team
+WorkSync`;
+
+    return {
+      subject: encodeURIComponent(subject),
+      body: encodeURIComponent(body)
+    };
+  };
+
   const formFields = [
     { type: 'text', id: 'name', placeholder: 'Name', value: name, onChange: setName },
     { type: 'text', id: 'department', placeholder: 'Department', value: department, onChange: setDepartment },
@@ -31,7 +59,7 @@ export default function HRRegistration() {
     { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining', value: dateOfJoining, onChange: setDateOfJoining }
   ];
 
-  function setHR(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newHR = {
       name,
@@ -41,23 +69,33 @@ export default function HRRegistration() {
       password,
       dateOfJoining,
     };
-    axios
-      .post(`http://localhost:8070/hr/addHR`, newHR)
-      .then((res) => {
+
+    try {
+      const response = await axios.post(`http://localhost:8070/hr/addHR`, newHR);
+      
+      if (response.status === 201 || response.status === 200) {
+        // Generate email content
+        const emailContent = generateEmailContent(newHR);
+        
+        // Open default email client with pre-filled content
+        window.location.href = `mailto:${newHR.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+        
         alert("HR Registered Successfully!✅");
         setSubmitted(true);
+        
+        // Clear form
         setName("");
         setDepartment("");
         setEmail("");
         setPhone("");
         setPassword("");
         setDateOfJoining("");
-      })
-      .catch((err) => {
-        alert("Error registering HR: " + err.message);
-      });
-    console.log(newHR);
-  }
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("Error registering HR: " + error.message);
+    }
+  };
 
   return (
     <section style={styles.section}>
@@ -81,11 +119,17 @@ export default function HRRegistration() {
                     <div style={styles.checkmark}>✓</div>
                     <h3 style={styles.successTitle}>HR Registered</h3>
                     <p style={styles.successText}>
-                      The HR has been successfully registered.
+                      The HR has been successfully registered and an email has been sent with their credentials.
                     </p>
+                    <Button 
+                      style={styles.submitButton}
+                      onClick={() => setSubmitted(false)}
+                    >
+                      Register Another HR
+                    </Button>
                   </div>
                 ) : (
-                  <Form onSubmit={setHR} style={styles.form}>
+                  <Form onSubmit={handleSubmit} style={styles.form}>
                     {formFields.map((field) => (
                       <FormGroup key={field.id}>
                         <Input
@@ -109,20 +153,13 @@ export default function HRRegistration() {
                       <Button
                         type="button"
                         style={styles.cancelButton}
-                        onClick={() => setSubmitted(false)}
+                        onClick={() => window.history.back()}
                       >
                         Cancel
                       </Button>
                     </div>
                   </Form>
                 )}
-
-                {/* <p style={styles.loginPrompt}>
-                  Already have an account?{" "}
-                  <Link to="/UserLogin" style={styles.loginLink}>
-                    Login
-                  </Link>
-                </p> */}
               </div>
             </div>
           </Col>
@@ -251,15 +288,7 @@ const styles = {
   },
   successText: {
     color: "#8f9491",
-    fontSize: "1rem"
-  },
-  loginPrompt: {
-    marginTop: "15px",
-    color: "#666"
-  },
-  loginLink: {
-    color: "#007bff",
-    textDecoration: "none",
-    fontWeight: "bold"
+    fontSize: "1rem",
+    marginBottom: "1.5rem"
   }
 };
