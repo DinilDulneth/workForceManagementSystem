@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
+import loginV from "../assets/videos/loginV.mp4";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -89,8 +90,19 @@ const UserLogin = () => {
   };
 
   return (
+    
     <div style={styles.authWrapper}>
-      <div style={styles.authGlassCard}>
+    <video
+      autoPlay
+      loop
+      muted
+      playsInline
+      style={styles.videoBackground}
+    >
+      <source src={loginV} type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    <div style={styles.authGlassCard}>
         <h2 style={styles.header}>Welcome to WorkSync</h2>
         {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -127,13 +139,23 @@ const UserLogin = () => {
 
 const styles = {
   authWrapper: {
+    position: "relative", // Add this
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
     margin: 0,
-    backgroundColor: "#ff6600",
-    fontFamily: "Arial, sans-serif"
+    fontFamily: "Arial, sans-serif",
+    overflow: "hidden" // Add this
+  },
+  videoBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    zIndex: -1
   },
   authGlassCard: {
     display: "flex",
@@ -143,9 +165,11 @@ const styles = {
     width: "100%",
     maxWidth: "400px",
     padding: "20px",
-    backgroundColor: "#fff",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    borderRadius: "10px"
+    backgroundColor: "rgba(255, 255, 255, 0.9)", // Make it slightly transparent
+    backdropFilter: "blur(10px)", // Add blur effect
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    borderRadius: "10px",
+    zIndex: 1 // Ensure it's above the video
   },
   header: {
     color: "#333",
