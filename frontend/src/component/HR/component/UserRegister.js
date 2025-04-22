@@ -1,31 +1,44 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  FormGroup,
-  Button,
-  Input
-} from "reactstrap";
-import { Link } from "react-router-dom";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
+import { ValidationSchema } from "../../../validation/validationSchema"; 
+
 
 export default function EmployeeRegister() {
-  const [submitted, setsubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setname] = useState("");
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
-  const [department, setdepartment] = useState("");
-  const [phone, setphone] = useState("");
-  const [salary, setsalary] = useState("");
-  const [dateOfJoining, setdateOfJoining] = useState("");
-  const [availability, setavailability] = useState("");
-  const [position, setposition] = useState("");
 
+  // Initial form values
+  const initialValues = {
+    name: "",
+    email: "",
+    password: "",
+    department: "",
+    phone: "",
+    salary: "",
+    dateOfJoining: "",
+    availability: "",
+    position: "",
+  };
+
+  // Form fields configuration
+  const formFields = [
+    { type: "text", name: "name", placeholder: "Name" },
+    { type: "email", name: "email", placeholder: "Email" },
+    { type: "password", name: "password", placeholder: "Password" },
+    { type: "text", name: "department", placeholder: "Department" },
+    { type: "text", name: "phone", placeholder: "Phone" },
+    { type: "number", name: "salary", placeholder: "Salary" },
+    { type: "date", name: "dateOfJoining", placeholder: "Date of Joining" },
+    { type: "text", name: "availability", placeholder: "Availability" },
+    { type: "text", name: "position", placeholder: "Position" },
+  ];
+
+  // Email content generator
   const generateEmailContent = (employeeData) => {
     const subject = "Welcome to WorkSync - Your Account Credentials";
     const body = `
@@ -51,81 +64,34 @@ WorkSync`;
 
     return {
       subject: encodeURIComponent(subject),
-      body: encodeURIComponent(body)
+      body: encodeURIComponent(body),
     };
   };
 
-  const formFields = [
-    { type: 'text', id: 'name', placeholder: 'Name', value: name, onChange: setname },
-    { type: 'email', id: 'email', placeholder: 'Email', value: email, onChange: setemail },
-    { type: 'password', id: 'password', placeholder: 'Password', value: password, onChange: setpassword },
-    { type: 'text', id: 'department', placeholder: 'Department', value: department, onChange: setdepartment },
-    { type: 'text', id: 'phone', placeholder: 'Phone', value: phone, onChange: setphone },
-    { type: 'number', id: 'salary', placeholder: 'Salary', value: salary, onChange: setsalary },
-    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining', value: dateOfJoining, onChange: setdateOfJoining },
-    { type: 'text', id: 'availability', placeholder: 'Availability', value: availability, onChange: setavailability },
-    { type: 'text', id: 'position', placeholder: 'Position', value: position, onChange: setposition }
-  ];
-
-  const clearForm = () => {
-    setname("");
-    setemail("");
-    setpassword("");
-    setdepartment("");
-    setphone("");
-    setsalary("");
-    setdateOfJoining("");
-    setavailability("");
-    setposition("");
-  };
-
-  async function setEmployee(e) {
-    e.preventDefault();
-
-    if (!name || !email || !password || !department || !position) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
+  // Form submission handler
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     setIsLoading(true);
-
-    const newEmployee = {
-      name,
-      email,
-      password,
-      department,
-      phone,
-      salary,
-      dateOfJoining,
-      availability,
-      position
-    };
-
     try {
       const response = await axios.post(
-        `http://localhost:8070/registration/addEmp`,
-        newEmployee
+        "http://localhost:8070/registration/addEmp",
+        values
       );
 
       if (response.status === 200 || response.status === 201) {
-        try {
-          const emailContent = generateEmailContent(newEmployee);
-          window.location.href = `mailto:${newEmployee.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-          alert("Employee Registered Successfully!✅");
-          setsubmitted(true);
-          clearForm();
-        } catch (emailError) {
-          console.error("Error generating email:", emailError);
-          alert("Employee registered but there was an error sending the email.");
-        }
+        const emailContent = generateEmailContent(values);
+        window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+        alert("Employee Registered Successfully!✅");
+        setSubmitted(true);
+        resetForm();
       }
     } catch (err) {
       alert("Error registering employee: " + err.message);
       console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <section style={styles.section}>
@@ -141,7 +107,7 @@ WorkSync`;
                 <div style={styles.userIconWrapper}>
                   <img src={userIcon} alt="User" style={styles.userIcon} />
                 </div>
-                
+
                 <h2 style={styles.title}>Register Employee</h2>
 
                 {submitted ? (
@@ -149,51 +115,71 @@ WorkSync`;
                     <div style={styles.checkmark}>✓</div>
                     <h3 style={styles.successTitle}>Employee Registered</h3>
                     <p style={styles.successText}>
-                      The employee has been successfully registered and an email has been sent with their credentials.
+                      The employee has been successfully registered and an email
+                      has been sent with their credentials.
                     </p>
-                    <Button 
+                    <Button
                       style={styles.submitButton}
-                      onClick={() => setsubmitted(false)}
+                      onClick={() => setSubmitted(false)}
                     >
                       Register Another Employee
                     </Button>
                   </div>
                 ) : (
-                  <Form onSubmit={setEmployee} style={styles.form}>
-                    {formFields.map((field) => (
-                      <FormGroup key={field.id}>
-                        <Input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          required
-                          id={field.id}
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          style={styles.input}
-                          onFocus={(e) => e.target.style.borderColor = "#333"}
-                          onBlur={(e) => e.target.style.borderColor = "#ccc"}
-                        />
-                      </FormGroup>
-                    ))}
+                  <Formik
+                    initialValues={initialValues}
+                    ValidationSchema={ValidationSchema}
+                    onSubmit={handleSubmit}
+                  >
+                    {({ errors, touched, isSubmitting }) => (
+                      <Form style={styles.form}>
+                        {formFields.map((field) => (
+                          <FormGroup key={field.name}>
+                            <Field
+                              type={field.type}
+                              name={field.name}
+                              placeholder={field.placeholder}
+                              className={`form-control ${
+                                errors[field.name] && touched[field.name]
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              style={{
+                                ...styles.input,
+                                borderColor:
+                                  errors[field.name] && touched[field.name]
+                                    ? "red"
+                                    : "#ccc",
+                              }}
+                            />
+                            {errors[field.name] && touched[field.name] && (
+                              <div style={styles.errorMessage}>
+                                {errors[field.name]}
+                              </div>
+                            )}
+                          </FormGroup>
+                        ))}
 
-                    <div style={styles.buttonGroup}>
-                      <Button 
-                        type="submit" 
-                        style={styles.submitButton}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? "Registering..." : "Register Employee"}
-                      </Button>
-                      <Button
-                        type="button"
-                        style={styles.cancelButton}
-                        onClick={() => window.history.back()}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </Form>
+                        <div style={styles.buttonGroup}>
+                          <Button
+                            type="submit"
+                            style={styles.submitButton}
+                            disabled={isLoading || isSubmitting}
+                          >
+                            {isLoading ? "Registering..." : "Register Employee"}
+                          </Button>
+                          <Button
+                            type="button"
+                            style={styles.cancelButton}
+                            onClick={() => window.history.back()}
+                            disabled={isLoading || isSubmitting}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </Form>
+                    )}
+                  </Formik>
                 )}
               </div>
             </div>
@@ -206,11 +192,18 @@ WorkSync`;
 
 const styles = {
   section: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "",
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+  },
+  errorMessage: {
+    color: "red",
+    fontSize: "0.75rem",
+    marginTop: "-10px",
+    marginBottom: "10px",
+    paddingLeft: "5px",
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -219,24 +212,24 @@ const styles = {
     overflow: "hidden",
     display: "flex",
     width: "100%",
-    maxWidth: "900px"
+    maxWidth: "900px",
   },
   imageSection: {
     width: "50%",
     display: "none",
-    backgroundColor: "#e6e6e6"
+    backgroundColor: "#e6e6e6",
   },
   image: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   formSection: {
     width: "100%",
     padding: "40px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"
+    alignItems: "center",
   },
   userIconWrapper: {
     width: "100px",
@@ -244,21 +237,21 @@ const styles = {
     marginBottom: "20px",
     borderRadius: "50%",
     overflow: "hidden",
-    border: "3px solid #333"
+    border: "3px solid #333",
   },
   userIcon: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   title: {
     color: "#333",
     marginBottom: "20px",
     paddingBottom: "10px",
-    borderBottom: "3px solid #fc6625"
+    borderBottom: "3px solid #fc6625",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   input: {
     width: "100%",
@@ -267,12 +260,19 @@ const styles = {
     borderRadius: "5px",
     border: "1px solid #ccc",
     outline: "none",
-    transition: "border-color 0.3s"
+    transition: "border-color 0.3s",
+    "&.is-invalid": {
+      borderColor: "red",
+      "&:focus": {
+        borderColor: "red",
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)",
+      },
+    },
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "1rem"
+    marginTop: "1rem",
   },
   submitButton: {
     width: "100%",
@@ -284,12 +284,12 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#555"
+      backgroundColor: "#555",
     },
     "&:disabled": {
       backgroundColor: "#999",
-      cursor: "not-allowed"
-    }
+      cursor: "not-allowed",
+    },
   },
   cancelButton: {
     width: "100%",
@@ -301,16 +301,16 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
+      backgroundColor: "#f5f5f5",
     },
     "&:disabled": {
       backgroundColor: "#eee",
-      cursor: "not-allowed"
-    }
+      cursor: "not-allowed",
+    },
   },
   successMessage: {
     textAlign: "center",
-    padding: "2rem 1rem"
+    padding: "2rem 1rem",
   },
   checkmark: {
     width: "70px",
@@ -322,16 +322,16 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    margin: "0 auto 1.5rem"
+    margin: "0 auto 1.5rem",
   },
   successTitle: {
     color: "#474747",
     fontSize: "1.5rem",
-    marginBottom: "1rem"
+    marginBottom: "1rem",
   },
   successText: {
     color: "#8f9491",
     fontSize: "1rem",
-    marginBottom: "1.5rem"
-  }
+    marginBottom: "1.5rem",
+  },
 };
