@@ -5,8 +5,7 @@ import * as Yup from "yup";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
-import { ValidationSchema } from "../../../validation/validationSchema"; 
-
+import { ValidationSchema } from "../../../validation/validationSchema";
 
 export default function EmployeeRegister() {
   const [submitted, setSubmitted] = useState(false);
@@ -25,17 +24,16 @@ export default function EmployeeRegister() {
     position: "",
   };
 
-  // Form fields configuration
   const formFields = [
-    { type: "text", name: "name", placeholder: "Name" },
-    { type: "email", name: "email", placeholder: "Email" },
-    { type: "password", name: "password", placeholder: "Password" },
-    { type: "text", name: "department", placeholder: "Department" },
-    { type: "text", name: "phone", placeholder: "Phone" },
-    { type: "number", name: "salary", placeholder: "Salary" },
-    { type: "date", name: "dateOfJoining", placeholder: "Date of Joining" },
-    { type: "text", name: "availability", placeholder: "Availability" },
-    { type: "text", name: "position", placeholder: "Position" },
+    { type: "text", id: "name", placeholder: "Name" }, // Changed 'name' to 'id'
+    { type: "email", id: "email", placeholder: "Email" },
+    { type: "password", id: "password", placeholder: "Password" },
+    { type: "text", id: "department", placeholder: "Department" },
+    { type: "text", id: "phone", placeholder: "Phone" },
+    { type: "number", id: "salary", placeholder: "Salary" },
+    { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
+    { type: "text", id: "availability", placeholder: "Availability" },
+    { type: "text", id: "position", placeholder: "Position" },
   ];
 
   // Email content generator
@@ -68,7 +66,6 @@ WorkSync`;
     };
   };
 
-  // Form submission handler
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     setIsLoading(true);
     try {
@@ -128,33 +125,33 @@ WorkSync`;
                 ) : (
                   <Formik
                     initialValues={initialValues}
-                    ValidationSchema={ValidationSchema}
+                    validationSchema={ValidationSchema}
                     onSubmit={handleSubmit}
                   >
                     {({ errors, touched, isSubmitting }) => (
                       <Form style={styles.form}>
                         {formFields.map((field) => (
-                          <FormGroup key={field.name}>
+                          <FormGroup key={field.id}>
                             <Field
                               type={field.type}
-                              name={field.name}
+                              name={field.id}
                               placeholder={field.placeholder}
                               className={`form-control ${
-                                errors[field.name] && touched[field.name]
+                                errors[field.id] && touched[field.id]
                                   ? "is-invalid"
                                   : ""
                               }`}
                               style={{
                                 ...styles.input,
                                 borderColor:
-                                  errors[field.name] && touched[field.name]
+                                  errors[field.id] && touched[field.id]
                                     ? "red"
                                     : "#ccc",
                               }}
                             />
-                            {errors[field.name] && touched[field.name] && (
+                            {errors[field.id] && touched[field.id] && (
                               <div style={styles.errorMessage}>
-                                {errors[field.name]}
+                                {errors[field.id]}
                               </div>
                             )}
                           </FormGroup>

@@ -11,23 +11,28 @@ export const ValidationSchema = Yup.object({
     .test('no-consecutive-spaces', 'Name cannot contain consecutive spaces',
       value => !value || !value.includes('  '))
     .required('Name is required'),
-  email: Yup.string()
+  
+    email: Yup.string()
     .email('Invalid email format')
     .required('Email is required'),
-  password: Yup.string()
+  
+    password: Yup.string()
     .min(6, 'Password must be at least 6 characters')
     .matches(/[0-9]/, 'Password must contain at least one number')
     .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
     .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .required('Password is required'),
-  department: Yup.string()
+  
+    department: Yup.string()
     .matches(/^[A-Za-z\s]+$/, 'Department can only contain letters and spaces')
     .required('Department is required'),
-  phone: Yup.string()
+  
+    phone: Yup.string()
     .matches(/^[0-9]+$/, 'Phone number must contain only digits')
     .min(10, 'Phone number must be at least 10 digits')
     .nullable(),
-  dateOfJoining: Yup.date()
+  
+    dateOfJoining: Yup.date()
     .min(new Date(), 'Date of joining cannot be in the past')
     .test('future-date', 'Date must be at least one day in the future', 
       value => {

@@ -53,11 +53,15 @@ export default function FetchResignations() {
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <h3 style={{ color: "#2c3e50", marginBottom: "20px" }}>Resignations Data</h3>
+        <h3 style={{ color: "#2c3e50", marginBottom: "20px" }}>
+          Resignations Data
+        </h3>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <p style={{ marginTop: "20px", color: "#666" }}>Loading resignation data...</p>
+        <p style={{ marginTop: "20px", color: "#666" }}>
+          Loading resignation data...
+        </p>
       </div>
     );
   }
@@ -74,13 +78,19 @@ export default function FetchResignations() {
           <div style={styles.card}>
             <h4>Active Requests</h4>
             <p style={styles.cardNumber}>
-              {resignations.filter(r => new Date(r.endDate) > new Date()).length}
+              {
+                resignations.filter((r) => new Date(r.endDate) > new Date())
+                  .length
+              }
             </p>
           </div>
           <div style={styles.card}>
             <h4>Processed</h4>
             <p style={styles.cardNumber}>
-              {resignations.filter(r => new Date(r.endDate) <= new Date()).length}
+              {
+                resignations.filter((r) => new Date(r.endDate) <= new Date())
+                  .length
+              }
             </p>
           </div>
         </div>
@@ -88,11 +98,24 @@ export default function FetchResignations() {
         <h2 style={styles.header}>Resignation Records</h2>
 
         {error && (
-          <div style={styles.alertBox} className="alert alert-warning alert-dismissible fade show" role="alert">
+          <div
+            style={styles.alertBox}
+            className="alert alert-warning alert-dismissible fade show"
+            role="alert"
+          >
             <strong>Note:</strong> {error}
-            <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
             <div className="mt-2">
-              <button className="btn btn-sm btn-primary" onClick={handleRetry} style={styles.button}>
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={handleRetry}
+                style={styles.button}
+              >
                 Retry Connection
               </button>
             </div>
@@ -122,7 +145,11 @@ export default function FetchResignations() {
                       <button
                         className="btn btn-sm"
                         style={{ ...styles.button, ...styles.editButton }}
-                        onClick={() => navigate(`/HRDashboard/UpdateResignation/${resignation._id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/HRDashboard/ResignationUemp/${resignation._id}`
+                          )
+                        }
                       >
                         Edit
                       </button>
@@ -159,75 +186,75 @@ const styles = {
     minHeight: "calc(100vh - 70px)",
     maxWidth: "calc(100vw - 250px)",
     backgroundColor: "#f8f9fa",
-    transition: "all 0.3s ease"
+    transition: "all 0.3s ease",
   },
   gridContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    width: '100%'
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+    width: "100%",
   },
   cardsContainer: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '20px',
-    marginBottom: '20px'
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "20px",
+    marginBottom: "20px",
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center'
+    backgroundColor: "#ffffff",
+    borderRadius: "8px",
+    padding: "20px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    textAlign: "center",
   },
   cardNumber: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#fc6625',
-    marginTop: '10px'
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#fc6625",
+    marginTop: "10px",
   },
   header: {
     color: "#2c3e50",
     marginBottom: "25px",
     paddingBottom: "15px",
-    borderBottom: "3px solid #fc6625"
+    borderBottom: "3px solid #fc6625",
   },
   tableContainer: {
     backgroundColor: "#ffffff",
     borderRadius: "8px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    overflow: "hidden"
+    overflow: "hidden",
   },
   tableHeader: {
     backgroundColor: "#2c3e50",
-    color: "white"
+    color: "white",
   },
   tableHeaderCell: {
     padding: "15px",
-    fontWeight: "500"
+    fontWeight: "500",
   },
   tableCell: {
     padding: "12px 15px",
-    verticalAlign: "middle"
+    verticalAlign: "middle",
   },
   button: {
     transition: "all 0.3s ease",
     margin: "0 5px",
-    padding: "5px 15px"
+    padding: "5px 15px",
   },
   editButton: {
     backgroundColor: "#3498db",
     border: "none",
-    color: "white"
+    color: "white",
   },
   deleteButton: {
     backgroundColor: "#e74c3c",
     border: "none",
-    color: "white"
+    color: "white",
   },
   alertBox: {
     marginBottom: "20px",
-    borderRadius: "8px"
+    borderRadius: "8px",
   },
   loadingContainer: {
     marginLeft: "250px",
@@ -236,11 +263,11 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   emptyMessage: {
     textAlign: "center",
     padding: "20px",
-    color: "#666"
-  }
+    color: "#666",
+  },
 };

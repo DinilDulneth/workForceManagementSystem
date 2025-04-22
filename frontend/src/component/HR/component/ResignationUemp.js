@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Swal from "sweetalert2";
 
 export default function UpdateResignation() {
   const { id } = useParams();
@@ -38,10 +39,18 @@ export default function UpdateResignation() {
     };
 
     axios
-      .put(`http://localhost:8070/resignation/updateempRes/${id}`, updatedResignation)
+      .put(
+        `http://localhost:8070/resignation/updateempRes/${id}`,
+        updatedResignation
+      )
       .then(() => {
-        alert("Resignation Updated Successfully! ✅");
-        navigate("/allResignations");
+        Swal.fire(
+          "Updated!",
+          "Resignation has been updated successfully.",
+          "success"
+        );
+
+        navigate("/HRDashboard/ResignationVemp");
       })
       .catch((err) => {
         alert("Error updating resignation: " + err.message);
@@ -78,7 +87,11 @@ export default function UpdateResignation() {
           </div>
 
           {error && (
-            <div style={styles.alert} className="alert alert-danger" role="alert">
+            <div
+              style={styles.alert}
+              className="alert alert-danger"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -126,7 +139,7 @@ export default function UpdateResignation() {
                 <button
                   type="button"
                   style={styles.cancelButton}
-                  onClick={() => navigate("/allResignations")}
+                  onClick={() => navigate("/HRDashboard/ResignationVemp")}
                 >
                   Cancel
                 </button>
@@ -147,51 +160,51 @@ const styles = {
     width: "calc(100% - 250px)",
     minHeight: "calc(100vh - 60px)",
     backgroundColor: "#f5f5f5",
-    marginTop: "60px"
+    marginTop: "60px",
   },
   container: {
     maxWidth: "800px",
     margin: "0 auto",
-    padding: "20px"
+    padding: "20px",
   },
   loadingContainer: {
     textAlign: "center",
-    marginTop: "2rem"
+    marginTop: "2rem",
   },
   loadingText: {
     marginTop: "1rem",
-    color: "#666"
+    color: "#666",
   },
   card: {
     backgroundColor: "#fff",
     borderRadius: "8px",
     boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
-    overflow: "hidden"
+    overflow: "hidden",
   },
   cardHeader: {
     backgroundColor: "#ff7043",
     padding: "20px",
-    color: "#fff"
+    color: "#fff",
   },
   title: {
     margin: 0,
     fontSize: "24px",
-    fontWeight: "500"
+    fontWeight: "500",
   },
   cardBody: {
-    padding: "30px"
+    padding: "30px",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   formGroup: {
-    marginBottom: "20px"
+    marginBottom: "20px",
   },
   label: {
     display: "block",
     marginBottom: "8px",
     color: "#333",
-    fontWeight: "500"
+    fontWeight: "500",
   },
   input: {
     width: "100%",
@@ -202,8 +215,8 @@ const styles = {
     transition: "border-color 0.3s ease",
     "&:focus": {
       borderColor: "#ff7043",
-      outline: "none"
-    }
+      outline: "none",
+    },
   },
   textarea: {
     width: "100%",
@@ -216,13 +229,13 @@ const styles = {
     transition: "border-color 0.3s ease",
     "&:focus": {
       borderColor: "#ff7043",
-      outline: "none"
-    }
+      outline: "none",
+    },
   },
   buttonGroup: {
     display: "flex",
     gap: "10px",
-    marginTop: "20px"
+    marginTop: "20px",
   },
   submitButton: {
     flex: "1",
@@ -235,8 +248,8 @@ const styles = {
     fontWeight: "500",
     transition: "background-color 0.3s ease",
     "&:hover": {
-      backgroundColor: "#f4511e"
-    }
+      backgroundColor: "#f4511e",
+    },
   },
   cancelButton: {
     flex: "1",
@@ -249,11 +262,11 @@ const styles = {
     fontWeight: "500",
     transition: "all 0.3s ease",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
-    }
+      backgroundColor: "#f5f5f5",
+    },
   },
   alert: {
     margin: "20px",
-    borderRadius: "4px"
-  }
+    borderRadius: "4px",
+  },
 };

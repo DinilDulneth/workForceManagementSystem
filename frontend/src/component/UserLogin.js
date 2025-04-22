@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
@@ -90,19 +90,12 @@ const UserLogin = () => {
   };
 
   return (
-    
     <div style={styles.authWrapper}>
-    <video
-      autoPlay
-      loop
-      muted
-      playsInline
-      style={styles.videoBackground}
-    >
-      <source src={loginV} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-    <div style={styles.authGlassCard}>
+      <video autoPlay loop muted playsInline style={styles.videoBackground}>
+        <source src={loginV} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div style={styles.authGlassCard}>
         <h2 style={styles.header}>Welcome to WorkSync</h2>
         {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -131,6 +124,17 @@ const UserLogin = () => {
           <button type="submit" style={styles.button}>
             Login
           </button>
+          <div style={styles.backToHome}>
+            <p style={styles.backToHomeText}>
+              Back to{" "}
+              <Link
+                to="/"
+                style={styles.homeLink}
+              >
+                Home
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>
@@ -138,6 +142,8 @@ const UserLogin = () => {
 };
 
 const styles = {
+
+
   authWrapper: {
     position: "relative", // Add this
     display: "flex",
@@ -146,7 +152,7 @@ const styles = {
     height: "100vh",
     margin: 0,
     fontFamily: "Arial, sans-serif",
-    overflow: "hidden" // Add this
+    overflow: "hidden", // Add this
   },
   videoBackground: {
     position: "absolute",
@@ -155,7 +161,7 @@ const styles = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    zIndex: -1
+    zIndex: -1,
   },
   authGlassCard: {
     display: "flex",
@@ -169,25 +175,25 @@ const styles = {
     backdropFilter: "blur(10px)", // Add blur effect
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
     borderRadius: "10px",
-    zIndex: 1 // Ensure it's above the video
+    zIndex: 1, // Ensure it's above the video
   },
   header: {
     color: "#333",
-    marginBottom: "20px"
+    marginBottom: "20px",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   inputGroup: {
     position: "relative",
-    marginBottom: "15px"
+    marginBottom: "15px",
   },
   icon: {
     position: "absolute",
     top: "50%",
     left: "10px",
     transform: "translateY(-50%)",
-    color: "#007bff"
+    color: "#007bff",
   },
   input: {
     width: "100%",
@@ -195,10 +201,10 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "5px",
     outline: "none",
-    transition: "border-color 0.3s"
+    transition: "border-color 0.3s",
   },
   inputFocus: {
-    borderColor: "#ff5722"
+    borderColor: "#ff5722",
   },
   button: {
     width: "100%",
@@ -208,15 +214,51 @@ const styles = {
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-    transition: "background-color 0.3s"
+    transition: "background-color 0.3s",
   },
   buttonHover: {
-    backgroundColor: "#e64a19"
+    backgroundColor: "#e64a19",
   },
   error: {
     color: "red",
-    marginBottom: "10px"
-  }
+    marginBottom: "10px",
+  },
+
+  backToHome: {
+    marginTop: "20px",
+    textAlign: "center",
+    padding: "10px",
+    borderTop: "1px solid rgba(0, 0, 0, 0.1)",
+  },
+  backToHomeText: {
+    color: "#666",
+    fontSize: "0.9rem",
+    margin: 0,
+  },
+  homeLink: {
+    color: "#ff5722",
+    textDecoration: "none",
+    fontWeight: "600",
+    position: "relative",
+    transition: "color 0.3s ease",
+    "&:hover": {
+      color: "#e64a19",
+    },
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      width: "100%",
+      height: "2px",
+      bottom: -2,
+      left: 0,
+      backgroundColor: "#ff5722",
+      transform: "scaleX(0)",
+      transition: "transform 0.3s ease",
+    },
+    "&:hover::after": {
+      transform: "scaleX(1)",
+    },
+  },
 };
 
 export default UserLogin;
