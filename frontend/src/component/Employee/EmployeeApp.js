@@ -12,50 +12,44 @@ import FetchFeedback from "./component/fetchFeedback";
 import Fetchinquiry from "./component/fetchinquiry";
 import Ine from "react-bootstrap";
 import DashboardTemp from "../DashboardTemp";
+import UpdateInquiry from "./component/UpdateInquiry";
 
 const Links = [
-  // { link: "#", name: "Dashboard", icon: "FaHome" },
   {
     link: "/EmployeeDashboard/ResignationF",
     name: "Resignation Form",
-    icon: "FaUserCircle"
+    icon: "bi bi-file-text",
   },
   {
     link: "/EmployeeDashboard/ResignationV",
     name: "Resignation View",
-    icon: "FaUserCircle"
+    icon: "bi bi-eye",
   },
   {
     link: "/EmployeeDashboard/ResignationD",
     name: "Resignation Delete",
-    icon: "FaUserCircle"
+    icon: "bi bi-trash",
   },
-  // {
-  //   link: "/EmployeeDashboard/addInquiry",
-  //   name: "Add Inquiry",
-  //   icon: "FaUserCircle"
-  // },
   {
     link: "/EmployeeDashboard/LeaveRequest",
     name: "Leave Request",
-    icon: "FaUserCircle"
+    icon: "bi bi-calendar-check",
   },
   {
     link: "/EmployeeDashboard/FetchFeedback",
-    name: "Fetch Feedback",
-    icon: "FaUserCircle"
+    name: "Feedback",
+    icon: "bi bi-chat-dots",
   },
   {
-    link: "/EmployeeDashboard/Fetchinquiry",
-    name: "Fetch Inquiry",
-    icon: "FaUserCircle"
+    link: "/EmployeeDashboard/fetchAnnouncement",
+    name: "Announcements",
+    icon: "bi bi-megaphone",
   },
   {
     link: "/EmployeeDashboard/addInquiry",
     name: "Add Inquiry",
-    icon: "FaUserCircle"
+    icon: "bi bi-question-circle",
   },
-  { link: "#", name: "Settings", icon: "FaCog" }
 ];
 
 export default function EmployeeApp() {
@@ -74,6 +68,7 @@ export default function EmployeeApp() {
         <Route path="/LeaveRequest" element={<LeaveRequest />} />
         <Route path="/FetchFeedback" element={<FetchFeedback />} />
         <Route path="/Fetchinquiry" element={<Fetchinquiry />} />
+        <Route path="/updateInquiry/:id" element={<UpdateInquiry />} />
       </Routes>
     </>
   );

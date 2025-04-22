@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
   Paper,
@@ -8,27 +8,21 @@ import {
   Button,
   Typography,
   Box,
-  MenuItem,
   Snackbar,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import SendIcon from "@mui/icons-material/Send";
+import UpdateIcon from "@mui/icons-material/Update";
+import PersonIcon from "@mui/icons-material/Person";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import BusinessIcon from "@mui/icons-material/Business";
-import BadgeIcon from "@mui/icons-material/Badge";
-import HistoryIcon from "@mui/icons-material/History"; // Added HistoryIcon
 
-export default function AddInquiry() {
+function UpdateInquiry() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    inquiry: "",
+  const [inquiry, setInquiry] = useState({
     employeeId: "",
+    inquiry: "",
     sender: "",
-    date: "",
     department: "",
   });
 
@@ -39,54 +33,49 @@ export default function AddInquiry() {
   });
 
   useEffect(() => {
-    // Get employee ID from the existing localStorage
-    const employeeId = localStorage.getItem("ID");
-    const employeeName = localStorage.getItem("Name");
-
-    if (!employeeId) {
-      setSnackbar({
-        open: true,
-        message: "Please log in to submit an inquiry",
-        severity: "error",
+    axios
+      .get(`http://localhost:8070/api/inquiry/getInquiry/${id}`)
+      .then((res) => {
+        const {
+          employeeId,
+          inquiry: inquiryText,
+          sender,
+          department,
+        } = res.data;
+        setInquiry({
+          employeeId,
+          inquiry: inquiryText,
+          sender,
+          department,
+        });
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message: "Error fetching inquiry: " + err.message,
+          severity: "error",
+        });
       });
-      setTimeout(() => navigate("/UserLogin"), 2000);
-      return;
-    }
+  }, [id]);
 
-    setFormData((prev) => ({
-      ...prev,
-      date: new Date().toISOString(),
-      employeeId: employeeId,
-      sender: employeeName || employeeId,
-    }));
-  }, [navigate]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleViewPastInquiries = () => {
-    navigate("/EmployeeDashboard/fetchInquiry");
-  };
-
-  function sendInquiryData(e) {
+  function updateInquiryData(e) {
     e.preventDefault();
 
-    if (!formData.inquiry || !formData.department) {
+    if (!inquiry.inquiry) {
       setSnackbar({
         open: true,
-        message: "Please fill in all required fields",
+        message: "Please fill in the inquiry field",
         severity: "error",
       });
       return;
     }
 
     axios
-      .post("http://localhost:8070/api/inquiry/addInquiry", formData)
+      .put(`http://localhost:8070/api/inquiry/updateInquiry/${id}`, inquiry)
       .then(() => {
         setSnackbar({
           open: true,
-          message: "Inquiry Added Successfully! ✅",
+          message: "Inquiry Updated Successfully! ✅",
           severity: "success",
         });
         setTimeout(() => navigate("/EmployeeDashboard/fetchInquiry"), 2000);
@@ -94,10 +83,18 @@ export default function AddInquiry() {
       .catch((err) => {
         setSnackbar({
           open: true,
-          message: "Error adding Inquiry: " + err.message,
+          message: "Error updating inquiry: " + err.message,
           severity: "error",
         });
       });
+  }
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setInquiry((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   return (
@@ -121,6 +118,7 @@ export default function AddInquiry() {
             border: "1px solid rgba(252, 102, 37, 0.1)",
           }}
         >
+          {" "}
           <Box
             sx={{
               display: "flex",
@@ -130,7 +128,7 @@ export default function AddInquiry() {
               gap: 2,
             }}
           >
-            <HelpOutlineIcon sx={{ fontSize: 40, color: "#fc6625" }} />
+            <UpdateIcon sx={{ fontSize: 40, color: "#fc6625" }} />
             <Typography
               variant="h4"
               sx={{
@@ -140,26 +138,24 @@ export default function AddInquiry() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Submit Inquiry
+              Update Inquiry
             </Typography>
           </Box>
-
           <Box
             component="form"
-            onSubmit={sendInquiryData}
+            onSubmit={updateInquiryData}
             sx={{ display: "flex", flexDirection: "column", gap: 3 }}
           >
-            {/* Existing form fields remain unchanged */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <TextField
                 fullWidth
                 label="Employee ID"
                 name="employeeId"
-                value={formData.employeeId}
+                value={inquiry.employeeId}
                 disabled
                 InputProps={{
                   startAdornment: (
-                    <BadgeIcon sx={{ mr: 1, color: "#fc6625" }} />
+                    <PersonIcon sx={{ mr: 1, color: "#fc6625" }} />
                   ),
                 }}
               />
@@ -170,7 +166,7 @@ export default function AddInquiry() {
                 fullWidth
                 label="Inquiry"
                 name="inquiry"
-                value={formData.inquiry}
+                value={inquiry.inquiry}
                 onChange={handleChange}
                 required
                 multiline
@@ -183,33 +179,13 @@ export default function AddInquiry() {
               />
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <FormControl fullWidth>
-                <InputLabel>Department</InputLabel>
-                <Select
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  required
-                  startAdornment={
-                    <BusinessIcon sx={{ mr: 1, color: "#fc6625" }} />
-                  }
-                >
-                  <MenuItem value="">Select Department</MenuItem>
-                  <MenuItem value="HR">HR</MenuItem>
-                  <MenuItem value="IT">IT</MenuItem>
-                  <MenuItem value="General Manager">General Manager</MenuItem>
-                </Select>
-              </FormControl>
-            </motion.div>
-
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 type="submit"
                 variant="contained"
                 fullWidth
                 size="large"
-                endIcon={<SendIcon />}
+                endIcon={<UpdateIcon />}
                 sx={{
                   mt: 2,
                   height: 48,
@@ -222,32 +198,7 @@ export default function AddInquiry() {
                   },
                 }}
               >
-                Submit Inquiry
-              </Button>
-            </motion.div>
-
-            {/* Added View Past Inquiries Button */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="button"
-                variant="contained"
-                fullWidth
-                size="large"
-                endIcon={<HistoryIcon />}
-                onClick={handleViewPastInquiries}
-                sx={{
-                  mt: 2,
-                  height: 48,
-                  background:
-                    "linear-gradient(45deg,rgb(255, 98, 0) 30%,rgb(252, 127, 37) 90%)",
-                  boxShadow: "0 3px 15px rgba(74, 108, 247, 0.3)",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(45deg,rgb(252, 91, 37) 30%,rgb(247, 129, 74) 90%)",
-                  },
-                }}
-              >
-                View Past Inquiries
+                Update Inquiry
               </Button>
             </motion.div>
           </Box>
@@ -280,3 +231,5 @@ export default function AddInquiry() {
     </Container>
   );
 }
+
+export default UpdateInquiry;
