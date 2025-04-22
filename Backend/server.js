@@ -43,11 +43,32 @@ app.use("/hr", hrRoutes); // this is the link name
 const managerRoutes = require("./routes/managerRoutes");
 app.use("/manager", managerRoutes); // this is the link name
 
+const leaveRoutes = require("./routes/leaveRoutes");
+app.use("/leave", leaveRoutes);
+
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
 const dashboardRoutes = require("./routes/dashboardRoutes");
 app.use("/api/dashboard", dashboardRoutes);
+
+const empResignation = require("./routes/eResignation");
+app.use("/resignation", empResignation); // this is the link name
+
+const empRegistration = require("./routes/employeeRoutes");
+app.use("/registration", empRegistration); // this is the link name
+
+const AnnouncementRouter = require("./routes/announcementRoute");
+app.use("/api/announcement", AnnouncementRouter); // this is the link name
+
+const FeedbackRouter = require("./routes/feedbackRoute");
+app.use("/api/feedback", FeedbackRouter); // this is the link name
+
+const inquiryRouter = require("./routes/inquiryRoute");
+app.use("/api/inquiry", inquiryRouter); // this is the link name
+
+const salaryRoutes = require("./routes/salaryRoutes");
+app.use("/salary", salaryRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is up and running on port number: ${PORT}`);

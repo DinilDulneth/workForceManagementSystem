@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import UserLogin from "./component/UserLogin";
 import HRApp from "./component/HR/HRApp";
-import UserRegister from "./component/UserRegister";
 import Index from "./component/Home";
 import EmployeeApp from "./component/Employee/EmployeeApp";
 import About from "./component/About";
@@ -15,7 +14,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/UserLogin" element={<UserLogin />} />
-        <Route path="/Register" element={<UserRegister />} />
         <Route path="/HRDashboard/*" element={<HRApp />} />
         <Route path="/ManagerDashboard/*" element={<ManagerApp />} />
         <Route path="/EmployeeDashboard/*" element={<EmployeeApp />} />

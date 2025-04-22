@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Swal from "sweetalert2";
+import { toast, ToastContainer } from "react-toastify";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function ManageTask() {
+  // Retrieve user data from localStorage
+  const email = localStorage.getItem("email");
+  const name = localStorage.getItem("Name");
+  const role = localStorage.getItem("role");
+  const MID = localStorage.getItem("ID");
+
   const [employees, setEmployees] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -114,14 +124,14 @@ export default function ManageTask() {
       tName,
       description,
       empID,
-      assignedBy: "1",
+      assignedBy: MID,
       deadLine,
       priority
     };
     axios
       .post("http://localhost:8070/task/add", newTask)
       .then((res) => {
-        alert("Task Added Successfully!✅");
+        Swal.fire("Success!", "Task Added Successfully! ✅", "success");
         setName("");
         setdescription("");
         setSelectedEmployeeId("");
@@ -130,7 +140,7 @@ export default function ManageTask() {
         getTask(); // Fetch tasks again to update the list
       })
       .catch((err) => {
-        alert("Error adding Task:" + err.message);
+        Swal.fire("Error!", "Error adding Task: " + err.message, "error");
       });
     console.log(newTask);
   }
@@ -150,25 +160,50 @@ export default function ManageTask() {
     axios
       .put(`http://localhost:8070/task/update/${tid}`, updateTask)
       .then(() => {
-        alert("Task Updated Successfully! ✅");
+        Swal.fire("Updated!", "Task has been updated successfully.", "success");
         setEditingTaskId(null);
-        getTask(); // Ensure this fetches the latest data
+        getTask(eid); // Ensure this fetches the latest data
       })
       .catch((err) => {
-        alert("Error updating task: " + err.message);
+        Swal.fire(
+          "Error!",
+          "Failed to update the task: " + err.message,
+          "error"
+        );
       });
   }
 
   function deleteTask(tid, eid) {
-    axios
-      .delete(`http://localhost:8070/task/deleteFromDatabase/${tid}`)
-      .then(() => {
-        alert("Task deleted successfully");
-        getTask();
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
+    Swal.fire({
+      title: "Warning!",
+      text: "Are you sure you want to delete this task? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`http://localhost:8070/task/deleteFromDatabase/${tid}`)
+          .then(() => {
+            Swal.fire(
+              "Deleted!",
+              "Task has been deleted successfully.",
+              "success"
+            );
+            getTask(eid); // Refresh the task list
+          })
+          .catch((err) => {
+            Swal.fire(
+              "Error!",
+              "Failed to delete the task: " + err.message,
+              "error"
+            );
+          });
+      }
+    });
   }
 
   // Filter tasks based on search term and selected status
@@ -183,6 +218,64 @@ export default function ManageTask() {
     return matchesSearch && matchesStatus;
   });
 
+  const downloadTasksAsPDF = () => {
+    // Show a toast notification for starting the download
+    toast.info("Preparing your PDF...", {
+      position: "top-right",
+      autoClose: 2000
+    });
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(18);
+    doc.text("Recent Tasks List", 10, 10);
+
+    // Table
+    const tableColumn = [
+      "Task No.",
+      "Task Name",
+      "Description",
+      "Status",
+      "Employee ID",
+      "Deadline",
+      "Start Date",
+      "End Date",
+      "Priority"
+    ];
+    const tableRows = [];
+
+    filteredTasks.forEach((task, index) => {
+      const taskData = [
+        index + 1,
+        task.tName,
+        task.description,
+        getTaskStatusLabel(task.status),
+        task.empID,
+        new Date(task.deadLine).toLocaleDateString(),
+        new Date(task.startDate).toLocaleDateString(),
+        task.endDate ? new Date(task.endDate).toLocaleDateString() : "N/A",
+        task.priority
+      ];
+      tableRows.push(taskData);
+    });
+
+    // Add table to the PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20
+    });
+
+    // Save the PDF
+    doc.save("Recent_Tasks_List.pdf");
+
+    // Show a toast notification for successful download
+    toast.success("PDF downloaded successfully!", {
+      position: "top-right",
+      autoClose: 2000
+    });
+  };
   return (
     <div
       style={{ marginLeft: "290px", marginTop: "100px", marginRight: "40px" }}
@@ -289,7 +382,15 @@ export default function ManageTask() {
               </tbody>
             </table>
           </div>
+          <button
+            className="btn btn-primary btn-sm mb-3 mt-4"
+            onClick={downloadTasksAsPDF}
+            style={{ width: "120px" }}
+          >
+            Download PDF
+          </button>
         </div>
+
         {editingTaskId && (
           <div className="bg-white shadow-lg p-4 mt-5">
             <h3 className="mb-4 text-left">Edit Task</h3>

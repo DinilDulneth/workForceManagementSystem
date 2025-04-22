@@ -1,9 +1,13 @@
 {
   "dependencies": {
+    "@vercel/blob": "^1.0.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.4.8",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "jwt-decode": "^4.0.0",
     "react-chartjs-2": "^5.3.0"
   }
 }

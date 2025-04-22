@@ -1,21 +1,90 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./fetchEmp.css"; // Assuming you'll put the custom CSS in a separate file
+import defaultProfilePic from "../../../assets/images/user_img.jpg";
+import "./fetchEmp.css";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 export default function FetchEmp() {
+  // Retrieve user data from localStorage
+  const email = localStorage.getItem("email");
+  const name = localStorage.getItem("Name");
+  const role = localStorage.getItem("role");
+  const MID = localStorage.getItem("ID");
+
   const [employees, setEmployees] = useState([]);
   const [expandedCard, setExpandedCard] = useState(null); // Track which card is expanded
   const [tasks, setTasks] = useState([]);
   const [tName, setName] = useState("");
   const [description, setdescription] = useState("");
   const [empID, setempID] = useState("");
-  const [assignedBy, setassignedBy] = useState("1");
+  const [assignedBy, setassignedBy] = useState(MID);
   const [deadLine, setdeadLine] = useState("");
   const [priority, setpriority] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null); // Track which task is being edited
   const [editedTask, setEditedTask] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+
+  const downloadTasksAsPDF = () => {
+    // Show a toast notification for starting the download
+    toast.info("Preparing your PDF...", {
+      position: "top-right",
+      autoClose: 2000
+    });
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(18);
+    doc.text("Tasks List", 10, 10);
+
+    // Table
+    const tableColumn = [
+      "Task No.",
+      "Task Name",
+      "Description",
+      "Status",
+      "Deadline",
+      "Start Date",
+      "End Date",
+      "Priority"
+    ];
+    const tableRows = [];
+
+    tasks.forEach((task, index) => {
+      const taskData = [
+        index + 1,
+        task.tName,
+        task.description,
+        getTaskStatusLabel(task.status),
+        new Date(task.deadLine).toLocaleDateString(),
+        new Date(task.startDate).toLocaleDateString(),
+        task.endDate ? new Date(task.endDate).toLocaleDateString() : "N/A",
+        task.priority
+      ];
+      tableRows.push(taskData);
+    });
+
+    // Add table to the PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20
+    });
+
+    // Save the PDF
+    doc.save("Recent_Tasks_List.pdf");
+
+    // Show a toast notification for successful download
+    toast.success("PDF downloaded successfully!", {
+      position: "top-right",
+      autoClose: 2000
+    });
+  };
 
   const getTaskStatusLabel = (status) => {
     switch (status) {
@@ -103,14 +172,15 @@ export default function FetchEmp() {
       tName,
       description,
       empID: id,
-      assignedBy: "1",
+      assignedBy: MID,
       deadLine,
       priority
     };
+
     axios
       .post("http://localhost:8070/task/add", newTask)
       .then((res) => {
-        alert("Task Added Successfully!✅");
+        Swal.fire("Success!", "Task Added Successfully! ✅", "success");
         setName("");
         setdescription("");
         setdeadLine("");
@@ -119,7 +189,7 @@ export default function FetchEmp() {
         getTask(id);
       })
       .catch((err) => {
-        alert("Error adding Task:" + err.message);
+        Swal.fire("Error!", "Error adding Task: " + err.message, "error");
       });
     console.log(newTask);
   }
@@ -150,24 +220,50 @@ export default function FetchEmp() {
     axios
       .put(`http://localhost:8070/task/update/${tid}`, updateTask)
       .then(() => {
-        alert("Task Updated Successfully! ✅");
+        Swal.fire("Updated!", "Task has been updated successfully.", "success");
         setEditingTaskId(null);
         getTask(eid); // Ensure this fetches the latest data
       })
       .catch((err) => {
-        alert("Error updating task: " + err.message);
+        Swal.fire(
+          "Error!",
+          "Failed to update the task: " + err.message,
+          "error"
+        );
       });
   }
+
   function deleteTask(tid, eid) {
-    axios
-      .delete(`http://localhost:8070/task/deleteFromDatabase/${tid}`)
-      .then(() => {
-        alert("Task deleted successfully");
-        getTask(eid);
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
+    Swal.fire({
+      title: "Warning!",
+      text: "Are you sure you want to delete this task? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`http://localhost:8070/task/deleteFromDatabase/${tid}`)
+          .then(() => {
+            Swal.fire(
+              "Deleted!",
+              "Task has been deleted successfully.",
+              "success"
+            );
+            getTask(eid); // Refresh the task list
+          })
+          .catch((err) => {
+            Swal.fire(
+              "Error!",
+              "Failed to delete the task: " + err.message,
+              "error"
+            );
+          });
+      }
+    });
   }
 
   const toggleCard = (id) => {
@@ -225,7 +321,7 @@ export default function FetchEmp() {
                   </div>
                   <div className="employee-img-container">
                     <img
-                      src={employee.image || "../../media/image/user_img.jpg"}
+                      src={employee.image || defaultProfilePic}
                       className="employee-img"
                       alt={employee.name}
                     />
@@ -480,7 +576,15 @@ export default function FetchEmp() {
                                   </tr>
                                 )}
                               </tbody>
+                              <button
+                                className="btn btn-primary btn-sm mb-3 mt-4"
+                                onClick={downloadTasksAsPDF}
+                                style={{ width: "120px" }}
+                              >
+                                Download PDF
+                              </button>
                             </table>
+
                             <span
                               className="fw-bold text-muted small"
                               style={{ fontSize: "16px" }}

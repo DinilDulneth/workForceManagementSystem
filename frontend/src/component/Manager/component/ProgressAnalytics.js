@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
+import defaultProfilePic from "../../../assets/images/user_img.jpg";
 import "./ProgressAnalytics.css";
 
 export default function ProgressAnalytics() {
@@ -65,7 +66,7 @@ export default function ProgressAnalytics() {
                   </div>
                   <div className="employee-img-container">
                     <img
-                      src={employee.image || "../../media/image/user_img.jpg"}
+                      src={employee.image || defaultProfilePic}
                       className="employee-img"
                       alt={employee.name}
                     />
