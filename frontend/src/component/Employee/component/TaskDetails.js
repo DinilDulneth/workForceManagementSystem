@@ -239,7 +239,7 @@ export default function TaskDetails() {
       minHeight: "100vh",
       padding: "2rem",
       marginLeft: "250px",
-      marginTop: "100px"
+      marginTop: "60px"
     },
     header: {
       marginBottom: "2rem",
@@ -251,19 +251,19 @@ export default function TaskDetails() {
       backgroundColor: "white",
       padding: "1.5rem",
       borderRadius: "15px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+      boxShadow: "1px 4px 6px rgba(0, 0, 0, 0.29)",
       marginBottom: "2rem"
     },
     taskCard: {
       backgroundColor: "white",
       borderRadius: "12px",
       border: "none",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.24)",
       transition: "transform 0.2s ease, box-shadow 0.2s ease",
       overflow: "hidden",
       "&:hover": {
         transform: "translateY(-5px)",
-        boxShadow: "0 8px 12px rgba(0, 0, 0, 0.1)"
+        boxShadow: "0 8px 12px rgba(0, 0, 0, 0.26)"
       }
     },
     filterButton: {
@@ -353,7 +353,7 @@ export default function TaskDetails() {
             className="card"
             style={{
               ...modernStyles.taskCard,
-              width: "320px"
+              width: "18%"
             }}
           >
             <div className="p-3">
@@ -364,16 +364,30 @@ export default function TaskDetails() {
                 >
                   {task.tName}
                 </h5>
-                <span
-                  className="badge"
-                  style={{
-                    backgroundColor: getStatusColor(task.status),
-                    padding: "0.5rem 1rem",
-                    borderRadius: "20px"
-                  }}
-                >
-                  {getTaskStatusLabel(task.status)}
-                </span>
+                {editingTaskId === task._id ? (
+                  <select
+                    value={editedTask.status}
+                    onChange={handleStatusChange}
+                    className="form-select"
+                  >
+                    <option value="">Select Status</option>
+                    {Object.entries(statusTypes).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span
+                    className="badge"
+                    style={{
+                      backgroundColor: getStatusColor(task.status),
+                      color: "white"
+                    }}
+                  >
+                    {getTaskStatusLabel(task.status)}
+                  </span>
+                )}
               </div>
 
               <p className="text-muted">{task.description}</p>

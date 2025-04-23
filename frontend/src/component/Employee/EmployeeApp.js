@@ -24,7 +24,7 @@ const Links = [
   {
     link: "/EmployeeHome/TaskDetails",
     name: "Task Details",
-    icon: "bi-tasks"
+    icon: "bi-list-task"
   },
   {
     link: "/EmployeeHome/ResignationF",
