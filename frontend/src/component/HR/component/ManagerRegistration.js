@@ -1,24 +1,38 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Form, FormGroup, Button, Input } from "reactstrap";
+import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import { Link } from "react-router-dom";
+import { Formik, Form, Field } from 'formik';
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
-import logo from "../../../assets/images/logo1.png";
-
+import { ValidationSchema } from "../../../validation/validationSchema"; 
 
 
 export default function ManagerRegistration() {
   const [submitted, setSubmitted] = useState(false);
-  const [name, setName] = useState("");
-  const [department, setDepartment] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [dateOfJoining, setDateOfJoining] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Initial form values
+  const initialValues = {
+    name: '',
+    department: '',
+    email: '',
+    phone: '',
+    password: '',
+    dateOfJoining: ''
+  };
 
+  // Form fields configuration
+  const formFields = [
+    { type: 'text', id: 'name', placeholder: 'Name' },
+    { type: 'text', id: 'department', placeholder: 'Department' },
+    { type: 'email', id: 'email', placeholder: 'Email' },
+    { type: 'text', id: 'phone', placeholder: 'Phone' },
+    { type: 'password', id: 'password', placeholder: 'Password' },
+    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining' }
+  ];
 
+  // Email content generator
   const generateEmailContent = (managerData) => {
     const subject = "Welcome to WorkSync - Manager Account Credentials";
     const body = `
@@ -37,11 +51,9 @@ Please change your password after your first login at: http://localhost:3000/log
 
 For any questions, please contact the HR department.
 
-
 Best regards,
 HR Team
-WorkSync
-`;
+WorkSync`;
 
     return {
       subject: encodeURIComponent(subject),
@@ -49,45 +61,30 @@ WorkSync
     };
   };
 
-  const formFields = [
-    { type: 'text', id: 'name', placeholder: 'Name', value: name, onChange: setName },
-    { type: 'text', id: 'department', placeholder: 'Department', value: department, onChange: setDepartment },
-    { type: 'email', id: 'email', placeholder: 'Email', value: email, onChange: setEmail },
-    { type: 'text', id: 'phone', placeholder: 'Phone', value: phone, onChange: setPhone },
-    { type: 'password', id: 'password', placeholder: 'Password', value: password, onChange: setPassword },
-    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining', value: dateOfJoining, onChange: setDateOfJoining }
-  ];
+  // Form submission handler
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        'http://localhost:8070/manager/addManager',
+        values
+      );
 
-  function setManager(e) {
-    e.preventDefault();
-    const newManager = {
-      name,
-      department,
-      email,
-      phone,
-      password,
-      dateOfJoining,
-    };
-    axios
-      .post(`http://localhost:8070/manager/addManager`, newManager)
-      .then((res) => {
-
-        const emailContent = generateEmailContent(newManager);
-        window.location.href = `mailto:${newManager.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        
+      if (response.status === 200 || response.status === 201) {
+        const emailContent = generateEmailContent(values);
+        window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
         alert("Manager Registered Successfully!✅");
         setSubmitted(true);
-        setName("");
-        setDepartment("");
-        setEmail("");
-        setPhone("");
-        setPassword("");
-        setDateOfJoining("");
-      })
-      .catch((err) => {
-        alert("Error registering manager: " + err.message);
-      });
-  }
+        resetForm();
+      }
+    } catch (err) {
+      alert("Error registering manager: " + err.message);
+      console.error("Registration error:", err);
+    } finally {
+      setIsLoading(false);
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section style={styles.section}>
@@ -113,46 +110,69 @@ WorkSync
                     <p style={styles.successText}>
                       The manager has been successfully registered.
                     </p>
+                    <Button
+                      style={styles.submitButton}
+                      onClick={() => setSubmitted(false)}
+                    >
+                      Register Another Manager
+                    </Button>
                   </div>
                 ) : (
-                  <Form onSubmit={setManager} style={styles.form}>
-                    {formFields.map((field) => (
-                      <FormGroup key={field.id}>
-                        <Input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          required
-                          id={field.id}
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          style={styles.input}
-                          onFocus={(e) => e.target.style.borderColor = "#333"}
-                          onBlur={(e) => e.target.style.borderColor = "#ccc"}
-                        />
-                      </FormGroup>
-                    ))}
+                  <Formik
+                    initialValues={initialValues}
+                    validationSchema={ValidationSchema}
+                    onSubmit={handleSubmit}
+                  >
+                    {({ errors, touched, isSubmitting }) => (
+                      <Form style={styles.form}>
+                        {formFields.map((field) => (
+                          <FormGroup key={field.id}>
+                            <Field
+                              type={field.type}
+                              name={field.id}
+                              placeholder={field.placeholder}
+                              className={`form-control ${
+                                errors[field.id] && touched[field.id]
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              style={{
+                                ...styles.input,
+                                borderColor:
+                                  errors[field.id] && touched[field.id]
+                                    ? "red"
+                                    : "#ccc",
+                              }}
+                            />
+                            {errors[field.id] && touched[field.id] && (
+                              <div style={styles.errorMessage}>
+                                {errors[field.id]}
+                              </div>
+                            )}
+                          </FormGroup>
+                        ))}
 
-                    <div style={styles.buttonGroup}>
-                      <Button type="submit" style={styles.submitButton}>
-                        Register Manager
-                      </Button>
-                      <Button
-                        type="button"
-                        style={styles.cancelButton}
-                        onClick={() => setSubmitted(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </Form>
+                        <div style={styles.buttonGroup}>
+                          <Button
+                            type="submit"
+                            style={styles.submitButton}
+                            disabled={isLoading || isSubmitting}
+                          >
+                            {isLoading ? "Registering..." : "Register Manager"}
+                          </Button>
+                          <Button
+                            type="button"
+                            style={styles.cancelButton}
+                            onClick={() => window.history.back()}
+                            disabled={isLoading || isSubmitting}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </Form>
+                    )}
+                  </Formik>
                 )}
-
-                {/* <p style={styles.loginPrompt}>
-                  Already have an account?{" "}
-                  <Link to="/UserLogin" style={styles.loginLink}>
-                    Login
-                  </Link>
-                </p> */}
               </div>
             </div>
           </Col>
@@ -161,14 +181,20 @@ WorkSync
     </section>
   );
 }
-
 const styles = {
   section: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "",
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
     justifyContent: "center"
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: '0.75rem',
+    marginTop: '-10px',
+    marginBottom: '10px',
+    paddingLeft: '5px'
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -225,8 +251,14 @@ const styles = {
     borderRadius: "5px",
     border: "1px solid #ccc",
     outline: "none",
-    transition: "border-color 0.3s"
-  },
+    transition: "border-color 0.3s",
+ '&.is-invalid': {
+      borderColor: 'red',
+      '&:focus': {
+        borderColor: 'red',
+        boxShadow: '0 0 0 0.2rem rgba(255, 0, 0, 0.25)'
+      }
+    } },
   buttonGroup: {
     display: "flex",
     gap: "1rem",

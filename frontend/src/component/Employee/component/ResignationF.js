@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import axios from "axios";
 
 export default function ResignationF() {
+  const ID = localStorage.getItem("ID");
+  const name = localStorage.getItem("Name");
+  
   const [submitted, setsubmitted] = useState(false);
-  const [empID, setempID] = useState("1");
+  const [empID, setempID] = useState(ID);
+  const [empName, setempName] = useState(name);
   const [reason, setreason] = useState("");
   const [endDate, setendDate] = useState("");
 
@@ -30,7 +34,9 @@ export default function ResignationF() {
   }
 
   return (
+    
     <div style={styles.mainContent}>
+    
       <div style={styles.formContainer}>
         {submitted ? (
           <div style={styles.successContainer}>
@@ -98,6 +104,7 @@ export default function ResignationF() {
                 >
                   Submit Resignation
                 </button>
+               
                 <button
                   type="button"
                   onClick={() => setsubmitted(false)}
@@ -111,7 +118,10 @@ export default function ResignationF() {
                 >
                   Cancel
                 </button>
+                
               </div>
+              <br></br>
+              <p>Hey {name}!! Are you sure , you want to quit ??</p>
             </form>
           </>
         )}

@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import FetchEmp from "./component/fetchEmp";
-import ResignationVemp from "./component/ResignationVemp";
 import UserRegister from "./component/UserRegister";
 import DashboardHR from "./component/DashboardHR";
 import SalaryDashboard from "./component/SalaryDashboard";
@@ -12,9 +11,9 @@ import FetchHR from "./component/fetchHR";
 import FetchManager from "./component/fetchManager";
 import HRRegistration from "./component/HRRegistration";
 import ManagerRegistration from "./component/ManagerRegistration";
-import RegistrationDemo from "./component/ResignationDemp";
-import RegistrationUemo from "./component/ResignationUemp";
-import RegistrationVemo from "./component/ResignationVemp";
+import ResignationDemp from "./component/ResignationDemp";
+import ResignationUemp from "./component/ResignationUemp";
+import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
 
 export default function HRApp() {
@@ -78,13 +77,12 @@ export default function HRApp() {
         <Route path="/FetchEmp" element={<FetchEmp />} />
         <Route path="/fetchHR" element={<FetchHR />} />
         <Route path="/fetchManager" element={<FetchManager />} />
-        <Route path="/ResignationVemp" element={<ResignationVemp />} />
         <Route path="/UserRegister" element={<UserRegister />} />
         <Route path="/HRRegistration" element={<HRRegistration />} />
         <Route path="/ManagerRegistration" element={<ManagerRegistration />} />
-        <Route path="/RegistrationDemo" element={<RegistrationDemo />} />
-        <Route path="/RegistrationUemo" element={<RegistrationUemo />} />
-        <Route path="/RegistrationVemo" element={<RegistrationVemo />} />
+        <Route path="/ResignationDemp" element={<ResignationDemp />} />
+        <Route path="/ResignationUemp/:id" element={<ResignationUemp />} />
+        <Route path="/ResignationVemp" element={<ResignationVemp />} />
         <Route path="/SalaryDashboard" element={<SalaryDashboard />} />
         <Route path="/addSalary" element={<AddSalary />} />
         <Route path="/fetchSalary" element={<FetchSalary />} />

@@ -10,26 +10,40 @@ export default function FetchResignations() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    getResignations();
-  }, []);
+  const Id = localStorage.getItem("ID");
+  const name = localStorage.getItem("Name");
+  const Email = localStorage.getItem("email")
 
-  function getResignations() {
+  useEffect(() => {
+    // Check if user is logged in
+    if (!Id) {
+      navigate('/login');
+      return;
+    }
+    getResignations();
+  }, [Id, navigate]);
+
+  function getResignations(id) {
     setLoading(true);
     setError(null);
 
-    axios.get(`http://localhost:8070/resignation/getempRes`, { timeout: 5000 })
+    axios.get(`http://localhost:8070/resignation/getempResByID/${id}`)
       .then((res) => {
-        setResignations(res.data);
+        if (res.data) {
+
+          
+          setResignations(res.data);
+        }
         setLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching resignations:", err);
-        setError("Could not connect to the server. Please try again later.");
+        setError("Could not fetch your resignation records. Please try again later.");
         setLoading(false);
       });
   }
-
+ 
+  // deleteResignation function
   function deleteResignation(id) {
     if (window.confirm("Are you sure you want to delete this resignation?")) {
       axios
@@ -63,6 +77,12 @@ export default function FetchResignations() {
   return (
     <div style={styles.mainContent}>
       <h2 style={styles.header}>Resignation Records</h2>
+
+      <div style={styles.employeeInfo}>
+        <p><strong>Employee ID:</strong> {Id}</p>
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Email:</strong> {Email}</p>
+      </div>
 
       {error && (
         <div style={styles.alertBox} className="alert alert-warning alert-dismissible fade show" role="alert">
@@ -140,6 +160,14 @@ const styles = {
     maxWidth: "calc(100vw - 250px)",
     backgroundColor: "#f8f9fa",
     transition: "all 0.3s ease"
+  },
+  employeeInfo: {
+    backgroundColor: "#fff",
+    padding: "15px 20px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    border: "1px solid #e0e0e0"
   },
   header: {
     color: "#2c3e50",
