@@ -30,10 +30,18 @@ router.get("/getAllFeedback", async (req, res) => {
 // Get one Feedback
 router.get("/getFeedback", async (req, res) => {
   try {
-    const feedback = await Feedback.find();
-    res.status(200).send(feedback);
+    const feedbacks = await Feedback.find().lean();
+    const transformedFeedbacks = feedbacks.map((feedback) => ({
+      ...feedback,
+      _id: feedback._id.toString(),
+      date: new Date(feedback.date).toISOString(),
+    }));
+    res.status(200).json(transformedFeedbacks);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({
+      message: "Error fetching feedbacks",
+      error: error.message,
+    });
   }
 });
 

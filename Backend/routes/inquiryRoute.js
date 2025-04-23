@@ -5,11 +5,30 @@ const Inquiry = require("../model/inquiry");
 // Create a new inquiry
 router.post("/addInquiry", async (req, res) => {
   try {
-    const inquiry = new Inquiry(req.body);
-    await inquiry.save();
-    res.status(201).send(inquiry);
+    // Validate required fields
+    const { employeeId, inquiry, department } = req.body;
+    if (!employeeId || !inquiry || !department) {
+      return res.status(400).json({
+        message: "Employee ID, inquiry, and department are required fields",
+      });
+    }
+
+    const newInquiry = new Inquiry({
+      employeeId,
+      inquiry,
+      sender: req.body.sender,
+      date: req.body.date || new Date(),
+      department,
+    });
+
+    const savedInquiry = await newInquiry.save();
+    res.status(201).json(savedInquiry);
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error creating inquiry:", error);
+    res.status(400).json({
+      message: "Error creating inquiry",
+      error: error.message,
+    });
   }
 });
 
@@ -45,12 +64,28 @@ router.get("/getInquiry", async (req, res) => {
   }
 });
 
+// Get an inquiry by ID
+router.get("/getInquiry/:id", async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findById(req.params.id);
+    if (!inquiry) {
+      return res.status(404).json({ message: "Inquiry not found" });
+    }
+    res.status(200).json(inquiry);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching inquiry",
+      error: error.message,
+    });
+  }
+});
+
 // Update an inquiry by ID
 router.put("/updateInquiry/:id", async (req, res) => {
   try {
     const inquiry = await Inquiry.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
     if (!inquiry) {
       return res.status(404).send();

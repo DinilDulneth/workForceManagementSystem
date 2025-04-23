@@ -1,15 +1,12 @@
 const mongoose = require("mongoose");
 
-// Inquiry Schema
 const inquirySchema = new mongoose.Schema({
-  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
-  inquiry: String,
-  sender: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
+  employeeId: { type: String }, // Changed from ObjectId to String to match frontend
+  inquiry: { type: String, required: true },
+  sender: { type: String }, // Changed from ObjectId to String
   date: { type: Date, default: Date.now },
+  department: { type: String, required: true }, // Added department field
 });
 
-// Create the Inquiry model
 const Inquiry = mongoose.model("Inquiry", inquirySchema);
-
-// Export the model using CommonJS syntax
 module.exports = Inquiry;

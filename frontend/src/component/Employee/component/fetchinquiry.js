@@ -1,13 +1,35 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  Box,
+  Card,
+  Typography,
+  IconButton,
+  Container,
+  Alert,
+  Snackbar,
+  Chip,
+  LinearProgress,
+  Button,
+} from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import PersonIcon from "@mui/icons-material/Person";
+import DateRangeIcon from "@mui/icons-material/DateRange";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import BusinessIcon from "@mui/icons-material/Business";
 
 function FetchInquiry() {
   const navigate = useNavigate();
   const [inquiry, setInquiry] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   useEffect(() => {
     getInquiry();
@@ -15,187 +37,248 @@ function FetchInquiry() {
 
   function getInquiry() {
     setLoading(true);
-    setError(null);
-    
     axios
       .get("http://localhost:8070/api/inquiry/getInquiry")
       .then((res) => {
         setInquiry(res.data);
-        setLoading(false);
       })
       .catch((err) => {
-        setError("Error fetching inquiries: " + err.message);
-        setLoading(false);
-      });
+        setSnackbar({
+          open: true,
+          message: "Error fetching inquiries: " + err.message,
+          severity: "error",
+        });
+      })
+      .finally(() => setLoading(false));
   }
 
   function deleteInquiry(id) {
-    if (window.confirm("Are you sure you want to delete this inquiry?")) {
-      axios
-        .delete(`http://localhost:8070/api/inquiry/deleteInquiry/${id}`)
-        .then(() => {
-          setInquiry(inquiry.filter((inq) => inq._id !== id));
-          alert("Inquiry deleted successfully ✅");
-        })
-        .catch((err) => {
-          alert("Error deleting inquiry: " + err.message);
+    axios
+      .delete(`http://localhost:8070/api/inquiry/deleteInquiry/${id}`)
+      .then(() => {
+        setSnackbar({
+          open: true,
+          message: "Inquiry deleted successfully ✅",
+          severity: "success",
         });
-    }
-  }
-
-  if (loading) {
-    return (
-      <div style={styles.pageContainer}>
-        <div style={styles.loadingContainer}>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p style={styles.loadingText}>Loading inquiries...</p>
-        </div>
-      </div>
-    );
+        setInquiry(inquiry.filter((inq) => inq._id !== id));
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message: "Error deleting inquiry: " + err.message,
+          severity: "error",
+        });
+      });
   }
 
   return (
-    <div style={styles.pageContainer}>
-      <div style={styles.container}>
-        <h2 style={styles.title}>Inquiry List</h2>
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <br></br>
+        <br></br>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 4,
+            gap: 2,
+          }}
+        >
+          <HelpOutlineIcon sx={{ fontSize: 40, color: "#fc6625" }} />
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              background: "linear-gradient(45deg, #fc6625 30%, #e55a1c 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            My Inquiries
+          </Typography>
+        </Box>
 
-        {error && (
-          <div style={styles.alert} className="alert alert-warning">
-            {error}
-          </div>
+        {loading && (
+          <LinearProgress
+            sx={{
+              mb: 3,
+              backgroundColor: "rgba(252, 102, 37, 0.1)",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor: "#fc6625",
+              },
+            }}
+          />
         )}
 
-        <div style={styles.tableWrapper}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.tableHeader}>Employee ID</th>
-                <th style={styles.tableHeader}>Inquiry</th>
-                <th style={styles.tableHeader}>Sender</th>
-                <th style={styles.tableHeader}>Date</th>
-                <th style={styles.tableHeader}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {inquiry.map((inq) => (
-                <tr key={inq._id} style={styles.tableRow}>
-                  <td style={styles.tableCell}>{inq.employeeId}</td>
-                  <td style={styles.tableCell}>{inq.inquiry}</td>
-                  <td style={styles.tableCell}>{inq.sender}</td>
-                  <td style={styles.tableCell}>
-                    {new Date(inq.date).toLocaleDateString()}
-                  </td>
-                  <td style={styles.tableCell}>
-                    <div style={styles.buttonGroup}>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => deleteInquiry(inq._id)}
-                        style={styles.deleteButton}
+        <AnimatePresence>
+          {inquiry.map((inq, index) => (
+            <motion.div
+              key={inq._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card
+                sx={{
+                  mb: 2,
+                  p: 3,
+                  borderRadius: 2,
+                  background: "rgba(255, 255, 255, 0.95)",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 8px 32px rgba(252, 102, 37, 0.1)",
+                  border: "1px solid rgba(252, 102, 37, 0.1)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 12px 40px rgba(252, 102, 37, 0.2)",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        color: "#474747",
+                        fontWeight: 600,
+                        mb: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <PersonIcon sx={{ color: "#fc6625" }} />
+                      Employee ID: {inq.employeeId}
+                    </Typography>
+
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: "#474747",
+                        mb: 2,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 1,
+                      }}
+                    >
+                      <HelpOutlineIcon sx={{ color: "#8f9491", mt: 0.5 }} />
+                      {inq.inquiry}
+                    </Typography>
+
+                    <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                      <Chip
+                        icon={<BusinessIcon />}
+                        label={`Department: ${inq.department}`}
+                        size="small"
+                        sx={{
+                          backgroundColor: "rgba(252, 102, 37, 0.1)",
+                          color: "#fc6625",
+                          "& .MuiChip-icon": {
+                            color: "#fc6625",
+                          },
+                        }}
+                      />
+                      <Chip
+                        icon={<DateRangeIcon />}
+                        label={new Date(inq.date).toLocaleDateString()}
+                        size="small"
+                        sx={{
+                          backgroundColor: "rgba(229, 90, 28, 0.1)",
+                          color: "#e55a1c",
+                          "& .MuiChip-icon": {
+                            color: "#e55a1c",
+                          },
+                        }}
+                      />
+                    </Box>
+
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        Delete
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => navigate(`/updateInquiry/${inq._id}`)}
-                        style={styles.updateButton}
-                      >
-                        Update
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+                        <Button
+                          variant="outlined"
+                          startIcon={<EditIcon />}
+                          onClick={() =>
+                            navigate(
+                              `/EmployeeDashboard/updateInquiry/${inq._id}`
+                            )
+                          }
+                          sx={{
+                            color: "#fc6625",
+                            borderColor: "#fc6625",
+                            "&:hover": {
+                              borderColor: "#e55a1c",
+                              backgroundColor: "rgba(252, 102, 37, 0.1)",
+                            },
+                          }}
+                        >
+                          Update
+                        </Button>
+                      </motion.div>
+                    </Box>
+                  </Box>
+
+                  <IconButton
+                    onClick={() => deleteInquiry(inq._id)}
+                    sx={{
+                      color: "#fc6625",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        color: "#e55a1c",
+                        background: "rgba(252, 102, 37, 0.1)",
+                      },
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            borderRadius: 2,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            ...(snackbar.severity === "success" && {
+              backgroundColor: "#fc6625",
+            }),
+            ...(snackbar.severity === "error" && {
+              backgroundColor: "#e55a1c",
+            }),
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 }
-
-const styles = {
-  pageContainer: {
-    marginLeft: "250px",
-    padding: "20px",
-    transition: "margin-left 0.3s ease",
-    width: "calc(100% - 250px)",
-    minHeight: "calc(100vh - 60px)",
-    backgroundColor: "#f5f5f5",
-    marginTop: "60px"
-  },
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "20px"
-  },
-  title: {
-    fontSize: "28px",
-    fontWeight: "500",
-    textAlign: "center",
-    marginBottom: "30px",
-    color: "#333"
-  },
-  tableWrapper: {
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    overflow: "hidden"
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    backgroundColor: "#fff"
-  },
-  tableHeader: {
-    backgroundColor: "#ff7043",
-    color: "#fff",
-    padding: "15px",
-    textAlign: "left",
-    fontWeight: "600",
-    fontSize: "14px"
-  },
-  tableRow: {
-    borderBottom: "1px solid #eee",
-    transition: "background-color 0.2s",
-    "&:hover": {
-      backgroundColor: "#f9f9f9"
-    }
-  },
-  tableCell: {
-    padding: "15px",
-    fontSize: "14px",
-    color: "#333"
-  },
-  buttonGroup: {
-    display: "flex",
-    gap: "8px"
-  },
-  deleteButton: {
-    backgroundColor: "#dc3545",
-    border: "none",
-    padding: "4px 8px",
-    fontSize: "12px"
-  },
-  updateButton: {
-    backgroundColor: "#ff7043",
-    border: "none",
-    padding: "4px 8px",
-    fontSize: "12px"
-  },
-  loadingContainer: {
-    textAlign: "center",
-    marginTop: "2rem"
-  },
-  loadingText: {
-    marginTop: "1rem",
-    color: "#666"
-  },
-  alert: {
-    marginBottom: "20px",
-    borderRadius: "8px"
-  }
-};
 
 export default FetchInquiry;
