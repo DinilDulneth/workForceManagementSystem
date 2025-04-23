@@ -4,7 +4,7 @@ import ResignationF from "./component/ResignationF";
 import ResignationU from "./component/ResignationU";
 import ResignationV from "./component/ResignationV";
 import ResignationD from "./component/ResignationD";
-import EmployeeHome from "./component/EmployeeHome";
+import EmployeeDashboard from "./component/EmployeeDashboard";
 import LeaveRequest from "./component/LeaveRequest";
 import FetchAnnouncement from "./component/fetchAnnouncement";
 import AddInquiry from "./component/addInquiry";
@@ -12,55 +12,44 @@ import FetchFeedback from "./component/fetchFeedback";
 import Fetchinquiry from "./component/fetchinquiry";
 import Ine from "react-bootstrap";
 import DashboardTemp from "../DashboardTemp";
+import UpdateInquiry from "./component/UpdateInquiry";
 
 const Links = [
-  // { link: "#", name: "Dashboard", icon: "FaHome" },
   {
-    link: "/EmployeeHome",
-    name: "Dashboard",
-    icon: "bi-house-door"
-  },
-  {
-    link: "/EmployeeHome/ResignationF",
+    link: "/EmployeeDashboard/ResignationF",
     name: "Resignation Form",
-    icon: "FaUserCircle"
+    icon: "bi bi-file-text",
   },
   {
-    link: "/EmployeeHome/ResignationV",
+    link: "/EmployeeDashboard/ResignationV",
     name: "Resignation View",
-    icon: "FaUserCircle"
+    icon: "bi bi-eye",
   },
   {
-    link: "/EmployeeHome/ResignationD",
+    link: "/EmployeeDashboard/ResignationD",
     name: "Resignation Delete",
-    icon: "FaUserCircle"
+    icon: "bi bi-trash",
   },
-  // {
-  //   link: "/EmployeeDashboard/addInquiry",
-  //   name: "Add Inquiry",
-  //   icon: "FaUserCircle"
-  // },
   {
-    link: "/EmployeeHome/LeaveRequest",
+    link: "/EmployeeDashboard/LeaveRequest",
     name: "Leave Request",
-    icon: "FaUserCircle"
+    icon: "bi bi-calendar-check",
   },
   {
-    link: "/EmployeeHome/FetchFeedback",
-    name: "Fetch Feedback",
-    icon: "FaUserCircle"
+    link: "/EmployeeDashboard/FetchFeedback",
+    name: "Feedback",
+    icon: "bi bi-chat-dots",
   },
   {
-    link: "/EmployeeHome/Fetchinquiry",
-    name: "Fetch Inquiry",
-    icon: "FaUserCircle"
+    link: "/EmployeeDashboard/fetchAnnouncement",
+    name: "Announcements",
+    icon: "bi bi-megaphone",
   },
   {
-    link: "/EmployeeHome/addInquiry",
+    link: "/EmployeeDashboard/addInquiry",
     name: "Add Inquiry",
-    icon: "FaUserCircle"
+    icon: "bi bi-question-circle",
   },
-  { link: "#", name: "Settings", icon: "FaCog" }
 ];
 
 export default function EmployeeApp() {
@@ -68,7 +57,7 @@ export default function EmployeeApp() {
     <>
       <DashboardTemp ArrLinkList={Links} />
       <Routes>
-        <Route path="/" element={<EmployeeHome />} />
+        <Route path="/" element={<EmployeeDashboard />} />
         <Route path="/ResignationF" element={<ResignationF />} />
         <Route path="/ResignationU/:id" element={<ResignationU />} />
         <Route path="/ResignationV" element={<ResignationV />} />
@@ -79,6 +68,7 @@ export default function EmployeeApp() {
         <Route path="/LeaveRequest" element={<LeaveRequest />} />
         <Route path="/FetchFeedback" element={<FetchFeedback />} />
         <Route path="/Fetchinquiry" element={<Fetchinquiry />} />
+        <Route path="/updateInquiry/:id" element={<UpdateInquiry />} />
       </Routes>
     </>
   );
