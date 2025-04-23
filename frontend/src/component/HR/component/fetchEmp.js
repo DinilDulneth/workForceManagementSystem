@@ -117,7 +117,7 @@ export default function FetchEmp() {
             <FontAwesomeIcon icon={faSearch} style={styles.searchIcon} />
             <input
               type="text"
-              placeholder={`Search ${searchField === 'all' ? 'employees' : searchField}...`}
+              placeholder={Search ${searchField === 'all' ? 'employees' : searchField}...}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={styles.searchInput}
