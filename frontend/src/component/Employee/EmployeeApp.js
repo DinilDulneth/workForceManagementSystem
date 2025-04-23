@@ -4,7 +4,7 @@ import ResignationF from "./component/ResignationF";
 import ResignationU from "./component/ResignationU";
 import ResignationV from "./component/ResignationV";
 import ResignationD from "./component/ResignationD";
-import EmployeeDashboard from "./component/EmployeeDashboard";
+import EmployeeDashboard from "./component/EmployeeHome";
 import LeaveRequest from "./component/LeaveRequest";
 import FetchAnnouncement from "./component/fetchAnnouncement";
 import AddInquiry from "./component/addInquiry";
@@ -16,40 +16,45 @@ import UpdateInquiry from "./component/UpdateInquiry";
 
 const Links = [
   {
-    link: "/EmployeeDashboard/ResignationF",
+    link: "/EmployeeHome",
+    name: "Dashboard Overview",
+    icon: "bi-house-door"
+  },
+  {
+    link: "/EmployeeHome/ResignationF",
     name: "Resignation Form",
-    icon: "bi bi-file-text",
+    icon: "bi bi-file-text"
   },
   {
-    link: "/EmployeeDashboard/ResignationV",
+    link: "/EmployeeHome/ResignationV",
     name: "Resignation View",
-    icon: "bi bi-eye",
+    icon: "bi bi-eye"
   },
   {
-    link: "/EmployeeDashboard/ResignationD",
+    link: "/EmployeeHome/ResignationD",
     name: "Resignation Delete",
-    icon: "bi bi-trash",
+    icon: "bi bi-trash"
   },
   {
-    link: "/EmployeeDashboard/LeaveRequest",
+    link: "/EmployeeHome/LeaveRequest",
     name: "Leave Request",
-    icon: "bi bi-calendar-check",
+    icon: "bi bi-calendar-check"
   },
   {
-    link: "/EmployeeDashboard/FetchFeedback",
+    link: "/EmployeeHome/FetchFeedback",
     name: "Feedback",
-    icon: "bi bi-chat-dots",
+    icon: "bi bi-chat-dots"
   },
   {
-    link: "/EmployeeDashboard/fetchAnnouncement",
+    link: "/EmployeeHome/fetchAnnouncement",
     name: "Announcements",
-    icon: "bi bi-megaphone",
+    icon: "bi bi-megaphone"
   },
   {
-    link: "/EmployeeDashboard/addInquiry",
+    link: "/EmployeeHome/addInquiry",
     name: "Add Inquiry",
-    icon: "bi bi-question-circle",
-  },
+    icon: "bi bi-question-circle"
+  }
 ];
 
 export default function EmployeeApp() {

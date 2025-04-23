@@ -41,7 +41,7 @@ const UserLogin = () => {
 
         case "Employee":
           await getEmployeeID(email);
-          navigate("/EmployeeDashboard");
+          navigate("/EmployeeHome");
           break;
 
         default:
