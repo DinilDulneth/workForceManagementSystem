@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faFilter } from "@fortawesome/free-solid-svg-icons";
 
 export default function FetchManager() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState("all");
+  const [advancedSearch, setAdvancedSearch] = useState(false);
 
   useEffect(() => {
     getManagers();
@@ -42,6 +47,28 @@ export default function FetchManager() {
   const getStatusClass = (status) => {
     return status === "1" || status === 1 ? "status-active" : "status-inactive";
   };
+
+  const filteredEmployees = employees.filter((employee) => {
+    if (!searchTerm) return true;
+    
+    const term = searchTerm.toLowerCase();
+    
+    switch (searchField) {
+      case "name":
+        return employee.name?.toLowerCase().includes(term);
+      case "email":
+        return employee.email?.toLowerCase().includes(term);
+      case "position":
+        return employee.position?.toLowerCase().includes(term);
+      case "department":
+        return employee.department?.toLowerCase().includes(term);
+      case "all":
+      default:
+        return Object.values(employee).some((value) =>
+          String(value).toLowerCase().includes(term)
+        );
+    }
+  });
 
   if (loading) {
     return (

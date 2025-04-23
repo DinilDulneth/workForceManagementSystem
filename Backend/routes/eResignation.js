@@ -24,17 +24,17 @@ router.get("/getempRes", async (req, res) => {
 });
 
 // Get a resignation by ID
-router.get("/getempResByID/:id", async (req, res) => {
-  try {
-    const empRes = await empResignation.findById(req.params.id);
-    if (!empRes) {
-      return res.status(404).send();
-    }
-    res.status(200).send(empRes);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+// router.get("/getempResByID/:id", async (req, res) => {
+//   try {
+//     const empRes = await empResignation.findById(req.params.id);
+//     if (!empRes) {
+//       return res.status(404).send();
+//     }
+//     res.status(200).send(empRes);
+//   } catch (error) {
+//     res.status(500).send(error);
+//   }
+// });
 
 // Get an employee by ID
 router.route("/getempResByID/:id").get(async (req, res) => {

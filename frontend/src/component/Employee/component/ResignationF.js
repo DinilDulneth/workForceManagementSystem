@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Swal from "sweetalert2";
 
 export default function ResignationF() {
+  const ID = localStorage.getItem("ID");
   const name = localStorage.getItem("Name");
-
+  
   const [submitted, setsubmitted] = useState(false);
-  const [empID, setempID] = useState("");
-
+  const [empID, setempID] = useState(ID);
+  const [empName, setempName] = useState(name);
   const [reason, setreason] = useState("");
   const [endDate, setendDate] = useState("");
 
@@ -16,16 +16,12 @@ export default function ResignationF() {
     const newResignation = {
       empId: empID,
       Reason: reason,
-      endDate,
+      endDate
     };
     axios
       .post("http://localhost:8070/resignation/addempRes", newResignation)
       .then((res) => {
-        Swal.fire(
-          "submitted!",
-          "Resignation has been sent successfully.",
-          "success"
-        );
+        alert("Resignation Added Successfully!✅");
         setsubmitted(true);
         setempID("");
         setreason("");
@@ -38,7 +34,9 @@ export default function ResignationF() {
   }
 
   return (
+    
     <div style={styles.mainContent}>
+    
       <div style={styles.formContainer}>
         {submitted ? (
           <div style={styles.successContainer}>
@@ -47,7 +45,7 @@ export default function ResignationF() {
               style={{
                 color: "#474747",
                 fontSize: "1.5rem",
-                marginBottom: "1rem",
+                marginBottom: "1rem"
               }}
             >
               Resignation Submitted
@@ -106,6 +104,7 @@ export default function ResignationF() {
                 >
                   Submit Resignation
                 </button>
+               
                 <button
                   type="button"
                   onClick={() => setsubmitted(false)}
@@ -119,7 +118,10 @@ export default function ResignationF() {
                 >
                   Cancel
                 </button>
+                
               </div>
+              <br></br>
+              <p>Hey {name}!! Are you sure , you want to quit ??</p>
             </form>
           </>
         )}
@@ -138,7 +140,7 @@ const styles = {
     backgroundColor: "#f8f9fa",
     display: "flex",
     justifyContent: "center",
-    alignItems: "flex-start",
+    alignItems: "flex-start"
   },
   formContainer: {
     width: "600px",
@@ -146,7 +148,7 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     padding: "2.5rem",
-    marginTop: "20px",
+    marginTop: "20px"
   },
   header: {
     color: "#2c3e50",
@@ -154,7 +156,7 @@ const styles = {
     marginBottom: "2rem",
     fontSize: "1.8rem",
     position: "relative",
-    paddingBottom: "0.75rem",
+    paddingBottom: "0.75rem"
   },
   headerUnderline: {
     content: '""',
@@ -164,18 +166,18 @@ const styles = {
     transform: "translateX(-50%)",
     width: "80px",
     height: "3px",
-    backgroundColor: "#fc6625",
+    backgroundColor: "#fc6625"
   },
   formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "0.5rem",
-    marginBottom: "1.5rem",
+    marginBottom: "1.5rem"
   },
   label: {
     color: "#474747",
     fontWeight: 500,
-    fontSize: "0.95rem",
+    fontSize: "0.95rem"
   },
   input: {
     width: "100%",
@@ -184,18 +186,18 @@ const styles = {
     borderRadius: "6px",
     fontSize: "1rem",
     color: "#474747",
-    transition: "all 0.3s ease",
+    transition: "all 0.3s ease"
   },
   textarea: {
     minHeight: "120px",
     resize: "vertical",
     fontFamily: "inherit",
-    lineHeight: 1.5,
+    lineHeight: 1.5
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "2rem",
+    marginTop: "2rem"
   },
   submitButton: {
     flex: 1,
@@ -207,7 +209,7 @@ const styles = {
     fontSize: "1rem",
     fontWeight: 600,
     cursor: "pointer",
-    transition: "all 0.3s ease",
+    transition: "all 0.3s ease"
   },
   cancelButton: {
     flex: 1,
@@ -219,11 +221,11 @@ const styles = {
     fontSize: "1rem",
     fontWeight: 600,
     cursor: "pointer",
-    transition: "all 0.3s ease",
+    transition: "all 0.3s ease"
   },
   successContainer: {
     textAlign: "center",
-    padding: "2rem 1rem",
+    padding: "2rem 1rem"
   },
   successIcon: {
     width: "70px",
@@ -235,6 +237,6 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    margin: "0 auto 1.5rem",
-  },
+    margin: "0 auto 1.5rem"
+  }
 };
