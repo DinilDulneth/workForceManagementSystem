@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-
 export default function FetchResignations() {
   const navigate = useNavigate();
   const [resignations, setResignations] = useState([]);
@@ -12,44 +11,42 @@ export default function FetchResignations() {
 
   const Id = localStorage.getItem("ID");
   const name = localStorage.getItem("Name");
-  const Email = localStorage.getItem("email")
+  const Email = localStorage.getItem("email");
 
   useEffect(() => {
-    // Check if user is logged in
-    if (!Id) {
-      navigate('/login');
-      return;
-    }
-    getResignations();
+    getResignations(Id);
   }, [Id, navigate]);
 
   function getResignations(id) {
     setLoading(true);
     setError(null);
-
-    axios.get(`http://localhost:8070/resignation/getempResByID/${id}`)
+    console.log("hello");
+    axios
+      .get(`http://localhost:8070/resignation/getempResByID/${id}`)
       .then((res) => {
         if (res.data) {
-
-          
           setResignations(res.data);
         }
         setLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching resignations:", err);
-        setError("Could not fetch your resignation records. Please try again later.");
+        setError(
+          "Could not fetch your resignation records. Please try again later."
+        );
         setLoading(false);
       });
   }
- 
+
   // deleteResignation function
   function deleteResignation(id) {
     if (window.confirm("Are you sure you want to delete this resignation?")) {
       axios
         .delete(`http://localhost:8070/resignation/deleteempRes/${id}`)
         .then(() => {
-          setResignations(resignations.filter((resignation) => resignation._id !== id));
+          setResignations(
+            resignations.filter((resignation) => resignation._id !== id)
+          );
           alert("Resignation deleted successfully");
         })
         .catch((err) => {
@@ -65,11 +62,15 @@ export default function FetchResignations() {
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <h3 style={{ color: "#2c3e50", marginBottom: "20px" }}>Resignations Data</h3>
+        <h3 style={{ color: "#2c3e50", marginBottom: "20px" }}>
+          Resignations Data
+        </h3>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <p style={{ marginTop: "20px", color: "#666" }}>Loading resignation data...</p>
+        <p style={{ marginTop: "20px", color: "#666" }}>
+          Loading resignation data...
+        </p>
       </div>
     );
   }
@@ -79,18 +80,33 @@ export default function FetchResignations() {
       <h2 style={styles.header}>Resignation Records</h2>
 
       <div style={styles.employeeInfo}>
-        <p><strong>Employee ID:</strong> {Id}</p>
-        <p><strong>Name:</strong> {name}</p>
-        <p><strong>Email:</strong> {Email}</p>
+        <p>
+          <strong>Employee ID:</strong> {Id}
+        </p>
+        <p>
+          <strong>Name:</strong> {name}
+        </p>
+        <p>
+          <strong>Email:</strong> {Email}
+        </p>
       </div>
 
       {error && (
-        <div style={styles.alertBox} className="alert alert-warning alert-dismissible fade show" role="alert">
+        <div
+          style={styles.alertBox}
+          className="alert alert-warning alert-dismissible fade show"
+          role="alert"
+        >
           <strong>Note:</strong> {error}
-          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
           <div className="mt-2">
-            <button 
-              className="btn btn-sm btn-primary" 
+            <button
+              className="btn btn-sm btn-primary"
               onClick={handleRetry}
               style={styles.button}
             >
@@ -123,7 +139,11 @@ export default function FetchResignations() {
                     <button
                       className="btn btn-sm"
                       style={{ ...styles.button, ...styles.editButton }}
-                      onClick={() => navigate(`/EmployeeDashboard/ResignationU/${resignation._id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/EmployeeDashboard/ResignationU/${resignation._id}`
+                        )
+                      }
                     >
                       Edit
                     </button>
@@ -139,7 +159,10 @@ export default function FetchResignations() {
               ))
             ) : (
               <tr>
-                <td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>
+                <td
+                  colSpan="4"
+                  style={{ textAlign: "center", padding: "20px" }}
+                >
                   No resignation records found.
                 </td>
               </tr>
@@ -199,7 +222,7 @@ const styles = {
     backgroundColor: "#3498db",
     border: "none",
     color: "white",
-    '&:hover': {
+    "&:hover": {
       backgroundColor: "#2980b9"
     }
   },
@@ -207,7 +230,7 @@ const styles = {
     backgroundColor: "#e74c3c",
     border: "none",
     color: "white",
-    '&:hover': {
+    "&:hover": {
       backgroundColor: "#c0392b"
     }
   },

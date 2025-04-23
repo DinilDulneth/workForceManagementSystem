@@ -11,14 +11,45 @@ export default function TaskDetails() {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTask, setEditedTask] = useState({ status: "" });
+  const [sortBy, setSortBy] = useState("startDate");
+  const [sortOrder, setSortOrder] = useState("desc");
 
+  const sortOptions = [
+    { value: "startDate", label: "Start Date" },
+    { value: "deadLine", label: "Deadline" },
+    { value: "priority", label: "Priority" }
+  ];
   useEffect(() => {
     const id = localStorage.getItem("ID");
     if (id) {
       getTask(id);
     }
   }, []);
+  const getSortedTasks = (tasks) => {
+    return [...tasks].sort((a, b) => {
+      switch (sortBy) {
+        case "startDate":
+        case "deadLine":
+          const dateA = new Date(a[sortBy]);
+          const dateB = new Date(b[sortBy]);
+          return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
 
+        case "priority":
+          const priorityOrder = { High: 3, Medium: 2, Low: 1 };
+          return sortOrder === "asc"
+            ? priorityOrder[a.priority] - priorityOrder[b.priority]
+            : priorityOrder[b.priority] - priorityOrder[a.priority];
+
+        case "status":
+          return sortOrder === "asc"
+            ? a.status - b.status
+            : b.status - a.status;
+
+        default:
+          return 0;
+      }
+    });
+  };
   const getTask = (id) => {
     axios
       .get(`http://localhost:8070/task/getByEmpID/${id}`)
@@ -88,16 +119,19 @@ export default function TaskDetails() {
     11: "Deferred"
   };
 
-  const filteredTask = tasks.filter((task) => {
-    const matchesSearch =
-      task.tName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      new Date(task.startDate).toLocaleDateString().includes(searchTerm);
-    const matchesStatus = selectedStatus
-      ? task.status === parseInt(selectedStatus)
-      : true;
-    return matchesSearch && matchesStatus;
-  });
+  // Replace the existing filteredTask variable with this
+  const filteredTask = getSortedTasks(
+    tasks.filter((task) => {
+      const matchesSearch =
+        task.tName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        new Date(task.startDate).toLocaleDateString().includes(searchTerm);
+      const matchesStatus = selectedStatus
+        ? task.status === parseInt(selectedStatus)
+        : true;
+      return matchesSearch && matchesStatus;
+    })
+  );
 
   const downloadTasksAsPDF = () => {
     toast.info("Preparing your PDF...", {
@@ -165,15 +199,25 @@ export default function TaskDetails() {
     }
 
     const updateTask = {
-      status: parseInt(editedTask.status)
+      status: parseInt(editedTask.status),
+      empID: empId // Include empID in the update
     };
 
     axios
       .put(`http://localhost:8070/task/update/${taskId}`, updateTask)
-      .then(() => {
-        Swal.fire("Updated!", "Task status updated successfully.", "success");
-        setEditingTaskId(null);
-        getTask(empId);
+      .then((response) => {
+        if (response.data) {
+          Swal.fire("Updated!", "Task status updated successfully.", "success");
+          setEditingTaskId(null);
+          // Update the local tasks state to reflect the change
+          setTasks(
+            tasks.map((task) =>
+              task._id === taskId
+                ? { ...task, status: parseInt(editedTask.status) }
+                : task
+            )
+          );
+        }
       })
       .catch((err) => {
         Swal.fire(
@@ -188,159 +232,220 @@ export default function TaskDetails() {
     setEditingTaskId(null);
     setEditedTask({ status: "" });
   };
+  // First, add these styles at the top of your file
+  const modernStyles = {
+    container: {
+      backgroundColor: "#f8f9fa",
+      minHeight: "100vh",
+      padding: "2rem",
+      marginLeft: "250px",
+      marginTop: "100px"
+    },
+    header: {
+      marginBottom: "2rem",
+      color: "#2c3e50",
+      fontSize: "2.5rem",
+      fontWeight: "600"
+    },
+    searchContainer: {
+      backgroundColor: "white",
+      padding: "1.5rem",
+      borderRadius: "15px",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+      marginBottom: "2rem"
+    },
+    taskCard: {
+      backgroundColor: "white",
+      borderRadius: "12px",
+      border: "none",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      overflow: "hidden",
+      "&:hover": {
+        transform: "translateY(-5px)",
+        boxShadow: "0 8px 12px rgba(0, 0, 0, 0.1)"
+      }
+    },
+    filterButton: {
+      padding: "0.5rem 1rem",
+      borderRadius: "20px",
+      border: "1px solid #e9ecef",
+      backgroundColor: "white",
+      color: "#495057",
+      transition: "all 0.2s ease",
+      "&:hover": {
+        backgroundColor: "#e9ecef"
+      }
+    },
+    modernInput: {
+      border: "1px solid #e9ecef",
+      borderRadius: "10px",
+      padding: "0.75rem 1rem",
+      width: "100%",
+      transition: "all 0.2s ease",
+      "&:focus": {
+        borderColor: "#007bff",
+        boxShadow: "0 0 0 3px rgba(0,123,255,0.1)"
+      }
+    }
+  };
 
+  // Update the return statement with modern styling
   return (
-    <div className="container" style={{ marginLeft: "250px", width: "83%" }}>
-      <h1>Task Details</h1>
-      <div className="card p-3">
-        <h5 className="mb-3">Recent Tasks</h5>
+    <div style={modernStyles.container}>
+      <h1 style={modernStyles.header}>Task Dashboard</h1>
 
-        <div className="mb-3 d-flex flex-column gap-2">
-          {Object.entries(statusTypes).map(([key, value]) => (
-            <div key={key} className="form-check">
-              <input
-                type="radio"
-                name="statusFilter"
-                id={`status-${key}`}
-                value={key}
-                checked={selectedStatus === key}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="form-check-input"
-              />
-              <label htmlFor={`status-${key}`} className="form-check-label">
-                {value}
-              </label>
-            </div>
-          ))}
-          <button
-            className="btn btn-sm btn-danger mt-2"
-            onClick={() => setSelectedStatus("")}
-            style={{ width: "150px" }}
+      <div style={modernStyles.searchContainer}>
+        <div className="d-flex gap-4 align-items-center mb-4">
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={modernStyles.modernInput}
+          />
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{ ...modernStyles.modernInput, width: "auto" }}
           >
-            Clear Filter
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            className="btn"
+            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+            style={modernStyles.filterButton}
+          >
+            {sortOrder === "asc" ? "↑" : "↓"}
           </button>
         </div>
 
-        <div className="mb-4 position-relative custom-search-wrapper">
-          <div className="custom-search-box">
-            <input
-              type="text"
-              className="custom-search-input"
-              placeholder="Search Task by name, Priority, or Start Date"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="d-flex flex-wrap gap-3">
-          {filteredTask.map((task) => (
-            <div
-              key={task._id}
-              className="card"
+        <div className="d-flex flex-wrap gap-2">
+          {Object.entries(statusTypes).map(([key, value]) => (
+            <button
+              key={key}
+              onClick={() =>
+                setSelectedStatus(selectedStatus === key ? "" : key)
+              }
               style={{
-                width: "300px",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "15px",
-                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                position: "relative" // Added for the priority bar
+                ...modernStyles.filterButton,
+                backgroundColor:
+                  selectedStatus === key ? getStatusColor(key) : "white",
+                color: selectedStatus === key ? "white" : "#495057"
               }}
             >
-              <h5>{task.tName}</h5>
-              <p>{task.description}</p>
-              <p>
-                <strong>Status:</strong>{" "}
+              {value}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="d-flex flex-wrap gap-4">
+        {filteredTask.map((task) => (
+          <div
+            key={task._id}
+            className="card"
+            style={{
+              ...modernStyles.taskCard,
+              width: "320px"
+            }}
+          >
+            <div className="p-3">
+              <div className="d-flex justify-content-between align-items-start mb-3">
+                <h5
+                  className="mb-0"
+                  style={{ color: "#2c3e50", fontWeight: "600" }}
+                >
+                  {task.tName}
+                </h5>
+                <span
+                  className="badge"
+                  style={{
+                    backgroundColor: getStatusColor(task.status),
+                    padding: "0.5rem 1rem",
+                    borderRadius: "20px"
+                  }}
+                >
+                  {getTaskStatusLabel(task.status)}
+                </span>
+              </div>
+
+              <p className="text-muted">{task.description}</p>
+
+              <div className="d-flex flex-column gap-2">
+                <div className="d-flex justify-content-between">
+                  <span>Deadline:</span>
+                  <strong>
+                    {new Date(task.deadLine).toLocaleDateString()}
+                  </strong>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Start Date:</span>
+                  <strong>
+                    {new Date(task.startDate).toLocaleDateString()}
+                  </strong>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Priority:</span>
+                  <strong style={{ color: getPriorityColor(task.priority) }}>
+                    {task.priority}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="mt-3">
                 {editingTaskId === task._id ? (
-                  <select
-                    value={editedTask.status}
-                    onChange={handleStatusChange}
-                    className="form-select"
-                  >
-                    <option value="">Select Status</option>
-                    {Object.entries(statusTypes).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span
-                    className="badge"
-                    style={{
-                      backgroundColor: getStatusColor(task.status),
-                      color: "white"
-                    }}
-                  >
-                    {getTaskStatusLabel(task.status)}
-                  </span>
-                )}
-              </p>
-              <p>
-                <strong>Deadline:</strong>{" "}
-                {new Date(task.deadLine).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Start Date:</strong>{" "}
-                {new Date(task.startDate).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>End Date:</strong>{" "}
-                {task.endDate
-                  ? new Date(task.endDate).toLocaleDateString()
-                  : "N/A"}
-              </p>
-              <p>
-                <strong>Priority:</strong> {task.priority}
-              </p>
-              <div className="d-flex justify-content-between">
-                {editingTaskId === task._id ? (
-                  <>
+                  <div className="d-flex gap-2">
                     <button
-                      className="btn btn-sm btn-success"
+                      className="btn btn-success w-100"
                       onClick={() => handleSave(task._id, task.empID)}
                     >
                       Save
                     </button>
                     <button
-                      className="btn btn-sm btn-secondary"
+                      className="btn btn-light w-100"
                       onClick={handleCancel}
                     >
                       Cancel
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <button
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-primary w-100"
                     onClick={() => handleEditClick(task)}
                   >
-                    Edit
+                    Edit Status
                   </button>
                 )}
               </div>
-              {/* Priority color bar */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "0",
-                  left: "0",
-                  width: "100%",
-                  height: "10px",
-                  backgroundColor: getPriorityColor(task.priority)
-                }}
-              ></div>
             </div>
-          ))}
-        </div>
-
-        <button
-          className="btn btn-primary btn-sm mb-3 mt-4"
-          onClick={downloadTasksAsPDF}
-          style={{ width: "120px" }}
-        >
-          Download PDF
-        </button>
+            <div
+              style={{
+                height: "4px",
+                backgroundColor: getPriorityColor(task.priority),
+                marginTop: "auto"
+              }}
+            />
+          </div>
+        ))}
       </div>
+
+      <button
+        className="btn btn-dark mt-4"
+        onClick={downloadTasksAsPDF}
+        style={{
+          borderRadius: "10px",
+          padding: "0.75rem 1.5rem"
+        }}
+      >
+        Download PDF Report
+      </button>
     </div>
   );
 }

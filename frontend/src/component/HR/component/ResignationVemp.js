@@ -186,75 +186,75 @@ const styles = {
     minHeight: "calc(100vh - 70px)",
     maxWidth: "calc(100vw - 250px)",
     backgroundColor: "#f8f9fa",
-    transition: "all 0.3s ease",
+    transition: "all 0.3s ease"
   },
   gridContainer: {
     display: "flex",
     flexDirection: "column",
     gap: "20px",
-    width: "100%",
+    width: "100%"
   },
   cardsContainer: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "20px",
-    marginBottom: "20px",
+    marginBottom: "20px"
   },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: "8px",
     padding: "20px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    textAlign: "center",
+    textAlign: "center"
   },
   cardNumber: {
     fontSize: "24px",
     fontWeight: "bold",
     color: "#fc6625",
-    marginTop: "10px",
+    marginTop: "10px"
   },
   header: {
     color: "#2c3e50",
     marginBottom: "25px",
     paddingBottom: "15px",
-    borderBottom: "3px solid #fc6625",
+    borderBottom: "3px solid #fc6625"
   },
   tableContainer: {
     backgroundColor: "#ffffff",
     borderRadius: "8px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    overflow: "hidden",
+    overflow: "hidden"
   },
   tableHeader: {
     backgroundColor: "#2c3e50",
-    color: "white",
+    color: "white"
   },
   tableHeaderCell: {
     padding: "15px",
-    fontWeight: "500",
+    fontWeight: "500"
   },
   tableCell: {
     padding: "12px 15px",
-    verticalAlign: "middle",
+    verticalAlign: "middle"
   },
   button: {
     transition: "all 0.3s ease",
     margin: "0 5px",
-    padding: "5px 15px",
+    padding: "5px 15px"
   },
   editButton: {
     backgroundColor: "#3498db",
     border: "none",
-    color: "white",
+    color: "white"
   },
   deleteButton: {
     backgroundColor: "#e74c3c",
     border: "none",
-    color: "white",
+    color: "white"
   },
   alertBox: {
     marginBottom: "20px",
-    borderRadius: "8px",
+    borderRadius: "8px"
   },
   loadingContainer: {
     marginLeft: "250px",
@@ -263,11 +263,11 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
   emptyMessage: {
     textAlign: "center",
     padding: "20px",
-    color: "#666",
-  },
+    color: "#666"
+  }
 };
