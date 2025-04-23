@@ -12,7 +12,7 @@ export default function ResignationF() {
     const newResignation = {
       empId: empID,
       Reason: reason,
-      endDate,
+      endDate
     };
     axios
       .post("http://localhost:8070/resignation/addempRes", newResignation)
@@ -35,7 +35,13 @@ export default function ResignationF() {
         {submitted ? (
           <div style={styles.successContainer}>
             <div style={styles.successIcon}>✓</div>
-            <h3 style={{ color: "#474747", fontSize: "1.5rem", marginBottom: "1rem" }}>
+            <h3
+              style={{
+                color: "#474747",
+                fontSize: "1.5rem",
+                marginBottom: "1rem"
+              }}
+            >
               Resignation Submitted
             </h3>
             <p style={{ color: "#8f9491", fontSize: "1rem" }}>
@@ -83,8 +89,12 @@ export default function ResignationF() {
                 <button
                   type="submit"
                   style={styles.submitButton}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e55a1c")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#fc6625")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#e55a1c")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#fc6625")
+                  }
                 >
                   Submit Resignation
                 </button>
@@ -92,8 +102,12 @@ export default function ResignationF() {
                   type="button"
                   onClick={() => setsubmitted(false)}
                   style={styles.cancelButton}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#f5f5f5")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#ffffff")
+                  }
                 >
                   Cancel
                 </button>

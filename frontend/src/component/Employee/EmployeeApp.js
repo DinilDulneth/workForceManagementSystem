@@ -4,7 +4,7 @@ import ResignationF from "./component/ResignationF";
 import ResignationU from "./component/ResignationU";
 import ResignationV from "./component/ResignationV";
 import ResignationD from "./component/ResignationD";
-import EmployeeDashboard from "./component/EmployeeDashboard";
+import EmployeeHome from "./component/EmployeeHome";
 import LeaveRequest from "./component/LeaveRequest";
 import FetchAnnouncement from "./component/fetchAnnouncement";
 import AddInquiry from "./component/addInquiry";
@@ -16,17 +16,22 @@ import DashboardTemp from "../DashboardTemp";
 const Links = [
   // { link: "#", name: "Dashboard", icon: "FaHome" },
   {
-    link: "/EmployeeDashboard/ResignationF",
+    link: "/EmployeeHome",
+    name: "Dashboard",
+    icon: "bi-house-door"
+  },
+  {
+    link: "/EmployeeHome/ResignationF",
     name: "Resignation Form",
     icon: "FaUserCircle"
   },
   {
-    link: "/EmployeeDashboard/ResignationV",
+    link: "/EmployeeHome/ResignationV",
     name: "Resignation View",
     icon: "FaUserCircle"
   },
   {
-    link: "/EmployeeDashboard/ResignationD",
+    link: "/EmployeeHome/ResignationD",
     name: "Resignation Delete",
     icon: "FaUserCircle"
   },
@@ -36,22 +41,22 @@ const Links = [
   //   icon: "FaUserCircle"
   // },
   {
-    link: "/EmployeeDashboard/LeaveRequest",
+    link: "/EmployeeHome/LeaveRequest",
     name: "Leave Request",
     icon: "FaUserCircle"
   },
   {
-    link: "/EmployeeDashboard/FetchFeedback",
+    link: "/EmployeeHome/FetchFeedback",
     name: "Fetch Feedback",
     icon: "FaUserCircle"
   },
   {
-    link: "/EmployeeDashboard/Fetchinquiry",
+    link: "/EmployeeHome/Fetchinquiry",
     name: "Fetch Inquiry",
     icon: "FaUserCircle"
   },
   {
-    link: "/EmployeeDashboard/addInquiry",
+    link: "/EmployeeHome/addInquiry",
     name: "Add Inquiry",
     icon: "FaUserCircle"
   },
@@ -63,7 +68,7 @@ export default function EmployeeApp() {
     <>
       <DashboardTemp ArrLinkList={Links} />
       <Routes>
-        <Route path="/" element={<EmployeeDashboard />} />
+        <Route path="/" element={<EmployeeHome />} />
         <Route path="/ResignationF" element={<ResignationF />} />
         <Route path="/ResignationU/:id" element={<ResignationU />} />
         <Route path="/ResignationV" element={<ResignationV />} />
