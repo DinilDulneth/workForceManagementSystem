@@ -36,9 +36,19 @@ export default function FetchAnnouncement() {
     axios
       .get("http://localhost:8070/api/announcement/getAnnouncement")
       .then((res) => {
+        console.log("Fetched announcements (full response):", res.data);
+        // Add detailed logging for first announcement
+        if (res.data.length > 0) {
+          console.log("First announcement details:", {
+            title: res.data[0].title,
+            Title: res.data[0].Title,
+            rawData: res.data[0],
+          });
+        }
         setAnnouncement(res.data);
       })
       .catch((err) => {
+        console.error("Error fetching announcements:", err); // Add this log
         setSnackbar({
           open: true,
           message: "Error fetching announcements: " + err.message,
@@ -120,10 +130,10 @@ export default function FetchAnnouncement() {
                 }}
               >
                 <Typography
-                  variant="h6"
+                  variant="h5"
                   sx={{
-                    color: "#474747",
-                    fontWeight: 600,
+                    color: "#fc6625",
+                    fontWeight: 700,
                     mb: 2,
                     display: "flex",
                     alignItems: "center",
@@ -131,7 +141,8 @@ export default function FetchAnnouncement() {
                   }}
                 >
                   <CampaignIcon sx={{ color: "#fc6625" }} />
-                  {ann.Title}
+                  {console.log("Current announcement data:", ann)}
+                  {ann.title || ann.Title || "No Title"} {/* Try both cases */}
                 </Typography>
 
                 <Typography

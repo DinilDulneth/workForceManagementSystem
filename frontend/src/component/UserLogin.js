@@ -90,19 +90,12 @@ const UserLogin = () => {
   };
 
   return (
-    
     <div style={styles.authWrapper}>
-    <video
-      autoPlay
-      loop
-      muted
-      playsInline
-      style={styles.videoBackground}
-    >
-      <source src={loginV} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-    <div style={styles.authGlassCard}>
+      <video autoPlay loop muted playsInline style={styles.videoBackground}>
+        <source src={loginV} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div style={styles.authGlassCard}>
         <h2 style={styles.header}>Welcome to WorkSync</h2>
         {error && <p style={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -146,7 +139,7 @@ const styles = {
     height: "100vh",
     margin: 0,
     fontFamily: "Arial, sans-serif",
-    overflow: "hidden" // Add this
+    overflow: "hidden", // Add this
   },
   videoBackground: {
     position: "absolute",
@@ -155,7 +148,7 @@ const styles = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    zIndex: -1
+    zIndex: -1,
   },
   authGlassCard: {
     display: "flex",
@@ -169,25 +162,25 @@ const styles = {
     backdropFilter: "blur(10px)", // Add blur effect
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
     borderRadius: "10px",
-    zIndex: 1 // Ensure it's above the video
+    zIndex: 1, // Ensure it's above the video
   },
   header: {
     color: "#333",
-    marginBottom: "20px"
+    marginBottom: "20px",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   inputGroup: {
     position: "relative",
-    marginBottom: "15px"
+    marginBottom: "15px",
   },
   icon: {
     position: "absolute",
     top: "50%",
     left: "10px",
     transform: "translateY(-50%)",
-    color: "#007bff"
+    color: "#007bff",
   },
   input: {
     width: "100%",
@@ -195,10 +188,10 @@ const styles = {
     border: "1px solid #ccc",
     borderRadius: "5px",
     outline: "none",
-    transition: "border-color 0.3s"
+    transition: "border-color 0.3s",
   },
   inputFocus: {
-    borderColor: "#ff5722"
+    borderColor: "#ff5722",
   },
   button: {
     width: "100%",
@@ -208,15 +201,15 @@ const styles = {
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-    transition: "background-color 0.3s"
+    transition: "background-color 0.3s",
   },
   buttonHover: {
-    backgroundColor: "#e64a19"
+    backgroundColor: "#e64a19",
   },
   error: {
     color: "red",
-    marginBottom: "10px"
-  }
+    marginBottom: "10px",
+  },
 };
 
 export default UserLogin;

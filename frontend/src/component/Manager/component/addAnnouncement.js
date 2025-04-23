@@ -52,18 +52,22 @@ export default function AddAnnouncement() {
   function sendAnnData(e) {
     e.preventDefault();
 
-    if (!formData.title || !formData.message) {
-      setSnackbar({
-        open: true,
-        message: "Please fill in all required fields",
-        severity: "error",
-      });
-      return;
-    }
+    const announcementData = {
+      title: formData.title, // Change to match schema case
+      message: formData.message,
+      sender: formData.sender,
+      date: formData.date,
+    };
+
+    console.log("Sending announcement data:", announcementData); // Add this log
 
     axios
-      .post("http://localhost:8070/api/announcement/addAnnouncement", formData)
+      .post(
+        "http://localhost:8070/api/announcement/addAnnouncement",
+        announcementData
+      )
       .then((response) => {
+        console.log("Server response:", response.data); // Add this log
         if (response.status === 201) {
           setSnackbar({
             open: true,
@@ -163,7 +167,7 @@ export default function AddAnnouncement() {
             >
               <TextField
                 fullWidth
-                label="Title"
+                label="title"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
