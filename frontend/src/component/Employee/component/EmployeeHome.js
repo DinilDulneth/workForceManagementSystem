@@ -386,7 +386,7 @@ export default function EmployeeHome() {
                   <button
                     className="btn btn-danger w-100 d-flex align-items-center justify-content-center"
                     onClick={() =>
-                      (window.location.href = "/EmployeeHome/ResignationF")
+                      (window.location.href = "/EmployeeHome/ResignationV")
                     }
                     style={{ height: "60px" }}
                   >
