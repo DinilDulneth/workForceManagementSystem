@@ -13,12 +13,18 @@ import Fetchinquiry from "./component/fetchinquiry";
 import Ine from "react-bootstrap";
 import DashboardTemp from "../DashboardTemp";
 import UpdateInquiry from "./component/UpdateInquiry";
+import TaskDetails from "./component/TaskDetails";
 
 const Links = [
   {
     link: "/EmployeeHome",
     name: "Dashboard Overview",
     icon: "bi-house-door"
+  },
+  {
+    link: "/EmployeeHome/TaskDetails",
+    name: "Task Details",
+    icon: "bi-tasks"
   },
   {
     link: "/EmployeeHome/ResignationF",
@@ -74,6 +80,7 @@ export default function EmployeeApp() {
         <Route path="/FetchFeedback" element={<FetchFeedback />} />
         <Route path="/Fetchinquiry" element={<Fetchinquiry />} />
         <Route path="/updateInquiry/:id" element={<UpdateInquiry />} />
+        <Route path="/TaskDetails" element={<TaskDetails />} />
       </Routes>
     </>
   );
