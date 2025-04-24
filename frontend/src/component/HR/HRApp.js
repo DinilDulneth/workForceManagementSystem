@@ -19,12 +19,27 @@ import DashboardTemp from "../../component/DashboardTemp";
 export default function HRApp() {
   const links = [
     // { link: "/", name: "Dashboard", icon: "bi-house-door" },
-    { link: "/HRDashboard/FetchEmp", name: "Employees", icon: "bi-people" },
     {
       link: "/HRDashboard/ResignationVemp",
       name: "Resignation View",
       icon: "bi-file-earmark"
     },
+    
+    { link: "/HRDashboard/FetchEmp", name: "Employees", icon: "bi-people" },
+
+    {
+      link: "/HRDashboard/fetchManager",
+      name: "View Manager",
+      icon: "bi-person-badge"
+    
+    },
+
+    {
+      link: "/HRDashboard/FetchHR",
+      name: "HR Records",
+      icon: "bi-clipboard-data"
+    },
+
     {
       link: "/HRDashboard/UserRegister",
       name: "User Registration",
@@ -36,20 +51,14 @@ export default function HRApp() {
       icon: "bi-person-workspace"
     },
     {
-      link: "/HRDashboard/fetchManager",
-      name: "View Manager",
-      icon: "bi-person-badge"
-    },
-    {
       link: "/HRDashboard/HRRegistration",
       name: "HR Registration",
       icon: "bi-person-lines-fill"
+
+
     },
-    {
-      link: "/HRDashboard/FetchHR",
-      name: "HR Records",
-      icon: "bi-clipboard-data"
-    },
+
+
 
 
     {
