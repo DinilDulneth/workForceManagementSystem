@@ -288,3 +288,19 @@ h1 {
   border-color: #007bff;
   box-shadow: 0px 3px 8px rgba(0, 123, 255, 0.2);
 }
+
+.custom-swal-popup {
+  z-index: 10005 !important; /* Ensure the SweetAlert2 popup is on top */
+}
+
+.swal2-container {
+  z-index: 10004 !important; /* Ensure the SweetAlert2 container is on top */
+}
+/* Ensure toast notifications are on top */
+.Toastify__toast-container {
+  z-index: 10003 !important; /* Toast container */
+}
+
+.Toastify__toast {
+  z-index: 10004 !important; /* Individual toast */
+}

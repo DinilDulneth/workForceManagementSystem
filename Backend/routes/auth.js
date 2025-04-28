@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const HR = require("../model/HR");
 const Manager = require("../model/Manager");
-const Employee = require("../model/Employee");
+const Employee = require("../model/employee");
 const dotenv = require("dotenv");
 
 dotenv.config();

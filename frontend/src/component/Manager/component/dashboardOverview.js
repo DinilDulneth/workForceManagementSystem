@@ -1,10 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
+
 import "./MDashboard.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import axios from "axios";
 import Chart from "chart.js/auto";
 import "./dashboardOverview.css";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function DashboardOverView() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -15,6 +19,65 @@ export default function DashboardOverView() {
   const canvasRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+
+  const downloadTasksAsPDF = () => {
+    // Show a toast notification for starting the download
+    toast.info("Preparing your PDF...", {
+      position: "top-right",
+      autoClose: 2000
+    });
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(18);
+    doc.text("Recent Tasks List", 10, 10);
+
+    // Table
+    const tableColumn = [
+      "Task No.",
+      "Task Name",
+      "Description",
+      "Status",
+      "Employee ID",
+      "Deadline",
+      "Start Date",
+      "End Date",
+      "Priority"
+    ];
+    const tableRows = [];
+
+    filteredTasks.forEach((task, index) => {
+      const taskData = [
+        index + 1,
+        task.tName,
+        task.description,
+        getTaskStatusLabel(task.status),
+        task.empID,
+        new Date(task.deadLine).toLocaleDateString(),
+        new Date(task.startDate).toLocaleDateString(),
+        task.endDate ? new Date(task.endDate).toLocaleDateString() : "N/A",
+        task.priority
+      ];
+      tableRows.push(taskData);
+    });
+
+    // Add table to the PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20
+    });
+
+    // Save the PDF
+    doc.save("Recent_Tasks_List.pdf");
+
+    // Show a toast notification for successful download
+    toast.success("PDF downloaded successfully!", {
+      position: "top-right",
+      autoClose: 2000
+    });
+  };
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -324,6 +387,13 @@ export default function DashboardOverView() {
             </tbody>
           </table>
         </div>
+        <button
+          className="btn btn-primary btn-sm mb-3 mt-4"
+          onClick={downloadTasksAsPDF}
+          style={{ width: "120px" }}
+        >
+          Download PDF
+        </button>
       </div>
     </div>
   );
