@@ -6,8 +6,11 @@ const dotenv = require("dotenv");
 const app = express();
 require("dotenv").config();
 
+dotenv.config(); // Load environment variables once
+
 const PORT = process.env.PORT || 8070;
 
+// CORS configuration
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -18,6 +21,7 @@ app.use(bodyParser.json());
 
 const URL = process.env.MONGODB_URL;
 
+// MongoDB connection
 mongoose.connect(URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -70,6 +74,10 @@ app.use("/api/inquiry", inquiryRouter); // this is the link name
 const salaryRoutes = require("./routes/salaryRoutes");
 app.use("/salary", salaryRoutes);
 
+const gmailRoutes = require("./routes/gmailRoute");
+app.use("/api/gmail", gmailRoutes); // this is the link name
+
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is up and running on port number: ${PORT}`);
 });
