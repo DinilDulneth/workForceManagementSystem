@@ -182,6 +182,22 @@ export default function TaskDetails() {
       autoClose: 2000
     });
   };
+  // First, add a function to fetch employee details
+  // Update the getEmployeeDetails function
+  const getEmployeeDetails = async (empId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8070/employee/getEmpByID/${empId}`
+      );
+      if (!response.data) {
+        throw new Error("Employee not found");
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching employee details:", error);
+      throw error;
+    }
+  };
 
   const handleEditClick = (task) => {
     setEditingTaskId(task._id);
@@ -192,46 +208,126 @@ export default function TaskDetails() {
     setEditedTask({ ...editedTask, status: e.target.value });
   };
 
-  const handleSave = (taskId, empId) => {
+  const handleSave = async (taskId, empId) => {
     if (!editedTask.status) {
-      Swal.fire("Error!", "Please select a status.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Status Required",
+        text: "Please select a status before saving."
+      });
       return;
     }
 
-    const updateTask = {
-      status: parseInt(editedTask.status),
-      empID: empId // Include empID in the update
-    };
-
-    axios
-      .put(`http://localhost:8070/task/update/${taskId}`, updateTask)
-      .then((response) => {
-        if (response.data) {
-          Swal.fire("Updated!", "Task status updated successfully.", "success");
-          setEditingTaskId(null);
-          // Update the local tasks state to reflect the change
-          setTasks(
-            tasks.map((task) =>
-              task._id === taskId
-                ? { ...task, status: parseInt(editedTask.status) }
-                : task
-            )
-          );
+    try {
+      // Show loading state
+      Swal.fire({
+        title: "Updating...",
+        text: "Please wait while we update the task status",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
         }
-      })
-      .catch((err) => {
-        Swal.fire(
-          "Error!",
-          "Failed to update task status: " + err.message,
-          "error"
-        );
       });
+
+      const updateTask = {
+        status: parseInt(editedTask.status),
+        empID: empId
+      };
+
+      // Update task status - Fixed API endpoint URL
+      const taskResponse = await axios.put(
+        `http://localhost:8070/task/updateStatus/${taskId}`, // Changed from updateStatus to update
+        updateTask
+      );
+
+      if (taskResponse.data) {
+        // If task is marked as completed (status 3)
+        if (updateTask.status === 3) {
+          try {
+            // Get employee details
+            const employeeDetails = await getEmployeeDetails(empId);
+
+            // Send completion notification
+            await sendTaskCompletedNotification(
+              taskResponse.data.task || taskResponse.data, // Handle both response formats
+              employeeDetails,
+              taskResponse.data.task?.assignedBy || taskResponse.data.assignedBy
+            );
+          } catch (notificationError) {
+            console.error("Error sending notification:", notificationError);
+            // Continue with update even if notification fails
+          }
+        }
+
+        // Update local state
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === taskId
+              ? { ...task, status: parseInt(editedTask.status) }
+              : task
+          )
+        );
+
+        // Reset editing state
+        setEditingTaskId(null);
+        setEditedTask({ status: "" });
+
+        // Show success message
+        Swal.fire("Success!", "Task Added Successfully! ✅", "success");
+
+        // Refresh task list
+        getTask(empId);
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text:
+          error.response?.data?.message ||
+          "Failed to update task status. Please try again.",
+        confirmButtonColor: "#3085d6"
+      });
+    }
   };
 
   const handleCancel = () => {
     setEditingTaskId(null);
     setEditedTask({ status: "" });
   };
+
+  // Update the sendTaskCompletedNotification function to use axios instead of fetch
+  const sendTaskCompletedNotification = async (
+    taskDetails,
+    employeeDetails,
+    managerEmail
+  ) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8070/api/gmail/send-task-completed-notification",
+        {
+          taskDetails,
+          employeeDetails,
+          managerEmail
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      if (response.data) {
+        console.log("Notification sent successfully:", response.data.message);
+        return true;
+      }
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      throw error;
+    }
+  };
+
   // First, add these styles at the top of your file
   const modernStyles = {
     container: {
