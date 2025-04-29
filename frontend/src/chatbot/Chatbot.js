@@ -123,7 +123,7 @@ const Chatbot = () => {
       boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
     },
     userMessage: {
-      backgroundColor: '#7C3AED',
+      backgroundColor: '#ff7043',
       color: 'white',
       padding: '12px 16px',
       borderRadius: '12px',
