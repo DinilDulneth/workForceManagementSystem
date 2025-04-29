@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFilter, faFilePdf,faTrash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
@@ -177,6 +177,20 @@ export default function FetchEmp() {
     );
   }
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      axios.delete(`http://localhost:8070/employee/deleteEmp/${id}`)
+        .then(() => {
+          toast.success('Employee deleted successfully');
+          getEmployee(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Delete error:', err);
+          toast.error('Failed to delete employee');
+        });
+    }
+  };
+
   return (
     <div style={styles.mainContent}>
       <h2 style={styles.header}>
@@ -262,7 +276,15 @@ export default function FetchEmp() {
               onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               <div style={styles.cardHeader}>
+              <div style={styles.cardHeaderContent}>
                 <h6 style={{ margin: 0 }}>{employee.name}</h6>
+                <FontAwesomeIcon 
+      icon={faTrash} 
+      style={styles.deleteIcon}
+      onClick={() => handleDelete(employee._id)}
+      title="Delete Employee"
+    />
+    </div>
               </div>
               <div style={styles.cardBody}>
                 <p style={styles.infoRow}>
@@ -454,6 +476,18 @@ const styles = {
       borderColor: "#fc6625"
     }
   },
+  cardHeaderContent: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%"
+},
+
+cardTitle: {
+  margin: 0,
+  fontSize: "1.1rem",
+  fontWeight: "600"
+},
 
   pdfButton: {
     padding: "10px 20px",
@@ -475,6 +509,22 @@ const styles = {
       backgroundColor: "#cccccc",
       cursor: "not-allowed",
       opacity: 0.7
-    }
+    },
+  
+
+   deleteIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
   }
+}}
 };

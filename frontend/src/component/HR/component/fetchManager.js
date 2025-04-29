@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFilter, faFilePdf,faTrash } from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
@@ -174,6 +174,20 @@ export default function FetchManager() {
     );
   }
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this Manager?')) {
+      axios.delete(`http://localhost:8070/manager/deleteManager/${id}`)
+        .then(() => {
+          toast.success('Manager deleted successfully');
+          getManagers(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Delete error:', err);
+          toast.error('Failed to delete Manager');
+        });
+    }
+  };
+
   return (
     <div style={styles.mainContent}>
       <h2 style={styles.header}>
@@ -258,9 +272,17 @@ export default function FetchManager() {
               onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              <div style={styles.cardHeader}>
-                <h6 style={{ margin: 0 }}>{manager.name}</h6>
-              </div>
+             <div style={styles.cardHeader}>
+  <div style={styles.cardHeaderContent}>
+    <h6 style={{ margin: 0 }}>{manager.name}</h6>
+    <FontAwesomeIcon 
+      icon={faTrash} 
+      style={styles.deleteIcon}
+      onClick={() => handleDelete(manager._id)}
+      title="Delete Manager"
+    />
+  </div>
+</div>
               <div style={styles.cardBody}>
                 {cardFields.map((field) => (
                   <p key={field.label} style={styles.cardField}>
@@ -487,5 +509,26 @@ const styles = {
     color: "#666",
     fontSize: "16px",
     gridColumn: "1 / -1"
+  },
+  cardHeaderContent: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%"
+},
+deleteIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
   }
+}
 };

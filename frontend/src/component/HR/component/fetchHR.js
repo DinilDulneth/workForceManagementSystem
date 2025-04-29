@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFilter, faFilePdf ,faTrash} from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
@@ -171,6 +171,20 @@ export default function FetchHR() {
     );
   }
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this HR employee?')) {
+      axios.delete(`http://localhost:8070/hr/deleteHR/${id}`)
+        .then(() => {
+          toast.success(' HR Employee deleted successfully');
+          getHR(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Delete error:', err);
+          toast.error('Failed to delete HR employee');
+        });
+    }
+  };
+
   return (
     <div style={styles.pageContainer}>
       <div style={styles.container}>
@@ -211,6 +225,7 @@ export default function FetchHR() {
               disabled={filteredEmployees.length === 0}
             >
               <FontAwesomeIcon icon={faFilePdf} style={styles.filterIcon} />
+
               Export PDF
             </button>
           </div>
@@ -249,9 +264,17 @@ export default function FetchHR() {
             filteredEmployees.map((employee) => (
               <div key={employee._id} style={styles.employeeCard}>
                 <div style={styles.card}>
-                  <div style={styles.cardHeader}>
-                    <h6 style={styles.cardHeaderText}>{employee.name}</h6>
-                  </div>
+                <div style={styles.cardHeader}>
+  <div style={styles.cardHeaderContent}>
+    <h6 style={{ margin: 0 }}>{employee.name}</h6>
+    <FontAwesomeIcon 
+      icon={faTrash} 
+      style={styles.deleteIcon}
+      onClick={() => handleDelete(employee._id)}
+      title="Delete HR Officer"
+    />
+  </div>
+</div>
                   <div style={styles.cardBody}>
                     {cardFields.map((field) => (
                       <p key={field.label} style={styles.cardField}>
@@ -355,9 +378,10 @@ const styles = {
     backgroundColor: "#fff"
   },
   cardHeader: {
-    backgroundColor: "#ff7043",
-    padding: "15px",
-    borderBottom: "none"
+    backgroundColor: "#fc6625",
+  color: "#ffffff",
+  padding: "15px",
+  fontWeight: "bold"
   },
   cardHeaderText: {
     color: "#fff",
@@ -470,6 +494,27 @@ const styles = {
     "&:focus": {
       borderColor: "#ff7043"
     }
+  },
+  cardHeaderContent: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%"
+},
+deleteIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
   }
+}
 
 };
