@@ -9,6 +9,7 @@ import StatsRow from "../component/StatsRow.js";
 import ImageSlider from "../component/ImageSlider.js";
 import Header from "./Header/Header.js";
 import Footer from "./Footer/Footer.js";
+import Chatbot from "../chatbot/Chatbot.js";
 
 export default function Home() {
   return (
@@ -54,7 +55,7 @@ export default function Home() {
       <section style={styles.statsSection}>
         <StatsRow />
       </section>
-
+      <Chatbot />
       <Footer />
     </div>
   );
