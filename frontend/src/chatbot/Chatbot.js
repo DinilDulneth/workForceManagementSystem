@@ -71,7 +71,7 @@ const Chatbot = () => {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '16px',
-      backgroundColor: '#7C3AED',
+      backgroundColor: '#ff7043',
       color: 'white'
     },
     headerLeft: {
@@ -154,7 +154,7 @@ const Chatbot = () => {
       }
     },
     sendButton: {
-      backgroundColor: '#7C3AED',
+      backgroundColor: '#ff7043',
       color: 'white',
       border: 'none',
       borderRadius: '8px',
@@ -182,7 +182,7 @@ const Chatbot = () => {
         <div style={styles.header}>
           <div style={styles.headerLeft}>
             <img src={anjuImage} alt="Bot Avatar" style={styles.botAvatar} />
-            <h3 style={styles.botTitle}>Wonderchat AI</h3>
+            <h3 style={styles.botTitle}>SyncBot AI</h3>
           </div>
           <button 
             onClick={() => setIsChatbotOpen(false)}
