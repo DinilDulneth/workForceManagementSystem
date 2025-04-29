@@ -7,6 +7,8 @@ import EmployeeApp from "./component/Employee/EmployeeApp";
 import About from "./component/About";
 import ContactUs from "./component/ContactUs";
 import ManagerApp from "./component/Manager/ManagerApp";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -19,8 +21,11 @@ function App() {
         <Route path="/EmployeeHome/*" element={<EmployeeApp />} />
         <Route path="/About" element={<About />} />
         <Route path="/ContactUs" element={<ContactUs />} />
+        
       </Routes>
+      <ToastContainer />
     </Router>
+    
   );
 }
 

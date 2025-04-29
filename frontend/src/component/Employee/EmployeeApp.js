@@ -36,11 +36,7 @@ const Links = [
     name: "Resignation View",
     icon: "bi bi-eye"
   },
-  {
-    link: "/EmployeeHome/ResignationD",
-    name: "Resignation Delete",
-    icon: "bi bi-trash"
-  },
+
   {
     link: "/EmployeeHome/LeaveRequest",
     name: "Leave Request",

@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
+import { faSearch, faFilter, faFilePdf,faTrash } from "@fortawesome/free-solid-svg-icons";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function FetchEmp() {
-  // State management
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,12 +16,10 @@ export default function FetchEmp() {
   const [searchField, setSearchField] = useState("all");
   const [advancedSearch, setAdvancedSearch] = useState(false);
 
-  // Fetch employees on component mount
   useEffect(() => {
     getEmployee();
   }, []);
 
-  // API call to fetch employees
   function getEmployee() {
     setLoading(true);
     setError(null);
@@ -44,7 +44,6 @@ export default function FetchEmp() {
       });
   }
 
-  // Retry handler
   const handleRetry = () => {
     getEmployee();
   };
@@ -72,7 +71,95 @@ export default function FetchEmp() {
     }
   });
 
-  // Loading state
+  const downloadEmployeesAsPDF = () => {
+    try {
+      toast.info("Preparing employee list PDF...", {
+        position: "top-right",
+        autoClose: 2000
+      });
+
+      const doc = new jsPDF();
+
+      // Add title and header
+      doc.setFontSize(20);
+      doc.setTextColor(44, 62, 80);
+      doc.text("Employee List Report", 14, 15);
+
+      // Add date
+      doc.setFontSize(10);
+      doc.setTextColor(108, 117, 125);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
+
+      const tableColumn = [
+        "Name",
+        "Position",
+        "Department",
+        "Email",
+        "Phone",
+        "Salary",
+        "JoinDate",
+        "Status"
+      ];
+
+      const tableRows = filteredEmployees.map(employee => [
+        employee.name || "N/A",
+        employee.position || "N/A",
+        employee.department || "N/A",
+        employee.email || "N/A",
+        employee.phone || "N/A",
+        employee.salary ? `$${employee.salary.toLocaleString()}` : "N/A",
+        employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString() : "N/A",
+        employee.availability === "1" || employee.availability === 1 ? "Active" : "Inactive"
+      ]);
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 35,
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [252, 102, 37],
+          textColor: [255, 255, 255],
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245]
+        },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 20 }
+        },
+        margin: { top: 35 }
+      });
+
+      doc.save(`Employee_List_${new Date().toISOString().split('T')[0]}.pdf`);
+      //doc.save(`HR_Officer_${new Date().toISOString().split('T')[0]}.pdf`);
+
+
+      toast.success("PDF downloaded successfully!", {
+        position: "top-right",
+        autoClose: 2000
+      });
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+      toast.error("Failed to generate PDF. Please try again.", {
+        position: "top-right",
+        autoClose: 3000
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div style={styles.mainContent}>
@@ -84,15 +171,26 @@ export default function FetchEmp() {
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
-          <p style={{ marginTop: "20px", color: "#666" }}>
-            Loading employee data...
-          </p>
+          <p style={{ marginTop: "20px", color: "#666" }}>Loading employee data...</p>
         </div>
       </div>
     );
   }
 
-  // Main render
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      axios.delete(`http://localhost:8070/employee/deleteEmp/${id}`)
+        .then(() => {
+          toast.success('Employee deleted successfully');
+          getEmployee(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Delete error:', err);
+          toast.error('Failed to delete employee');
+        });
+    }
+  };
+
   return (
     <div style={styles.mainContent}>
       <h2 style={styles.header}>
@@ -100,7 +198,6 @@ export default function FetchEmp() {
         <span style={styles.headerUnderline}></span>
       </h2>
 
-      {/* Search Section */}
       <div style={styles.searchContainer}>
         <div style={styles.searchControls}>
           <button
@@ -119,14 +216,25 @@ export default function FetchEmp() {
             <FontAwesomeIcon icon={faSearch} style={styles.searchIcon} />
             <input
               type="text"
-              placeholder={`Search ${
-                searchField === "all" ? "employees" : searchField
-              }...`}
+              placeholder={`Search ${searchField === "all" ? "employees" : searchField}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={styles.searchInput}
             />
           </div>
+
+          <button
+            onClick={downloadEmployeesAsPDF}
+            style={{
+              ...styles.pdfButton,
+              opacity: filteredEmployees.length === 0 ? 0.7 : 1,
+              cursor: filteredEmployees.length === 0 ? 'not-allowed' : 'pointer'
+            }}
+            disabled={filteredEmployees.length === 0}
+          >
+            <FontAwesomeIcon icon={faFilePdf} style={styles.filterIcon} />
+            Export PDF
+          </button>
         </div>
 
         {advancedSearch && (
@@ -146,19 +254,10 @@ export default function FetchEmp() {
         )}
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div
-          className="alert alert-warning alert-dismissible fade show"
-          role="alert"
-        >
+        <div className="alert alert-warning alert-dismissible fade show" role="alert">
           <strong>Note:</strong> {error}
-          <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-          ></button>
+          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           <div className="mt-2">
             <button className="btn btn-sm btn-primary" onClick={handleRetry}>
               Retry Connection
@@ -167,65 +266,55 @@ export default function FetchEmp() {
         </div>
       )}
 
-      {/* Employee Cards */}
       <div style={styles.cardContainer}>
         {filteredEmployees.length > 0 ? (
           filteredEmployees.map((employee) => (
             <div
               key={employee._id}
               style={styles.employeeCard}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "translateY(-5px)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "translateY(0)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               <div style={styles.cardHeader}>
+              <div style={styles.cardHeaderContent}>
                 <h6 style={{ margin: 0 }}>{employee.name}</h6>
+                <FontAwesomeIcon 
+      icon={faTrash} 
+      style={styles.deleteIcon}
+      onClick={() => handleDelete(employee._id)}
+      title="Delete Employee"
+    />
+    </div>
               </div>
               <div style={styles.cardBody}>
                 <p style={styles.infoRow}>
-                  <strong style={styles.infoLabel}>Position:</strong>{" "}
-                  {employee.position}
+                  <strong style={styles.infoLabel}>Position:</strong> {employee.position}
                 </p>
                 <p style={styles.infoRow}>
-                  <strong style={styles.infoLabel}>Department:</strong>{" "}
-                  {employee.department}
+                  <strong style={styles.infoLabel}>Department:</strong> {employee.department}
                 </p>
                 <p style={styles.infoRow}>
-                  <strong style={styles.infoLabel}>Phone:</strong>{" "}
-                  {employee.phone}
+                  <strong style={styles.infoLabel}>Phone:</strong> {employee.phone}
                 </p>
                 <p style={styles.infoRow}>
-                  <strong style={styles.infoLabel}>Salary:</strong> $
-                  {employee.salary?.toLocaleString() || "N/A"}
+                  <strong style={styles.infoLabel}>Salary:</strong> ${employee.salary?.toLocaleString() || "N/A"}
                 </p>
                 <p style={styles.infoRow}>
                   <strong style={styles.infoLabel}>Joined:</strong>{" "}
-                  {employee.dateOfJoining
-                    ? new Date(employee.dateOfJoining).toLocaleDateString()
-                    : "N/A"}
+                  {employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString() : "N/A"}
                 </p>
                 <p style={styles.infoRow}>
-                  <strong style={styles.infoLabel}>Email:</strong>{" "}
-                  {employee.email}
+                  <strong style={styles.infoLabel}>Email:</strong> {employee.email}
                 </p>
                 <p style={styles.infoRow}>
                   <strong style={styles.infoLabel}>Status:</strong>{" "}
                   <span
                     style={{
                       ...styles.statusIndicator,
-                      backgroundColor:
-                        employee.availability === "1" ||
-                        employee.availability === 1
-                          ? "#2ecc71"
-                          : "#e74c3c"
+                      backgroundColor: employee.availability === "1" || employee.availability === 1 ? "#2ecc71" : "#e74c3c"
                     }}
                   ></span>
-                  {employee.availability === "1" || employee.availability === 1
-                    ? "Active"
-                    : "Inactive"}
+                  {employee.availability === "1" || employee.availability === 1 ? "Active" : "Inactive"}
                 </p>
               </div>
             </div>
@@ -386,5 +475,56 @@ const styles = {
     "&:focus": {
       borderColor: "#fc6625"
     }
+  },
+  cardHeaderContent: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%"
+},
+
+cardTitle: {
+  margin: 0,
+  fontSize: "1.1rem",
+  fontWeight: "600"
+},
+
+  pdfButton: {
+    padding: "10px 20px",
+    borderRadius: "25px",
+    border: "none",
+    backgroundColor: "#fc6625",
+    color: "#ffffff",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.3s ease",
+    fontSize: "14px",
+    fontWeight: "500",
+    "&:hover": {
+      backgroundColor: "#e55a1c"
+    },
+    "&:disabled": {
+      backgroundColor: "#cccccc",
+      cursor: "not-allowed",
+      opacity: 0.7
+    },
+  
+
+   deleteIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
   }
+}}
 };

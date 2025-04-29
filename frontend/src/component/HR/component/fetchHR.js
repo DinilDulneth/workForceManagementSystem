@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faFilter, faFilePdf ,faTrash} from "@fortawesome/free-solid-svg-icons";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function FetchHR() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState("all");
+  const [advancedSearch, setAdvancedSearch] = useState(false);
 
   useEffect(() => {
     getHR();
@@ -30,13 +39,122 @@ export default function FetchHR() {
       })
       .catch((err) => {
         console.error("Error fetching HR employees:", err);
-        setError("Could not connect to the server. Using sample data instead.");
+        setError("Could not connect to the server. Please try again.");
         setLoading(false);
       });
   }
 
   const handleRetry = () => {
     getHR();
+  };
+
+  const filteredEmployees = employees.filter((employee) => {
+    if (!searchTerm) return true;
+
+    const term = searchTerm.toLowerCase();
+
+    switch (searchField) {
+      case "name":
+        return employee.name?.toLowerCase().includes(term);
+      case "email":
+        return employee.email?.toLowerCase().includes(term);
+      case "position":
+        return employee.position?.toLowerCase().includes(term);
+      case "department":
+        return employee.department?.toLowerCase().includes(term);
+      case "all":
+      default:
+        return Object.values(employee).some((value) =>
+          String(value).toLowerCase().includes(term)
+        );
+    }
+  });
+
+  const downloadHRAsPDF = () => {
+    try {
+      toast.info("Preparing HR list PDF...", {
+        position: "top-right",
+        autoClose: 2000
+      });
+
+      const doc = new jsPDF();
+
+      // Add title and header
+      doc.setFontSize(20);
+      doc.setTextColor(44, 62, 80);
+      doc.text("HR Officers List Report", 14, 15);
+
+      // Add date
+      doc.setFontSize(10);
+      doc.setTextColor(108, 117, 125);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
+
+      const tableColumn = [
+        "Name",
+        "Position",
+        "Department",
+        "Email",
+        "Phone",
+        "Salary",
+        "Join Date",
+        "Status"
+      ];
+
+      const tableRows = filteredEmployees.map(hr => [
+        hr.name || "N/A",
+        hr.position || "N/A",
+        hr.department || "N/A",
+        hr.email || "N/A",
+        hr.phone || "N/A",
+        hr.salary ? `$${hr.salary.toLocaleString()}` : "N/A",
+        hr.dateOfJoining ? new Date(hr.dateOfJoining).toLocaleDateString() : "N/A",
+        hr.availability === "1" || hr.availability === 1 ? "Active" : "Inactive"
+      ]);
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 35,
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [255, 112, 67],
+          textColor: [255, 255, 255],
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245]
+        },
+        columnStyles: {
+          0: { cellWidth: 30 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 40 },
+          4: { cellWidth: 25 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 25 },
+          7: { cellWidth: 20 }
+        },
+        margin: { top: 35 }
+      });
+
+      doc.save(`HR_Officers_${new Date().toISOString().split('T')[0]}.pdf`);
+
+      toast.success("PDF downloaded successfully!", {
+        position: "top-right",
+        autoClose: 2000
+      });
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+      toast.error("Failed to generate PDF. Please try again.", {
+        position: "top-right",
+        autoClose: 3000
+      });
+    }
   };
 
   if (loading) {
@@ -53,10 +171,81 @@ export default function FetchHR() {
     );
   }
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this HR employee?')) {
+      axios.delete(`http://localhost:8070/hr/deleteHR/${id}`)
+        .then(() => {
+          toast.success(' HR Employee deleted successfully');
+          getHR(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Delete error:', err);
+          toast.error('Failed to delete HR employee');
+        });
+    }
+  };
+
   return (
     <div style={styles.pageContainer}>
       <div style={styles.container}>
-        <h2 style={styles.title}>HR Employees Data</h2>
+        <h2 style={styles.title}>HR Officers Data</h2>
+
+        <div style={styles.searchContainer}>
+          <div style={styles.searchControls}>
+            <button
+              style={{
+                ...styles.advancedSearchButton,
+                backgroundColor: advancedSearch ? "#ff7043" : "#fff",
+                color: advancedSearch ? "#fff" : "#666"
+              }}
+              onClick={() => setAdvancedSearch(!advancedSearch)}
+            >
+              <FontAwesomeIcon icon={faFilter} style={styles.filterIcon} />
+              Filter
+            </button>
+
+            <div style={styles.searchWrapper}>
+              <FontAwesomeIcon icon={faSearch} style={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder={`Search ${searchField === "all" ? "HR officers" : searchField}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={styles.searchInput}
+              />
+            </div>
+
+            <button
+              onClick={downloadHRAsPDF}
+              style={{
+                ...styles.pdfButton,
+                opacity: filteredEmployees.length === 0 ? 0.7 : 1,
+                cursor: filteredEmployees.length === 0 ? 'not-allowed' : 'pointer'
+              }}
+              disabled={filteredEmployees.length === 0}
+            >
+              <FontAwesomeIcon icon={faFilePdf} style={styles.filterIcon} />
+
+              Export PDF
+            </button>
+          </div>
+
+          {advancedSearch && (
+            <div style={styles.searchOptions}>
+              <select
+                value={searchField}
+                onChange={(e) => setSearchField(e.target.value)}
+                style={styles.searchSelect}
+              >
+                <option value="all">All Fields</option>
+                <option value="name">Name</option>
+                <option value="email">Email</option>
+                <option value="position">Position</option>
+                <option value="department">Department</option>
+              </select>
+            </div>
+          )}
+        </div>
 
         {error && (
           <div style={styles.alert} className="alert alert-warning alert-dismissible fade show" role="alert">
@@ -71,23 +260,37 @@ export default function FetchHR() {
         )}
 
         <div style={styles.cardGrid}>
-          {employees.map((employee) => (
-            <div key={employee._id} style={styles.employeeCard}>
-              <div style={styles.card}>
+          {filteredEmployees.length > 0 ? (
+            filteredEmployees.map((employee) => (
+              <div key={employee._id} style={styles.employeeCard}>
+                <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  <h6 style={styles.cardHeaderText}>{employee.name}</h6>
-                </div>
-                <div style={styles.cardBody}>
-                  {cardFields.map((field) => (
-                    <p key={field.label} style={styles.cardField}>
-                      <strong style={styles.fieldLabel}>{field.label}:</strong>{" "}
-                      {field.getValue(employee)}
-                    </p>
-                  ))}
+  <div style={styles.cardHeaderContent}>
+    <h6 style={{ margin: 0 }}>{employee.name}</h6>
+    <FontAwesomeIcon 
+      icon={faTrash} 
+      style={styles.deleteIcon}
+      onClick={() => handleDelete(employee._id)}
+      title="Delete HR Officer"
+    />
+  </div>
+</div>
+                  <div style={styles.cardBody}>
+                    {cardFields.map((field) => (
+                      <p key={field.label} style={styles.cardField}>
+                        <strong style={styles.fieldLabel}>{field.label}:</strong>{" "}
+                        {field.getValue(employee)}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div style={styles.noResults}>
+              <p>No HR officers found matching your search criteria.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
@@ -175,9 +378,10 @@ const styles = {
     backgroundColor: "#fff"
   },
   cardHeader: {
-    backgroundColor: "#ff7043",
-    padding: "15px",
-    borderBottom: "none"
+    backgroundColor: "#fc6625",
+  color: "#ffffff",
+  padding: "15px",
+  fontWeight: "bold"
   },
   cardHeaderText: {
     color: "#fff",
@@ -203,5 +407,114 @@ const styles = {
     borderRadius: "50%",
     marginRight: "5px",
     backgroundColor: "currentColor"
+  },
+  searchContainer: {
+    marginBottom: "30px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px"
+  },
+  searchControls: {
+    display: "flex",
+    gap: "15px",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  searchWrapper: {
+    position: "relative",
+    flex: 1,
+    maxWidth: "500px"
+  },
+  searchInput: {
+    width: "100%",
+    padding: "12px 20px 12px 45px",
+    fontSize: "14px",
+    border: "2px solid #e0e0e0",
+    borderRadius: "25px",
+    outline: "none",
+    transition: "border-color 0.3s ease",
+    "&:focus": {
+      borderColor: "#ff7043"
+    }
+  },
+  searchIcon: {
+    position: "absolute",
+    left: "15px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#666"
+  },
+  filterIcon: {
+    fontSize: "14px",
+    marginRight: "8px"
+  },
+  advancedSearchButton: {
+    padding: "10px 20px",
+    borderRadius: "25px",
+    border: "2px solid #e0e0e0",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.3s ease",
+    fontSize: "14px",
+    fontWeight: "500"
+  },
+  pdfButton: {
+    padding: "10px 20px",
+    borderRadius: "25px",
+    border: "none",
+    backgroundColor: "#ff7043",
+    color: "#ffffff",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.3s ease",
+    fontSize: "14px",
+    fontWeight: "500",
+    "&:hover": {
+      backgroundColor: "#f4511e"
+    }
+  },
+  searchOptions: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "15px"
+  },
+  searchSelect: {
+    padding: "8px 15px",
+    borderRadius: "20px",
+    border: "2px solid #e0e0e0",
+    outline: "none",
+    fontSize: "14px",
+    cursor: "pointer",
+    minWidth: "150px",
+    transition: "border-color 0.3s ease",
+    "&:focus": {
+      borderColor: "#ff7043"
+    }
+  },
+  cardHeaderContent: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%"
+},
+deleteIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
   }
+}
+
 };
