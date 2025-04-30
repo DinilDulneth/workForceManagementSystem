@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
-import { ValidationSchema } from "../../../validation/validationSchema";
+//import { ValidationSchema } from "../../../validation/validationSchema";
 
 export default function EmployeeRegister() {
   const [submitted, setSubmitted] = useState(false);
@@ -168,7 +168,7 @@ WorkSync`;
                           <Button
                             type="button"
                             style={styles.cancelButton}
-                            onClick={() => window.history.back()}
+                            onClick={() => window.location.href='/HRDashboard/FetchEmp'}
                             disabled={isLoading || isSubmitting}
                           >
                             Cancel
@@ -332,3 +332,55 @@ const styles = {
     marginBottom: "1.5rem",
   },
 };
+const ValidationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .matches(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required")
+    .matches(
+      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+      "Invalid email format"
+    ),
+
+  password: Yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters")
+    .matches(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
+
+  department: Yup.string()
+    .required("Department is required")
+    .min(2, "Department must be at least 2 characters"),
+
+  phone: Yup.string()
+    .required("Phone number is required")
+    .matches(
+      /^(?:\+94|0)?[0-9]{9,10}$/,
+      "Invalid phone number format. Use +94 or 0 prefix"
+    ),
+
+  salary: Yup.number()
+    .required("Salary is required")
+    .positive("Salary must be positive")
+    .min(1000, "Salary must be at least 1000")
+    .max(1000000, "Salary cannot exceed 1000000"),
+
+  dateOfJoining: Yup.date()
+  .required("Date of joining is required")
+    .max(new Date(), "Date cannot be in the future")
+    .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
+
+  availability: Yup.string()
+    .required("Availability is required")
+    .min(2, "Availability must be at least 2 characters"),
+
+  position: Yup.string()
+    .required("Position is required")
+    .min(2, "Position must be at least 2 characters")
+});

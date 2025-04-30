@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { Formik, Form, Field } from 'formik';
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
-import { ValidationSchema } from "../../../validation/validationSchema"; 
+import * as Yup from 'yup';
+//import { ValidationSchema } from "../../../validation/validationSchema"; 
 
 
 export default function ManagerRegistration() {
@@ -163,7 +164,7 @@ WorkSync`;
                           <Button
                             type="button"
                             style={styles.cancelButton}
-                            onClick={() => window.history.back()}
+                            onClick={() => window.location.href='/HRDashboard/fetchManager'}
                             disabled={isLoading || isSubmitting}
                           >
                             Cancel
@@ -325,3 +326,36 @@ const styles = {
     fontWeight: "bold"
   }
 };
+
+const ValidationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .matches(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+
+  department: Yup.string()
+    .required("Department is required")
+    .min(2, "Department must be at least 2 characters"),
+
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required")
+    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"),
+
+  phone: Yup.string()
+    .required("Phone number is required")
+    .matches(/^(?:\+94|0)?[0-9]{9,10}$/, "Invalid phone number format. Use +94 or 0 prefix"),
+
+  password: Yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters")
+    .matches(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
+
+  dateOfJoining: Yup.date()
+    .required("Date of joining is required")
+    .max(new Date(), "Date cannot be in the future")
+    .min(new Date(2000, 0, 1), "Date cannot be before year 2000")
+});
