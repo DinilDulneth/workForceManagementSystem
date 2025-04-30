@@ -4,7 +4,43 @@ import axios from "axios";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 
+// Add email generation function
+const generateEmailContent = (userData) => {
+  const subject = "Welcome to WorkSync - Your Access Credentials";
+  const body = `
+Dear ${userData.name},
 
+Welcome to WorkSync! Your account has been successfully created.
+
+Your login credentials are:
+Email: ${userData.email}
+Password: ${userData.password}
+
+Role Details:
+Position: ${userData.position}
+Department: ${userData.department}
+Role Type: ${
+    userData.status === "1"
+      ? "Employee"
+      : userData.status === "2"
+      ? "Manager"
+      : "HR"
+  }
+
+Please login at: http://localhost:3000/login
+For security reasons, please change your password after your first login.
+
+If you have any questions, please contact the HR department.
+
+Best regards,
+HR Team
+WorkSync`;
+
+  return {
+    subject: encodeURIComponent(subject),
+    body: encodeURIComponent(body),
+  };
+};
 
 export default function AccessF() {
   const [submitted, setSubmitted] = useState(false);
@@ -27,8 +63,13 @@ export default function AccessF() {
         "http://localhost:8070/access/addAccess",
         values
       );
+
       if (response.status === 201) {
-        alert("Access Added Successfully!✅");
+        // Generate and trigger email
+        const emailContent = generateEmailContent(values);
+        window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+
+        alert("Access Added Successfully and email notification prepared!✅");
         setSubmitted(true);
         resetForm();
       }
@@ -287,48 +328,48 @@ const styles = {
 };
 
 const ValidationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required("Name is required")
-      .min(2, "Name must be at least 2 characters")
-      .matches(
-        /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
-        "Name can only contain letters, spaces and simple punctuation"
-      ),
-  
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email is required")
-      .matches(
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        "Invalid email format"
-      ),
-  
-    password: Yup.string()
-      .required("Password is required")
-      .min(8, "Password must be at least 8 characters")
-      .matches(
-        /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/,
-        "Password must contain at least one letter and one number"
-      ),
-  
-    position: Yup.string()
-      .required("Position is required")
-      .min(2, "Position must be at least 2 characters"),
-  
-    department: Yup.string()
-      .required("Department is required")
-      .min(2, "Department must be at least 2 characters"),
-  
-    salary: Yup.string()
-      .required("Salary is required")
-      .matches(/^\d+$/, "Salary must be a number")
-      .test(
-        "salary-range",
-        "Salary must be between 10000 and 500000",
-        (value) => value && parseInt(value) >= 10000 && parseInt(value) <= 500000
-      ),
-  
-    status: Yup.string()
-      .required("Status is required")
-      .oneOf(["1", "2", "3"], "Status must be 1, 2, or 3"),
-  });
+  name: Yup.string()
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .matches(
+      /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
+      "Name can only contain letters, spaces and simple punctuation"
+    ),
+
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required")
+    .matches(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Invalid email format"
+    ),
+
+  password: Yup.string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/,
+      "Password must contain at least one letter and one number"
+    ),
+
+  position: Yup.string()
+    .required("Position is required")
+    .min(2, "Position must be at least 2 characters"),
+
+  department: Yup.string()
+    .required("Department is required")
+    .min(2, "Department must be at least 2 characters"),
+
+  salary: Yup.string()
+    .required("Salary is required")
+    .matches(/^\d+$/, "Salary must be a number")
+    .test(
+      "salary-range",
+      "Salary must be between 10000 and 500000",
+      (value) => value && parseInt(value) >= 10000 && parseInt(value) <= 500000
+    ),
+
+  status: Yup.string()
+    .required("Status is required")
+    .oneOf(["1", "2", "3"], "Status must be 1, 2, or 3"),
+});
