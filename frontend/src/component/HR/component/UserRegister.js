@@ -1,31 +1,42 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  FormGroup,
-  Button,
-  Input,
-} from "reactstrap";
-import { Link } from "react-router-dom";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
+//import { ValidationSchema } from "../../../validation/validationSchema";
 
 export default function EmployeeRegister() {
-  const [submitted, setsubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setname] = useState("");
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
-  const [department, setdepartment] = useState("");
-  const [phone, setphone] = useState("");
-  const [salary, setsalary] = useState("");
-  const [dateOfJoining, setdateOfJoining] = useState("");
-  const [availability, setavailability] = useState("");
-  const [position, setposition] = useState("");
 
+  // Initial form values
+  const initialValues = {
+    name: "",
+    email: "",
+    password: "",
+    department: "",
+    phone: "",
+    salary: "",
+    dateOfJoining: "",
+    availability: "",
+    position: "",
+  };
+
+  const formFields = [
+    { type: "text", id: "name", placeholder: "Name" }, // Changed 'name' to 'id'
+    { type: "email", id: "email", placeholder: "Email" },
+    { type: "password", id: "password", placeholder: "Password" },
+    { type: "text", id: "department", placeholder: "Department" },
+    { type: "text", id: "phone", placeholder: "Phone" },
+    { type: "number", id: "salary", placeholder: "Salary" },
+    { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
+    { type: "text", id: "availability", placeholder: "Availability" },
+    { type: "text", id: "position", placeholder: "Position" },
+  ];
+
+  // Email content generator
   const generateEmailContent = (employeeData) => {
     const subject = "Welcome to WorkSync - Your Account Credentials";
     const body = `
@@ -55,133 +66,29 @@ WorkSync`;
     };
   };
 
-  const formFields = [
-    {
-      type: "text",
-      id: "name",
-      placeholder: "Name",
-      value: name,
-      onChange: setname,
-    },
-    {
-      type: "email",
-      id: "email",
-      placeholder: "Email",
-      value: email,
-      onChange: setemail,
-    },
-    {
-      type: "password",
-      id: "password",
-      placeholder: "Password",
-      value: password,
-      onChange: setpassword,
-    },
-    {
-      type: "text",
-      id: "department",
-      placeholder: "Department",
-      value: department,
-      onChange: setdepartment,
-    },
-    {
-      type: "text",
-      id: "phone",
-      placeholder: "Phone",
-      value: phone,
-      onChange: setphone,
-    },
-    {
-      type: "number",
-      id: "salary",
-      placeholder: "Salary",
-      value: salary,
-      onChange: setsalary,
-    },
-    {
-      type: "date",
-      id: "dateOfJoining",
-      placeholder: "Date of Joining",
-      value: dateOfJoining,
-      onChange: setdateOfJoining,
-    },
-    {
-      type: "text",
-      id: "availability",
-      placeholder: "Availability",
-      value: availability,
-      onChange: setavailability,
-    },
-    {
-      type: "text",
-      id: "position",
-      placeholder: "Position",
-      value: position,
-      onChange: setposition,
-    },
-  ];
-
-  const clearForm = () => {
-    setname("");
-    setemail("");
-    setpassword("");
-    setdepartment("");
-    setphone("");
-    setsalary("");
-    setdateOfJoining("");
-    setavailability("");
-    setposition("");
-  };
-
-  async function setEmployee(e) {
-    e.preventDefault();
-
-    if (!name || !email || !password || !department || !position) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     setIsLoading(true);
-
-    const newEmployee = {
-      name,
-      email,
-      password,
-      department,
-      phone,
-      salary,
-      dateOfJoining,
-      availability,
-      position,
-    };
-
     try {
       const response = await axios.post(
-        `http://localhost:8070/registration/addEmp`,
-        newEmployee
+        "http://localhost:8070/registration/addEmp",
+        values
       );
 
       if (response.status === 200 || response.status === 201) {
-        try {
-          const emailContent = generateEmailContent(newEmployee);
-          window.location.href = `mailto:${newEmployee.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-          alert("Employee Registered Successfully!✅");
-          setsubmitted(true);
-          clearForm();
-        } catch (emailError) {
-          console.error("Error generating email:", emailError);
-          alert(
-            "Employee registered but there was an error sending the email."
-          );
-        }
+        const emailContent = generateEmailContent(values);
+        window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+        alert("Employee Registered Successfully!✅");
+        setSubmitted(true);
+        resetForm();
       }
     } catch (err) {
       alert("Error registering employee: " + err.message);
       console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <section style={styles.section}>
@@ -210,47 +117,66 @@ WorkSync`;
                     </p>
                     <Button
                       style={styles.submitButton}
-                      onClick={() => setsubmitted(false)}
+                      onClick={() => setSubmitted(false)}
                     >
                       Register Another Employee
                     </Button>
                   </div>
                 ) : (
-                  <Form onSubmit={setEmployee} style={styles.form}>
-                    {formFields.map((field) => (
-                      <FormGroup key={field.id}>
-                        <Input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          required
-                          id={field.id}
-                          value={field.value}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          style={styles.input}
-                          onFocus={(e) => (e.target.style.borderColor = "#333")}
-                          onBlur={(e) => (e.target.style.borderColor = "#ccc")}
-                        />
-                      </FormGroup>
-                    ))}
+                  <Formik
+                    initialValues={initialValues}
+                    validationSchema={ValidationSchema}
+                    onSubmit={handleSubmit}
+                  >
+                    {({ errors, touched, isSubmitting }) => (
+                      <Form style={styles.form}>
+                        {formFields.map((field) => (
+                          <FormGroup key={field.id}>
+                            <Field
+                              type={field.type}
+                              name={field.id}
+                              placeholder={field.placeholder}
+                              className={`form-control ${
+                                errors[field.id] && touched[field.id]
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              style={{
+                                ...styles.input,
+                                borderColor:
+                                  errors[field.id] && touched[field.id]
+                                    ? "red"
+                                    : "#ccc",
+                              }}
+                            />
+                            {errors[field.id] && touched[field.id] && (
+                              <div style={styles.errorMessage}>
+                                {errors[field.id]}
+                              </div>
+                            )}
+                          </FormGroup>
+                        ))}
 
-                    <div style={styles.buttonGroup}>
-                      <Button
-                        type="submit"
-                        style={styles.submitButton}
-                        disabled={isLoading}
-                      >
-                        {isLoading ? "Registering..." : "Register Employee"}
-                      </Button>
-                      <Button
-                        type="button"
-                        style={styles.cancelButton}
-                        onClick={() => window.history.back()}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </Form>
+                        <div style={styles.buttonGroup}>
+                          <Button
+                            type="submit"
+                            style={styles.submitButton}
+                            disabled={isLoading || isSubmitting}
+                          >
+                            {isLoading ? "Registering..." : "Register Employee"}
+                          </Button>
+                          <Button
+                            type="button"
+                            style={styles.cancelButton}
+                            onClick={() => window.location.href='/HRDashboard/FetchEmp'}
+                            disabled={isLoading || isSubmitting}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </Form>
+                    )}
+                  </Formik>
                 )}
               </div>
             </div>
@@ -263,11 +189,18 @@ WorkSync`;
 
 const styles = {
   section: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "",
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+  },
+  errorMessage: {
+    color: "red",
+    fontSize: "0.75rem",
+    marginTop: "-10px",
+    marginBottom: "10px",
+    paddingLeft: "5px",
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -325,6 +258,13 @@ const styles = {
     border: "1px solid #ccc",
     outline: "none",
     transition: "border-color 0.3s",
+    "&.is-invalid": {
+      borderColor: "red",
+      "&:focus": {
+        borderColor: "red",
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)",
+      },
+    },
   },
   buttonGroup: {
     display: "flex",
@@ -392,3 +332,55 @@ const styles = {
     marginBottom: "1.5rem",
   },
 };
+const ValidationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .matches(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required")
+    .matches(
+      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+      "Invalid email format"
+    ),
+
+  password: Yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters")
+    .matches(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+    ),
+
+  department: Yup.string()
+    .required("Department is required")
+    .min(2, "Department must be at least 2 characters"),
+
+  phone: Yup.string()
+    .required("Phone number is required")
+    .matches(
+      /^(?:\+94|0)?[0-9]{9,10}$/,
+      "Invalid phone number format. Use +94 or 0 prefix"
+    ),
+
+  salary: Yup.number()
+    .required("Salary is required")
+    .positive("Salary must be positive")
+    .min(1000, "Salary must be at least 1000")
+    .max(1000000, "Salary cannot exceed 1000000"),
+
+  dateOfJoining: Yup.date()
+  .required("Date of joining is required")
+    .max(new Date(), "Date cannot be in the future")
+    .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
+
+  availability: Yup.string()
+    .required("Availability is required")
+    .min(2, "Availability must be at least 2 characters"),
+
+  position: Yup.string()
+    .required("Position is required")
+    .min(2, "Position must be at least 2 characters")
+});
