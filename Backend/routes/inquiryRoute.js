@@ -6,15 +6,17 @@ const Inquiry = require("../model/inquiry");
 router.post("/addInquiry", async (req, res) => {
   try {
     // Validate required fields
-    const { employeeId, inquiry, department } = req.body;
-    if (!employeeId || !inquiry || !department) {
+    const { employeeId, inquiry, department, title } = req.body;
+    if (!employeeId || !inquiry || !department || !title) {
       return res.status(400).json({
-        message: "Employee ID, inquiry, and department are required fields",
+        message:
+          "Employee ID, title, inquiry, and department are required fields",
       });
     }
 
     const newInquiry = new Inquiry({
       employeeId,
+      title,
       inquiry,
       sender: req.body.sender,
       date: req.body.date || new Date(),
@@ -75,6 +77,19 @@ router.get("/getInquiry/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error fetching inquiry",
+      error: error.message,
+    });
+  }
+});
+
+// Get inquiries by department
+router.get("/getInquiryByDepartment/:department", async (req, res) => {
+  try {
+    const inquiries = await Inquiry.find({ department: req.params.department });
+    res.status(200).send(inquiries);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching inquiries by department",
       error: error.message,
     });
   }

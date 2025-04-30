@@ -17,6 +17,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import MessageIcon from "@mui/icons-material/Message";
 import TitleIcon from "@mui/icons-material/Title";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export default function AddFeedback() {
   const navigate = useNavigate();
@@ -254,6 +255,34 @@ export default function AddFeedback() {
                 }}
               >
                 Submit Feedback
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 500, damping: 15 }}
+            >
+              <Button
+                variant="contained"
+                fullWidth
+                size="large"
+                endIcon={<VisibilityIcon />}
+                onClick={() => navigate("/ManagerDashboard/fetchFeedback")}
+                sx={{
+                  height: 56,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  background: `linear-gradient(45deg, #fc6625 30%, #e55a1c 90%)`,
+                  boxShadow: "0 3px 15px rgba(252, 102, 37, 0.3)",
+                  "&:hover": {
+                    background: `linear-gradient(45deg, #e55a1c 30%, #fc6625 90%)`,
+                    boxShadow: "0 5px 20px rgba(252, 102, 37, 0.4)",
+                  },
+                }}
+              >
+                View Feedbacks
               </Button>
             </motion.div>
           </Box>

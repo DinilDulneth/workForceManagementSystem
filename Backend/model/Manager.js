@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
-const ManagerSchema = new mongoose.Schema({
+const managerSchema = new mongoose.Schema({
+  employeeId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  department: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String, required: true },
+  department: { type: String, required: true }, // HR, IT, General Manager
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  dateOfJoining: { type: Date, required: true }
+  // Add other fields as needed
 });
 
-module.exports =
-  mongoose.models.Manager || mongoose.model("Manager", ManagerSchema);
+const Manager = mongoose.model("Manager", managerSchema);
+module.exports = Manager;
