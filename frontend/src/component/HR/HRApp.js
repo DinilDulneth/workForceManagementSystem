@@ -108,7 +108,7 @@ export default function HRApp() {
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />
        <Route path="/accessF" element={<AccessF />} />
        <Route path="/accessV" element={<AccessV />} />
-       <Route path="/HRDashboard/AccessUpdate/:id" element={<AccessUpdate />} />
+       <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
       </Routes>
     </>
   );
