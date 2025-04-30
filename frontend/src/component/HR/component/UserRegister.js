@@ -168,7 +168,7 @@ WorkSync`;
                           <Button
                             type="button"
                             style={styles.cancelButton}
-                            onClick={() => window.history.back()}
+                            onClick={() => window.location.href='/HRDashboard/FetchEmp'}
                             disabled={isLoading || isSubmitting}
                           >
                             Cancel
