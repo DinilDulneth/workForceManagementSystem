@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
@@ -124,6 +125,17 @@ const UserLogin = () => {
           <button type="submit" style={styles.button}>
             Login
           </button>
+          <div style={styles.backToHome}>
+            <p style={styles.backToHomeText}>
+              Back to{" "}
+              <Link
+                to="/"
+                style={styles.homeLink}
+              >
+                Home
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>
@@ -131,6 +143,8 @@ const UserLogin = () => {
 };
 
 const styles = {
+
+
   authWrapper: {
     position: "relative", // Add this
     display: "flex",
@@ -209,6 +223,42 @@ const styles = {
   error: {
     color: "red",
     marginBottom: "10px",
+  },
+
+  backToHome: {
+    marginTop: "20px",
+    textAlign: "center",
+    padding: "10px",
+    borderTop: "1px solid rgba(0, 0, 0, 0.1)",
+  },
+  backToHomeText: {
+    color: "#666",
+    fontSize: "0.9rem",
+    margin: 0,
+  },
+  homeLink: {
+    color: "#ff5722",
+    textDecoration: "none",
+    fontWeight: "600",
+    position: "relative",
+    transition: "color 0.3s ease",
+    "&:hover": {
+      color: "#e64a19",
+    },
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      width: "100%",
+      height: "2px",
+      bottom: -2,
+      left: 0,
+      backgroundColor: "#ff5722",
+      transform: "scaleX(0)",
+      transition: "transform 0.3s ease",
+    },
+    "&:hover::after": {
+      transform: "scaleX(1)",
+    },
   },
 };
 
