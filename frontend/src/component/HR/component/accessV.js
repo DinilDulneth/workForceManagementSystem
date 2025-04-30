@@ -44,6 +44,39 @@ export default function AccessView() {
     }
   }
 
+  function revokeAccess(id) {
+    if (window.confirm("Are you sure you want to revoke this user's access?")) {
+      axios
+        .patch(`http://localhost:8070/access/revokeAccess/${id}`)
+        .then(() => {
+          alert("Access revoked successfully");
+          getAccessRecords(); // Refresh the records
+        })
+        .catch((err) => {
+          alert("Error revoking access: " + err.message);
+        });
+    }
+  }
+
+  function restoreAccess(id) {
+    if (
+      window.confirm("Are you sure you want to restore this user's access?")
+    ) {
+      axios
+        .patch(`http://localhost:8070/access/updateAccess/${id}`, {
+          access: "1",
+          status: "1",
+        })
+        .then(() => {
+          alert("Access restored successfully");
+          getAccessRecords();
+        })
+        .catch((err) => {
+          alert("Error restoring access: " + err.message);
+        });
+    }
+  }
+
   const handleRetry = () => {
     getAccessRecords();
   };
@@ -75,13 +108,17 @@ export default function AccessView() {
           <div style={styles.card}>
             <h4>Active Users</h4>
             <p style={styles.cardNumber}>
-              {accessRecords.filter((record) => record.status === "1").length}
+              {
+                accessRecords.filter(
+                  (record) => record.access !== "99" && record.status === "1"
+                ).length
+              }
             </p>
           </div>
           <div style={styles.card}>
-            <h4>Inactive Users</h4>
+            <h4>Revoked Users</h4>
             <p style={styles.cardNumber}>
-              {accessRecords.filter((record) => record.status === "3").length}
+              {accessRecords.filter((record) => record.access === "99").length}
             </p>
           </div>
         </div>
@@ -113,7 +150,9 @@ export default function AccessView() {
           </div>
         )}
 
+        {/* Active Users Table */}
         <div style={styles.tableContainer}>
+          <h3 style={styles.subHeader}>Active Users</h3>
           <table className="table table-hover mb-0">
             <thead style={styles.tableHeader}>
               <tr>
@@ -126,8 +165,9 @@ export default function AccessView() {
               </tr>
             </thead>
             <tbody>
-              {accessRecords.length > 0 ? (
-                accessRecords.map((record) => (
+              {accessRecords
+                .filter((record) => record.access !== "99")
+                .map((record) => (
                   <tr key={record._id}>
                     <td style={styles.tableCell}>{record.name}</td>
                     <td style={styles.tableCell}>{record.email}</td>
@@ -162,6 +202,55 @@ export default function AccessView() {
                       >
                         Edit
                       </button>
+
+                      <button
+                        className="btn btn-sm"
+                        style={{ ...styles.button, ...styles.revokeButton }}
+                        onClick={() => revokeAccess(record._id)}
+                      >
+                        Revoke
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Revoked Users Table */}
+        <h3 style={styles.subHeader}>Revoked Users</h3>
+        <div style={styles.tableContainer}>
+          <table className="table table-hover mb-0">
+            <thead style={styles.tableHeader}>
+              <tr>
+                <th style={styles.tableHeaderCell}>Name</th>
+                <th style={styles.tableHeaderCell}>Email</th>
+                <th style={styles.tableHeaderCell}>Department</th>
+                <th style={styles.tableHeaderCell}>Position</th>
+                <th style={styles.tableHeaderCell}>Status</th>
+                <th style={styles.tableHeaderCell}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {accessRecords
+                .filter((record) => record.access === "99")
+                .map((record) => (
+                  <tr key={record._id} style={styles.revokedRow}>
+                    <td style={styles.tableCell}>{record.name}</td>
+                    <td style={styles.tableCell}>{record.email}</td>
+                    <td style={styles.tableCell}>{record.department}</td>
+                    <td style={styles.tableCell}>{record.position}</td>
+                    <td style={styles.tableCell}>
+                      <span style={styles.revokedBadge}>Access Revoked</span>
+                    </td>
+                    <td style={styles.tableCell}>
+                      <button
+                        className="btn btn-sm"
+                        style={{ ...styles.button, ...styles.restoreButton }}
+                        onClick={() => restoreAccess(record._id)}
+                      >
+                        Restore Access
+                      </button>
                       <button
                         className="btn btn-sm"
                         style={{ ...styles.button, ...styles.deleteButton }}
@@ -171,14 +260,7 @@ export default function AccessView() {
                       </button>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" style={styles.emptyMessage}>
-                    No access records found.
-                  </td>
-                </tr>
-              )}
+                ))}
             </tbody>
           </table>
         </div>
@@ -228,6 +310,11 @@ const styles = {
     paddingBottom: "15px",
     borderBottom: "3px solid #fc6625",
   },
+  subHeader: {
+    color: "#2c3e50",
+    marginBottom: "15px",
+    fontSize: "1.5rem",
+  },
   tableContainer: {
     backgroundColor: "#ffffff",
     borderRadius: "8px",
@@ -273,6 +360,33 @@ const styles = {
     "&:hover": {
       backgroundColor: "#c0392b",
     },
+  },
+  revokeButton: {
+    backgroundColor: "#f39c12",
+    border: "none",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#d68910",
+    },
+  },
+  restoreButton: {
+    backgroundColor: "#27ae60",
+    border: "none",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#219a52",
+    },
+  },
+  revokedRow: {
+    backgroundColor: "#fff3e0",
+  },
+  revokedBadge: {
+    backgroundColor: "#f39c12",
+    color: "white",
+    padding: "4px 8px",
+    borderRadius: "12px",
+    fontSize: "0.85rem",
+    fontWeight: "500",
   },
   alertBox: {
     marginBottom: "20px",
