@@ -657,14 +657,16 @@ export default function FetchEmp() {
                                   />
                                   <input
                                     type="date"
-                                    className=" mb-0 form-control"
+                                    className="mb-0 form-control"
                                     placeholder="Task Deadline..."
                                     value={deadLine}
                                     onChange={(e) =>
                                       setdeadLine(e.target.value)
                                     }
+                                    min={new Date().toISOString().split("T")[0]}
                                     required
                                   />
+
                                   <input
                                     type="text"
                                     className="mb-0 form-control"
