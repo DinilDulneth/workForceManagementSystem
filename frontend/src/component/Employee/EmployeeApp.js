@@ -13,48 +13,50 @@ import Fetchinquiry from "./component/fetchinquiry";
 import Ine from "react-bootstrap";
 import DashboardTemp from "../DashboardTemp";
 import UpdateInquiry from "./component/UpdateInquiry";
+import TaskDetails from "./component/TaskDetails";
 
 const Links = [
   {
     link: "/EmployeeHome",
     name: "Dashboard Overview",
-    icon: "bi-house-door",
+    icon: "bi-house-door"
+  },
+  {
+    link: "/EmployeeHome/TaskDetails",
+    name: "Task Details",
+    icon: "bi-list-task"
   },
   {
     link: "/EmployeeHome/ResignationF",
     name: "Resignation Form",
-    icon: "bi bi-file-text",
+    icon: "bi bi-file-text"
   },
   {
     link: "/EmployeeHome/ResignationV",
     name: "Resignation View",
-    icon: "bi bi-eye",
+    icon: "bi bi-eye"
   },
-  {
-    link: "/EmployeeHome/ResignationD",
-    name: "Resignation Delete",
-    icon: "bi bi-trash",
-  },
+
   {
     link: "/EmployeeHome/LeaveRequest",
     name: "Leave Request",
-    icon: "bi bi-calendar-check",
+    icon: "bi bi-calendar-check"
   },
   {
     link: "/EmployeeHome/FetchFeedback",
     name: "Feedback",
-    icon: "bi bi-chat-dots",
+    icon: "bi bi-chat-dots"
   },
   {
     link: "/EmployeeHome/fetchAnnouncement",
     name: "Announcements",
-    icon: "bi bi-megaphone",
+    icon: "bi bi-megaphone"
   },
   {
     link: "/EmployeeHome/addInquiry",
     name: "Add Inquiry",
-    icon: "bi bi-question-circle",
-  },
+    icon: "bi bi-question-circle"
+  }
 ];
 
 export default function EmployeeApp() {
@@ -72,8 +74,9 @@ export default function EmployeeApp() {
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
         <Route path="/LeaveRequest" element={<LeaveRequest />} />
         <Route path="/FetchFeedback" element={<FetchFeedback />} />
-        <Route path="/fetchInquiry" element={<Fetchinquiry />} />
+        <Route path="/Fetchinquiry" element={<Fetchinquiry />} />
         <Route path="/updateInquiry/:id" element={<UpdateInquiry />} />
+        <Route path="/TaskDetails" element={<TaskDetails />} />
       </Routes>
     </>
   );
