@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 // Check if the Counter model already exists before defining it

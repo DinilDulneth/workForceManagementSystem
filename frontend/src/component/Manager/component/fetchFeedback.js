@@ -17,124 +17,86 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
 import DateRangeIcon from "@mui/icons-material/DateRange";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import BusinessIcon from "@mui/icons-material/Business";
 import MessageIcon from "@mui/icons-material/Message";
+import TitleIcon from "@mui/icons-material/Title";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import SortIcon from "@mui/icons-material/Sort";
-import ClearIcon from "@mui/icons-material/Clear";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 
-function FetchInquiry() {
+function FetchFeedback() {
   const navigate = useNavigate();
-  const [inquiry, setInquiry] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortOrder, setSortOrder] = useState("newest"); // Track sort order: "newest" or "oldest"
+  const [sortOrder, setSortOrder] = useState("newest"); // Add sort order state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
   const [editDialog, setEditDialog] = useState(false);
-  const [editingInquiry, setEditingInquiry] = useState({
+  const [editingFeedback, setEditingFeedback] = useState({
     _id: "",
-    inquiry: "",
-    title: "", // Add title field
-    department: "",
+    title: "",
+    feedback: "",
     employeeId: "",
+    sender: "",
   });
-  const [selectedDate, setSelectedDate] = useState(null); // State for date filter
-  const [selectedDepartment, setSelectedDepartment] = useState(""); // State for department filter
 
   useEffect(() => {
-    getInquiry();
+    getFeedbacks();
   }, []);
 
-  function getInquiry() {
+  function getFeedbacks() {
     setLoading(true);
-    const employeeId = localStorage.getItem("ID");
+    const managerId = localStorage.getItem("ID");
 
+    // Use the new endpoint that filters by sender (manager ID)
     axios
-      .get("http://localhost:8070/api/inquiry/getInquiry")
+      .get(
+        `http://localhost:8070/api/feedback/getFeedbackBySender/${managerId}`
+      )
       .then((res) => {
-        // Filter inquiries to only show those from the current employee
-        const filteredInquiries = res.data.filter(
-          (inq) => inq.employeeId === employeeId
-        );
-        setInquiry(filteredInquiries);
+        const formattedFeedbacks = res.data.map((feedback) => ({
+          ...feedback,
+          date: new Date(feedback.date),
+        }));
+        setFeedbacks(formattedFeedbacks);
       })
       .catch((err) => {
         setSnackbar({
           open: true,
-          message: "Error fetching inquiries: " + err.message,
+          message: "Error fetching feedback: " + err.message,
           severity: "error",
         });
+        console.error(err);
       })
       .finally(() => setLoading(false));
   }
 
-  // Function to sort inquiries by date
-  const sortInquiries = (inquiries) => {
-    return [...inquiries].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-    });
-  };
-
-  // Function to filter inquiries by selected date
-  const filterInquiriesByDate = (inquiries) => {
-    if (!selectedDate) return inquiries;
-    return inquiries.filter((inq) => {
-      const inquiryDate = new Date(inq.date).toDateString();
-      const filterDate = new Date(selectedDate).toDateString();
-      return inquiryDate === filterDate;
-    });
-  };
-
-  // Function to filter inquiries by selected department
-  const filterInquiriesByDepartment = (inquiries) => {
-    if (!selectedDepartment) return inquiries;
-    return inquiries.filter((inq) => inq.department === selectedDepartment);
-  };
-
-  // Toggle sort order function
-  const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "newest" ? "oldest" : "newest");
-  };
-
-  function handleDelete(id) {
-    if (window.confirm("Are you sure you want to delete this inquiry?")) {
+  function deleteFeedback(id) {
+    if (window.confirm("Are you sure you want to delete this feedback?")) {
       axios
-        .delete(`http://localhost:8070/api/inquiry/deleteInquiry/${id}`)
+        .delete(`http://localhost:8070/api/feedback/deleteFeedback/${id}`)
         .then(() => {
           setSnackbar({
             open: true,
-            message: "Inquiry deleted successfully!",
+            message: "Feedback deleted successfully",
             severity: "success",
           });
-          getInquiry(); // Refresh the list
+          setFeedbacks(feedbacks.filter((feedback) => feedback._id !== id));
         })
-        .catch((error) => {
-          console.error("Error deleting inquiry:", error);
+        .catch((err) => {
           setSnackbar({
             open: true,
-            message: "Error deleting inquiry: " + error.message,
+            message: "Error deleting feedback: " + err.message,
             severity: "error",
           });
+          console.error(err);
         });
     }
   }
@@ -142,45 +104,63 @@ function FetchInquiry() {
   function handleUpdate() {
     axios
       .put(
-        `http://localhost:8070/api/inquiry/updateInquiry/${editingInquiry._id}`,
+        `http://localhost:8070/api/feedback/updateFeedback/${editingFeedback._id}`,
         {
-          inquiry: editingInquiry.inquiry,
-          title: editingInquiry.title, // Include title in update
-          department: editingInquiry.department,
-          employeeId: editingInquiry.employeeId,
+          title: editingFeedback.title,
+          feedback: editingFeedback.feedback,
+          employeeId: editingFeedback.employeeId,
+          sender: editingFeedback.sender,
         }
       )
       .then((response) => {
         setSnackbar({
           open: true,
-          message: "Inquiry updated successfully!",
+          message: "Feedback updated successfully!",
           severity: "success",
         });
-        getInquiry(); // Refresh the list
+        getFeedbacks(); // Refresh the list
         setEditDialog(false);
       })
       .catch((error) => {
-        console.error("Error updating inquiry:", error);
+        console.error("Error updating feedback:", error);
         setSnackbar({
           open: true,
-          message: "Error updating inquiry: " + error.message,
+          message: "Error updating feedback: " + error.message,
           severity: "error",
         });
       });
   }
 
-  // Get sorted and filtered inquiries
-  const sortedInquiries = sortInquiries(inquiry);
-  const dateFilteredInquiries = filterInquiriesByDate(sortedInquiries);
-  const filteredInquiries = filterInquiriesByDepartment(dateFilteredInquiries);
+  function formatDate(date) {
+    if (!date) return "";
+    try {
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  }
 
-  // Get unique departments for the filter dropdown and make sure HR is included
-  const uniqueDepartments = [
-    ...new Set([...inquiry.map((inq) => inq.department), "HR"]),
-  ].filter(Boolean);
+  // Function to sort feedbacks by date
+  const sortFeedbacks = (feedbacksToSort) => {
+    return [...feedbacksToSort].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+  };
 
-  // Check if any inquiries will be shown with current filters
-  const hasFilteredResults = filteredInquiries.length > 0;
+  // Toggle sort order function
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "newest" ? "oldest" : "newest");
+  };
+
+  // Get sorted feedbacks
+  const sortedFeedbacks = sortFeedbacks(feedbacks);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -200,7 +180,7 @@ function FetchInquiry() {
             gap: 2,
           }}
         >
-          <HelpOutlineIcon sx={{ fontSize: 40, color: "#fc6625" }} />
+          <MessageIcon sx={{ fontSize: 40, color: "#fc6625" }} />
           <Typography
             variant="h4"
             sx={{
@@ -210,12 +190,12 @@ function FetchInquiry() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            My Inquiries
+            Feedback Dashboard
           </Typography>
         </Box>
 
-        {/* Add sort and filter controls */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        {/* Add sort button */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
           <Button
             variant="outlined"
             startIcon={
@@ -237,68 +217,6 @@ function FetchInquiry() {
           >
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
           </Button>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <FormControl sx={{ minWidth: 150 }}>
-              <InputLabel id="department-filter-label">Department</InputLabel>
-              <Select
-                labelId="department-filter-label"
-                id="department-filter"
-                value={selectedDepartment}
-                label="Department"
-                onChange={(e) => setSelectedDepartment(e.target.value)}
-                size="small"
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#fc6625",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#e55a1c",
-                  },
-                }}
-              >
-                <MenuItem value="">All Departments</MenuItem>
-                {uniqueDepartments.map((dept) => (
-                  <MenuItem key={dept} value={dept}>
-                    {dept}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {selectedDepartment && (
-              <IconButton
-                onClick={() => setSelectedDepartment("")}
-                sx={{
-                  color: "#e55a1c",
-                  "&:hover": {
-                    backgroundColor: "rgba(229, 90, 28, 0.1)",
-                  },
-                }}
-              >
-                <ClearIcon />
-              </IconButton>
-            )}
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Filter by Date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                renderInput={(params) => <TextField {...params} size="small" />}
-              />
-            </LocalizationProvider>
-            {selectedDate && (
-              <IconButton
-                onClick={() => setSelectedDate(null)}
-                sx={{
-                  color: "#e55a1c",
-                  "&:hover": {
-                    backgroundColor: "rgba(229, 90, 28, 0.1)",
-                  },
-                }}
-              >
-                <ClearIcon />
-              </IconButton>
-            )}
-          </Box>
         </Box>
 
         {loading && (
@@ -313,31 +231,10 @@ function FetchInquiry() {
           />
         )}
 
-        {!loading && filteredInquiries.length === 0 && (
-          <Box
-            sx={{
-              textAlign: "center",
-              py: 5,
-              border: "1px dashed rgba(252, 102, 37, 0.3)",
-              borderRadius: 2,
-              backgroundColor: "rgba(252, 102, 37, 0.05)",
-            }}
-          >
-            <Typography variant="h6" sx={{ color: "#fc6625", mb: 1 }}>
-              No inquiries found
-            </Typography>
-            <Typography variant="body1" sx={{ color: "#8f9491" }}>
-              {selectedDepartment
-                ? `There are no inquiries for the "${selectedDepartment}" department. Try creating one or selecting a different department.`
-                : "No inquiries match your current filters. Try adjusting your filters or creating new inquiries."}
-            </Typography>
-          </Box>
-        )}
-
         <AnimatePresence>
-          {filteredInquiries.map((inq, index) => (
+          {sortedFeedbacks.map((feedback, index) => (
             <motion.div
-              key={inq._id}
+              key={feedback._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -366,40 +263,55 @@ function FetchInquiry() {
                     alignItems: "flex-start",
                   }}
                 >
-                  <Box sx={{ width: "100%" }}>
+                  <Box>
                     <Typography
-                      variant="h5"
+                      variant="h6"
                       sx={{
-                        color: "#fc6625",
-                        fontWeight: 700,
+                        color: "#474747",
+                        fontWeight: 600,
                         mb: 2,
-                        borderBottom: "2px solid rgba(252, 102, 37, 0.1)",
-                        paddingBottom: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
                       }}
                     >
-                      {inq.title || "Untitled Inquiry"}
+                      <PersonIcon sx={{ color: "#fc6625" }} />
+                      Employee ID: {feedback.employeeId}
                     </Typography>
 
-                    {/* Display inquiry message */}
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        color: "#474747",
+                        mb: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        fontWeight: 500,
+                      }}
+                    >
+                      <TitleIcon sx={{ color: "#fc6625" }} />
+                      {feedback.title}
+                    </Typography>
+
                     <Typography
                       variant="body1"
                       sx={{
                         color: "#474747",
-                        mb: 3,
+                        mb: 2,
                         display: "flex",
                         alignItems: "flex-start",
                         gap: 1,
-                        fontSize: "1.05rem",
                       }}
                     >
                       <MessageIcon sx={{ color: "#8f9491", mt: 0.5 }} />
-                      {inq.inquiry}
+                      {feedback.feedback}
                     </Typography>
 
                     <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                       <Chip
-                        icon={<BusinessIcon />}
-                        label={`Department: ${inq.department}`}
+                        icon={<PersonIcon />}
+                        label={`Sender: ${feedback.sender}`}
                         size="small"
                         sx={{
                           backgroundColor: "rgba(252, 102, 37, 0.1)",
@@ -411,7 +323,7 @@ function FetchInquiry() {
                       />
                       <Chip
                         icon={<DateRangeIcon />}
-                        label={new Date(inq.date).toLocaleDateString()}
+                        label={formatDate(feedback.date)}
                         size="small"
                         sx={{
                           backgroundColor: "rgba(229, 90, 28, 0.1)",
@@ -432,12 +344,12 @@ function FetchInquiry() {
                           variant="outlined"
                           startIcon={<EditIcon />}
                           onClick={() => {
-                            setEditingInquiry({
-                              _id: inq._id,
-                              inquiry: inq.inquiry,
-                              title: inq.title || "", // Include title in editing
-                              department: inq.department,
-                              employeeId: inq.employeeId,
+                            setEditingFeedback({
+                              _id: feedback._id,
+                              title: feedback.title,
+                              feedback: feedback.feedback,
+                              employeeId: feedback.employeeId,
+                              sender: feedback.sender,
                             });
                             setEditDialog(true);
                           }}
@@ -460,7 +372,7 @@ function FetchInquiry() {
                         <Button
                           variant="outlined"
                           startIcon={<DeleteIcon />}
-                          onClick={() => handleDelete(inq._id)}
+                          onClick={() => deleteFeedback(feedback._id)}
                           sx={{
                             color: "#e55a1c",
                             borderColor: "#e55a1c",
@@ -489,16 +401,16 @@ function FetchInquiry() {
         fullWidth
       >
         <DialogTitle sx={{ color: "#fc6625", fontWeight: 600 }}>
-          Edit Inquiry
+          Edit Feedback
         </DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             label="Title"
-            value={editingInquiry.title || ""}
+            value={editingFeedback.title}
             onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
+              setEditingFeedback({
+                ...editingFeedback,
                 title: e.target.value,
               })
             }
@@ -506,12 +418,12 @@ function FetchInquiry() {
           />
           <TextField
             fullWidth
-            label="Inquiry"
-            value={editingInquiry.inquiry}
+            label="Feedback"
+            value={editingFeedback.feedback}
             onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                inquiry: e.target.value,
+              setEditingFeedback({
+                ...editingFeedback,
+                feedback: e.target.value,
               })
             }
             multiline
@@ -520,24 +432,24 @@ function FetchInquiry() {
           />
           <TextField
             fullWidth
-            label="Department"
-            value={editingInquiry.department}
+            label="Employee ID"
+            value={editingFeedback.employeeId}
             onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                department: e.target.value,
+              setEditingFeedback({
+                ...editingFeedback,
+                employeeId: e.target.value,
               })
             }
             sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
-            label="Employee ID"
-            value={editingInquiry.employeeId}
+            label="Sender"
+            value={editingFeedback.sender}
             onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                employeeId: e.target.value,
+              setEditingFeedback({
+                ...editingFeedback,
+                sender: e.target.value,
               })
             }
           />
@@ -591,4 +503,4 @@ function FetchInquiry() {
   );
 }
 
-export default FetchInquiry;
+export default FetchFeedback;

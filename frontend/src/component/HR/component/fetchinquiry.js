@@ -5,17 +5,13 @@ import {
   Box,
   Card,
   Typography,
-  IconButton,
   Container,
   Alert,
   Snackbar,
   Chip,
   LinearProgress,
   Button,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
+  IconButton,
   TextField,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,33 +20,40 @@ import DateRangeIcon from "@mui/icons-material/DateRange";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import BusinessIcon from "@mui/icons-material/Business";
 import MessageIcon from "@mui/icons-material/Message";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 function FetchInquiry() {
   const navigate = useNavigate();
   const [inquiry, setInquiry] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortOrder, setSortOrder] = useState("newest");
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [managerDepartment, setManagerDepartment] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest"); // Track sort order
+  const [selectedDate, setSelectedDate] = useState(null); // State for date filter
 
   useEffect(() => {
+    // Get manager department from localStorage
+    const department = localStorage.getItem("Department") || "";
+    setManagerDepartment(department);
+
+    // Only get HR department inquiries
     getInquiry();
   }, []);
 
   function getInquiry() {
     setLoading(true);
+
+    // Directly fetch only HR inquiries
     axios
-      .get("http://localhost:8070/api/inquiry/getInquiry")
+      .get("http://localhost:8070/api/inquiry/getInquiryByDepartment/HR")
       .then((res) => {
         setInquiry(res.data);
       })
@@ -64,10 +67,7 @@ function FetchInquiry() {
       .finally(() => setLoading(false));
   }
 
-  const filterNonHRInquiries = (inquiries) => {
-    return inquiries.filter((inq) => inq.department !== "HR");
-  };
-
+  // Function to sort inquiries by date
   const sortInquiries = (inquiries) => {
     return [...inquiries].sort((a, b) => {
       const dateA = new Date(a.date).getTime();
@@ -76,6 +76,7 @@ function FetchInquiry() {
     });
   };
 
+  // Function to filter inquiries by selected date
   const filterInquiriesByDate = (inquiries) => {
     if (!selectedDate) return inquiries;
     return inquiries.filter((inq) => {
@@ -85,27 +86,14 @@ function FetchInquiry() {
     });
   };
 
-  const filterInquiriesByDepartment = (inquiries) => {
-    if (!selectedDepartment) return inquiries;
-    return inquiries.filter((inq) => inq.department === selectedDepartment);
-  };
-
+  // Toggle sort order function
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === "newest" ? "oldest" : "newest");
   };
 
+  // Get sorted and filtered inquiries
   const sortedInquiries = sortInquiries(inquiry);
-  const nonHRInquiries = filterNonHRInquiries(sortedInquiries);
-  const dateFilteredInquiries = filterInquiriesByDate(nonHRInquiries);
-  const filteredInquiries = filterInquiriesByDepartment(dateFilteredInquiries);
-
-  const uniqueDepartments = [
-    ...new Set(
-      inquiry
-        .filter((inq) => inq.department !== "HR")
-        .map((inq) => inq.department)
-    ),
-  ].filter(Boolean);
+  const filteredInquiries = filterInquiriesByDate(sortedInquiries);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -135,10 +123,11 @@ function FetchInquiry() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Employee Inquiries
+            HR Department Inquiries
           </Typography>
         </Box>
 
+        {/* Add sort and filter controls */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <Button
             variant="outlined"
@@ -162,45 +151,6 @@ function FetchInquiry() {
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
           </Button>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <FormControl sx={{ minWidth: 150 }}>
-              <InputLabel id="department-filter-label">Department</InputLabel>
-              <Select
-                labelId="department-filter-label"
-                id="department-filter"
-                value={selectedDepartment}
-                label="Department"
-                onChange={(e) => setSelectedDepartment(e.target.value)}
-                size="small"
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#fc6625",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#e55a1c",
-                  },
-                }}
-              >
-                <MenuItem value="">All Departments</MenuItem>
-                {uniqueDepartments.map((dept) => (
-                  <MenuItem key={dept} value={dept}>
-                    {dept}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {selectedDepartment && (
-              <IconButton
-                onClick={() => setSelectedDepartment("")}
-                sx={{
-                  color: "#e55a1c",
-                  "&:hover": {
-                    backgroundColor: "rgba(229, 90, 28, 0.1)",
-                  },
-                }}
-              >
-                <ClearIcon />
-              </IconButton>
-            )}
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Filter by Date"
@@ -248,12 +198,12 @@ function FetchInquiry() {
             }}
           >
             <Typography variant="h6" sx={{ color: "#fc6625", mb: 1 }}>
-              No inquiries found
+              No HR inquiries found
             </Typography>
             <Typography variant="body1" sx={{ color: "#8f9491" }}>
-              {selectedDepartment
-                ? `There are no inquiries for the "${selectedDepartment}" department.`
-                : "No inquiries match your current filters. Try adjusting your filters."}
+              {selectedDate
+                ? "No HR inquiries found for the selected date. Try another date or clear the filter."
+                : "New HR inquiries will appear here when employees submit them."}
             </Typography>
           </Box>
         )}
@@ -283,83 +233,76 @@ function FetchInquiry() {
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <Box sx={{ width: "100%" }}>
-                    <Typography
-                      variant="h5"
+                <Box>
+                  {/* Display inquiry title */}
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      color: "#fc6625",
+                      fontWeight: 700,
+                      mb: 2,
+                      borderBottom: "2px solid rgba(252, 102, 37, 0.1)",
+                      paddingBottom: 1.5,
+                    }}
+                  >
+                    {inq.title || "Untitled Inquiry"}
+                  </Typography>
+
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: "#474747",
+                      fontWeight: 600,
+                      mb: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <PersonIcon sx={{ color: "#fc6625" }} />
+                    Employee ID: {inq.employeeId}
+                  </Typography>
+
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "#474747",
+                      mb: 3,
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 1,
+                      fontSize: "1.05rem",
+                    }}
+                  >
+                    <MessageIcon sx={{ color: "#8f9491", mt: 0.5 }} />
+                    {inq.inquiry}
+                  </Typography>
+
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <Chip
+                      icon={<BusinessIcon />}
+                      label="Department: HR"
+                      size="small"
                       sx={{
+                        backgroundColor: "rgba(252, 102, 37, 0.1)",
                         color: "#fc6625",
-                        fontWeight: 700,
-                        mb: 2,
-                        borderBottom: "2px solid rgba(252, 102, 37, 0.1)",
-                        paddingBottom: 1.5,
-                      }}
-                    >
-                      {inq.title || "Untitled Inquiry"}
-                    </Typography>
-
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        color: "#474747",
-                        fontWeight: 600,
-                        mb: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <PersonIcon sx={{ color: "#fc6625" }} />
-                      Employee ID: {inq.employeeId}
-                    </Typography>
-
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: "#474747",
-                        mb: 3,
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 1,
-                        fontSize: "1.05rem",
-                      }}
-                    >
-                      <MessageIcon sx={{ color: "#8f9491", mt: 0.5 }} />
-                      {inq.inquiry}
-                    </Typography>
-
-                    <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                      <Chip
-                        icon={<BusinessIcon />}
-                        label={`Department: ${inq.department}`}
-                        size="small"
-                        sx={{
-                          backgroundColor: "rgba(252, 102, 37, 0.1)",
+                        "& .MuiChip-icon": {
                           color: "#fc6625",
-                          "& .MuiChip-icon": {
-                            color: "#fc6625",
-                          },
-                        }}
-                      />
-                      <Chip
-                        icon={<DateRangeIcon />}
-                        label={new Date(inq.date).toLocaleDateString()}
-                        size="small"
-                        sx={{
-                          backgroundColor: "rgba(229, 90, 28, 0.1)",
+                        },
+                      }}
+                    />
+                    <Chip
+                      icon={<DateRangeIcon />}
+                      label={new Date(inq.date).toLocaleDateString()}
+                      size="small"
+                      sx={{
+                        backgroundColor: "rgba(229, 90, 28, 0.1)",
+                        color: "#e55a1c",
+                        "& .MuiChip-icon": {
                           color: "#e55a1c",
-                          "& .MuiChip-icon": {
-                            color: "#e55a1c",
-                          },
-                        }}
-                      />
-                    </Box>
+                        },
+                      }}
+                    />
                   </Box>
                 </Box>
               </Card>

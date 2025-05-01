@@ -14,6 +14,8 @@ import AddFeedback from "./component/addFeedback";
 import UpdateFeedback from "./component/UpdateFeedback";
 import UpdateAnnouncement from "./component/UpdateAnnouncement";
 import Settings from "./component/Settings";
+import FetchAnnouncement from "./component/fetchAnnouncement";
+import FetchFeedback from "./component/fetchFeedback";
 
 const links = [
   { link: "/ManagerDashboard", name: "Dashboard", icon: "bi-house-door" },
@@ -75,6 +77,8 @@ function ManagerApp() {
           path="/updateAnnouncement/:id"
           element={<UpdateAnnouncement />}
         />
+        <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
+        <Route path="/fetchFeedback" element={<FetchFeedback />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </>

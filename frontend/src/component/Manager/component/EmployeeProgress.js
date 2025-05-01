@@ -12,7 +12,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
 } from "chart.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./EmployeeProgress.css";
@@ -172,17 +172,17 @@ export default function EmployeeProgress() {
             "#36A2EB",
             "#FFCE56",
             "#4BC0C0",
-            "#9966FF"
+            "#9966FF",
           ],
           hoverBackgroundColor: [
             "#FF6384",
             "#36A2EB",
             "#FFCE56",
             "#4BC0C0",
-            "#9966FF"
-          ]
-        }
-      ]
+            "#9966FF",
+          ],
+        },
+      ],
     };
   };
 
@@ -190,7 +190,7 @@ export default function EmployeeProgress() {
     if (!data || Object.keys(data).length === 0) {
       return {
         labels: [],
-        datasets: []
+        datasets: [],
       };
     }
 
@@ -200,7 +200,7 @@ export default function EmployeeProgress() {
     const formattedLabels = labels.map((date) =>
       new Date(date).toLocaleDateString("en-US", {
         month: "short",
-        day: "numeric"
+        day: "numeric",
       })
     );
 
@@ -219,9 +219,9 @@ export default function EmployeeProgress() {
           pointHoverBorderColor: "rgba(75, 192, 192, 1)",
           pointRadius: 4,
           pointHoverRadius: 6,
-          tension: 0.2
-        }
-      ]
+          tension: 0.2,
+        },
+      ],
     };
   };
 
@@ -229,7 +229,7 @@ export default function EmployeeProgress() {
     if (!data || Object.keys(data).length === 0) {
       return {
         labels: [],
-        datasets: []
+        datasets: [],
       };
     }
 
@@ -239,7 +239,7 @@ export default function EmployeeProgress() {
     const formattedLabels = labels.map((date) =>
       new Date(date).toLocaleDateString("en-US", {
         month: "short",
-        day: "numeric"
+        day: "numeric",
       })
     );
 
@@ -251,9 +251,9 @@ export default function EmployeeProgress() {
           data: values,
           backgroundColor: "rgba(153, 102, 255, 0.2)",
           borderColor: "rgba(153, 102, 255, 1)",
-          borderWidth: 1
-        }
-      ]
+          borderWidth: 1,
+        },
+      ],
     };
   };
 
@@ -265,8 +265,8 @@ export default function EmployeeProgress() {
         position: "top",
         labels: {
           font: { size: 14 },
-          color: "#333"
-        }
+          color: "#333",
+        },
       },
       tooltip: {
         enabled: true,
@@ -279,9 +279,9 @@ export default function EmployeeProgress() {
           label: (context) => {
             const value = context.parsed.y;
             return `${context.dataset.label}: ${value.toFixed(3)}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       y: {
@@ -289,35 +289,35 @@ export default function EmployeeProgress() {
         ticks: {
           stepSize: 0.5,
           callback: (value) => value.toFixed(3),
-          color: "#666"
+          color: "#666",
         },
         title: {
           display: true,
           text: "Working Hours",
           font: { size: 14, weight: "bold" },
-          color: "#333"
+          color: "#333",
         },
-        grid: { color: "rgba(0, 0, 0, 0.1)" }
+        grid: { color: "rgba(0, 0, 0, 0.1)" },
       },
       x: {
         title: {
           display: true,
           text: "Date",
           font: { size: 14, weight: "bold" },
-          color: "#333"
+          color: "#333",
         },
         ticks: {
           color: "#666",
           maxRotation: 35,
-          minRotation: 35
+          minRotation: 35,
         },
-        grid: { display: false }
-      }
+        grid: { display: false },
+      },
     },
     animation: {
       duration: 900,
-      easing: "easeOutQuart"
-    }
+      easing: "easeOutQuart",
+    },
   };
 
   const chartOptions = {
@@ -328,8 +328,8 @@ export default function EmployeeProgress() {
         position: "top",
         labels: {
           font: { size: 14 },
-          color: "#333"
-        }
+          color: "#333",
+        },
       },
       tooltip: {
         enabled: true,
@@ -342,9 +342,9 @@ export default function EmployeeProgress() {
           label: (context) => {
             const value = context.parsed.y;
             return `${context.dataset.label}: ${value.toFixed(3)}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     scales: {
       y: {
@@ -352,37 +352,37 @@ export default function EmployeeProgress() {
         ticks: {
           stepSize: 0.05,
           callback: (value) => value.toFixed(3),
-          color: "#666"
+          color: "#666",
         },
         title: {
           display: true,
           text: "Progress Value",
           font: { size: 14, weight: "bold" },
-          color: "#333"
+          color: "#333",
         },
         grid: { color: "rgba(0, 0, 0, 0.1)" },
         min: 0,
-        max: 0.2
+        max: 0.2,
       },
       x: {
         title: {
           display: true,
           text: "Date",
           font: { size: 14, weight: "bold" },
-          color: "#333"
+          color: "#333",
         },
         ticks: {
           color: "#666",
           maxRotation: 35,
-          minRotation: 35
+          minRotation: 35,
         },
-        grid: { display: false }
-      }
+        grid: { display: false },
+      },
     },
     animation: {
       duration: 1000,
-      easing: "easeOutQuart"
-    }
+      easing: "easeOutQuart",
+    },
   };
 
   return (
@@ -444,7 +444,7 @@ export default function EmployeeProgress() {
                   "Review Required",
                   "Blocked",
                   "Deferred",
-                  "Unknown"
+                  "Unknown",
                 ])}
               />
             </div>
