@@ -26,7 +26,7 @@ import UpdateHR from "./component/UpdateHR";
 export default function HRApp() {
   const links = [
     {
-      link: "/HRDashboard/AccessV",
+      link: "/HRDashboard",
       name: "Access View Table",
       icon: "bi-file-earmark",
     },
@@ -99,7 +99,7 @@ export default function HRApp() {
     <>
       <DashboardTemp ArrLinkList={links} />
       <Routes>
-        <Route path="/accessV" element={<AccessV />} />
+        <Route path="/" element={<AccessV />} />
         <Route path="/FetchEmp" element={<FetchEmp />} />
         <Route path="/fetchHR" element={<FetchHR />} />
         <Route path="/fetchManager" element={<FetchManager />} />
@@ -113,7 +113,6 @@ export default function HRApp() {
         <Route path="/fetchSalary" element={<FetchSalary />} />
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />
         <Route path="/accessF" element={<AccessF />} />
-        <Route path="/accessV" element={<AccessV />} />
         <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
         <Route path="/updateEmployee/:id" element={<UpdateEmployee />} />
         <Route path="/updateManager/:id" element={<UpdateManager />} />
