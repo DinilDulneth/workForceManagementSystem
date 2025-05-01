@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import FetchEmp from "./component/fetchEmp";
 import UserRegister from "./component/UserRegister";
 import DashboardHR from "./component/DashboardHR";
-import SalaryDashboard from "./component/SalaryDashboard";
 import FetchSalary from "./component/fetchSalary";
 import AddSalary from "./component/addSalary";
 import UpdateSalary from "./component/updateSalary";
@@ -83,11 +82,6 @@ export default function HRApp() {
       name: "View Salary",
       icon: "bi-wallet2",
     },
-    {
-      link: "/HRDashboard/SalaryDashboard",
-      name: "Salary Dashboard",
-      icon: "bi-bar-chart",
-    },
   ];
 
   return (
@@ -104,7 +98,6 @@ export default function HRApp() {
         <Route path="/ResignationDemp" element={<ResignationDemp />} />
         <Route path="/ResignationUemp/:id" element={<ResignationUemp />} />
         <Route path="/ResignationVemp" element={<ResignationVemp />} />
-        <Route path="/SalaryDashboard" element={<SalaryDashboard />} />
         <Route path="/addSalary" element={<AddSalary />} />
         <Route path="/fetchSalary" element={<FetchSalary />} />
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />

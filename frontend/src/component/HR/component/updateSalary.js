@@ -1,274 +1,339 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function UpdateSalary() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [hasValidEmployee, setHasValidEmployee] = useState(false);
+  const [salary, setSalary] = useState({
+    employeeId: "",
+    name: "",
+    department: "",
+    basic: "",
+    additionalIncentives: "",
+    reductions: ""
+  });
 
-  const [name, setName] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
-  const [paidHours, setPaidHours] = useState("");
-  const [grossPay, setGrossPay] = useState("");
-  const [statutoryPay, setStatutoryPay] = useState("");
-  const [deductions, setDeductions] = useState("");
-  const [netPay, setNetPay] = useState("");
-  const [status, setStatus] = useState("Pending");
+  const lookupEmployee = async (employeeId) => {
+    try {
+      const response = await axios.get(`http://localhost:8070/salary/employee/${employeeId}`);
+      if (response.data) {
+        setSalary(prev => ({
+          ...prev,
+          name: response.data.name,
+          department: response.data.department
+        }));
+        setHasValidEmployee(true);
+      }
+    } catch (error) {
+      console.error("Error fetching employee details:", error);
+      toast.error("Employee not found with this ID");
+      setSalary(prev => ({
+        ...prev,
+        name: "",
+        department: ""
+      }));
+      setHasValidEmployee(false);
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:8070/salary/${id}`)
-      .then((res) => {
-        const data = res.data;
-        setName(data.name);
-        setEmployeeId(data.employeeId);
-        setPaidHours(data.paidHours);
-        setGrossPay(data.grossPay);
-        setStatutoryPay(data.statutoryPay);
-        setDeductions(data.deductions);
-        setNetPay(data.netPay);
-        setStatus(data.status);
-      })
-      .catch((err) => {
-        alert("Error fetching salary: " + err.message);
-      });
+    const fetchSalary = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8070/salary/${id}`);
+        setSalary(response.data);
+        if (response.data.employeeId) {
+          await lookupEmployee(response.data.employeeId);
+        }
+      } catch (error) {
+        console.error("Error fetching salary:", error);
+        toast.error("Error loading salary record");
+      }
+    };
+    fetchSalary();
   }, [id]);
 
-  // Auto-calculate net pay when gross pay or deductions change
-  useEffect(() => {
-    const grossPayNum = parseFloat(grossPay) || 0;
-    const deductionsNum = parseFloat(deductions) || 0;
-    const calculatedNetPay = Math.max(0, grossPayNum - deductionsNum).toFixed(2);
-    setNetPay(calculatedNetPay);
-  }, [grossPay, deductions]);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSalary(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const updatedSalary = {
-      name,
-      employeeId,
-      paidHours: parseFloat(paidHours) || 0,
-      grossPay: parseFloat(grossPay) || 0,
-      statutoryPay,
-      deductions: parseFloat(deductions) || 0,
-      netPay: parseFloat(netPay) || 0,
-      status,
-    };
+    setLoading(true);
 
     try {
-      await axios.put(`http://localhost:8070/salary/update/${id}`, updatedSalary);
-      alert("Salary Updated Successfully! ✅");
+      const salaryData = {
+        ...salary,
+        basic: parseFloat(salary.basic) || 0,
+        additionalIncentives: parseFloat(salary.additionalIncentives) || 0,
+        reductions: parseFloat(salary.reductions) || 0
+      };
+
+      await axios.put(`http://localhost:8070/salary/update/${id}`, salaryData);
+      toast.success("Salary updated successfully!");
       navigate("/HRDashboard/fetchSalary");
-    } catch (err) {
-      alert("Error updating salary: " + err.message);
+    } catch (error) {
+      console.error("Error updating salary:", error);
+      toast.error("Failed to update salary");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.cardHeader}>
-          <h2 style={styles.title}>Update Salary</h2>
-        </div>
+    <div style={styles.mainContent}>
+      <div style={styles.formContainer}>
+        <h2 style={styles.header}>
+          Update Salary Record
+          <span style={styles.headerUnderline}></span>
+        </h2>
 
-        <div style={styles.cardBody}>
-          <form onSubmit={handleSubmit}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={name}
-                readOnly
-                style={styles.input}
-              />
-            </div>
+        <form onSubmit={handleSubmit}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Employee ID
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <input
+              type="text"
+              name="employeeId"
+              value={salary.employeeId}
+              onChange={handleChange}
+              onBlur={(e) => {
+                if (e.target.value) {
+                  lookupEmployee(e.target.value);
+                }
+              }}
+              style={{...styles.input, backgroundColor: '#e9ecef', cursor: 'not-allowed'}}
+              readOnly
+            />
+          </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Employee ID</label>
-              <input
-                type="text"
-                className="form-control"
-                value={employeeId}
-                readOnly
-                style={styles.input}
-              />
-            </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Employee Name
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={salary.name}
+              style={{...styles.input, backgroundColor: '#e9ecef', cursor: 'not-allowed'}}
+              readOnly
+            />
+          </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Paid Hours</label>
-              <input
-                type="number"
-                className="form-control"
-                value={paidHours}
-                onChange={(e) => setPaidHours(e.target.value)}
-                style={styles.input}
-              />
-            </div>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Department
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <input
+              type="text"
+              name="department"
+              value={salary.department}
+              style={{...styles.input, backgroundColor: '#e9ecef', cursor: 'not-allowed'}}
+              readOnly
+            />
+          </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Statutory Pay</label>
-              <input
-                type="text"
-                className="form-control"
-                value={statutoryPay}
-                onChange={(e) => setStatutoryPay(e.target.value)}
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Gross Pay</label>
-              <input
-                type="number"
-                className="form-control"
-                value={grossPay}
-                onChange={(e) => setGrossPay(e.target.value)}
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Deductions</label>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Basic Salary
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <div style={styles.inputGroup}>
+              <div style={styles.currencyPrefix}>Rs</div>
               <input
                 type="number"
-                className="form-control"
-                value={deductions}
-                onChange={(e) => setDeductions(e.target.value)}
-                style={styles.input}
+                name="basic"
+                value={salary.basic}
+                onChange={handleChange}
+                style={{...styles.input, paddingLeft: '40px'}}
+                required
+                min="0"
+                step="0.01"
               />
             </div>
+          </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Net Pay</label>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Additional Incentives
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <div style={styles.inputGroup}>
+              <div style={styles.currencyPrefix}>Rs</div>
               <input
                 type="number"
-                className="form-control"
-                value={netPay}
-                readOnly
-                style={{
-                  ...styles.input,
-                  backgroundColor: "#f8f9fa"
-                }}
+                name="additionalIncentives"
+                value={salary.additionalIncentives}
+                onChange={handleChange}
+                style={{...styles.input, paddingLeft: '40px'}}
+                min="0"
+                step="0.01"
               />
             </div>
+          </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Status</label>
-              <select
-                className="form-control"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                style={styles.input}
-              >
-                <option value="Pending">Pending</option>
-                <option value="Paid">Paid</option>
-              </select>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Reductions
+              <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+            </label>
+            <div style={styles.inputGroup}>
+              <div style={styles.currencyPrefix}>Rs</div>
+              <input
+                type="number"
+                name="reductions"
+                value={salary.reductions}
+                onChange={handleChange}
+                style={{...styles.input, paddingLeft: '40px'}}
+                min="0"
+                step="0.01"
+              />
             </div>
+          </div>
 
-            <div style={styles.buttonGroup}>
-              <button type="submit" style={styles.submitButton}>
-                Update
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/HRDashboard/fetchSalary")}
-                style={styles.cancelButton}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
+          <div style={styles.buttonGroup}>
+            <button
+              type="submit"
+              style={styles.submitButton}
+              disabled={loading}
+            >
+              {loading ? "Updating..." : "Update Salary"}
+            </button>
+            <button
+              type="button"
+              style={styles.cancelButton}
+              onClick={() => navigate("/HRDashboard/fetchSalary")}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
+  mainContent: {
     marginLeft: "250px",
-    padding: "20px",
-    transition: "margin-left 0.3s ease",
-    width: "calc(100% - 250px)",
-    minHeight: "calc(100vh - 60px)",
-    backgroundColor: "#f5f5f5",
-    marginTop: "60px"
+    marginTop: "70px",
+    padding: "25px",
+    minHeight: "calc(100vh - 70px)",
+    backgroundColor: "#f8f9fa",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start"
   },
-  card: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
-    overflow: "hidden"
+  formContainer: {
+    width: "600px",
+    backgroundColor: "#ffffff",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    padding: "2.5rem"
   },
-  cardHeader: {
-    backgroundColor: "#ff7043",
-    padding: "20px",
-    color: "#fff"
+  header: {
+    color: "#2c3e50",
+    textAlign: "center",
+    marginBottom: "2rem",
+    fontSize: "1.8rem",
+    position: "relative",
+    paddingBottom: "0.75rem"
   },
-  title: {
-    margin: 0,
-    fontSize: "24px",
-    fontWeight: "500"
-  },
-  cardBody: {
-    padding: "30px"
+  headerUnderline: {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "80px",
+    height: "3px",
+    backgroundColor: "#fc6625"
   },
   formGroup: {
-    marginBottom: "20px"
+    marginBottom: "1.5rem"
   },
   label: {
     display: "block",
-    marginBottom: "8px",
-    color: "#455a64",
-    fontWeight: "600"
+    marginBottom: "0.5rem",
+    color: "#474747",
+    fontWeight: 500
+  },
+  inputGroup: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center"
+  },
+  currencyPrefix: {
+    position: "absolute",
+    left: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#666",
+    zIndex: 1,
+    fontSize: "14px",
+    fontWeight: "500"
   },
   input: {
     width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
-    border: "2px solid #e0e0e0",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
+    padding: "0.75rem",
+    borderRadius: "6px",
+    border: "1px solid #ced4da",
+    transition: "all 0.2s ease-in-out",
     "&:focus": {
-      borderColor: "#ff7043",
+      borderColor: "#fc6625",
       outline: "none"
     }
   },
   buttonGroup: {
     display: "flex",
-    gap: "10px",
-    marginTop: "30px"
+    gap: "1rem",
+    marginTop: "2rem"
   },
   submitButton: {
-    flex: "1",
-    padding: "12px",
-    backgroundColor: "#ff7043",
-    color: "#fff",
+    flex: 1,
+    padding: "0.75rem",
+    backgroundColor: "#fc6625",
+    color: "white",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "6px",
     cursor: "pointer",
-    fontWeight: "600",
-    transition: "background-color 0.3s ease",
+    transition: "all 0.2s ease",
     "&:hover": {
-      backgroundColor: "#f4511e"
+      backgroundColor: "#e55a1c"
+    },
+    "&:disabled": {
+      backgroundColor: "#ffa07a",
+      cursor: "not-allowed"
     }
   },
   cancelButton: {
-    flex: "1",
-    padding: "12px",
-    backgroundColor: "#fff",
-    color: "#455a64",
-    border: "2px solid #e0e0e0",
-    borderRadius: "8px",
+    flex: 1,
+    padding: "0.75rem",
+    backgroundColor: "white",
+    color: "#6c757d",
+    border: "1px solid #6c757d",
+    borderRadius: "6px",
     cursor: "pointer",
-    fontWeight: "600",
-    transition: "all 0.3s ease",
+    transition: "all 0.2s ease",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
+      backgroundColor: "#f8f9fa"
+    },
+    "&:disabled": {
+      opacity: 0.7,
+      cursor: "not-allowed"
     }
   }
 };

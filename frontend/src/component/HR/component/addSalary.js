@@ -1,305 +1,360 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import * as Yup from 'yup';
+import { Formik, Form, Field } from 'formik';
 
-export default function AddSalary() {
+const AddSalary = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [fetchingEmployee, setFetchingEmployee] = useState(false);
-  const [salary, setSalary] = useState({
-    name: "",
-    employeeId: "",
-    paidHours: "",
-    grossPay: "",
-    statutoryPay: "",
-    deductions: "",
-    netPay: "",
-    status: "Pending",
-  });
+  const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasValidEmployee, setHasValidEmployee] = useState(false);
 
-  // Calculate net pay whenever grossPay or deductions change
-  useEffect(() => {
-    const grossPayNum = parseFloat(salary.grossPay) || 0;
-    const deductionsNum = parseFloat(salary.deductions) || 0;
-    const netPay = Math.max(0, grossPayNum - deductionsNum).toFixed(2);
-    
-    setSalary(prev => ({
-      ...prev,
-      netPay: netPay
-    }));
-  }, [salary.grossPay, salary.deductions]);
+  const initialValues = {
+    employeeId: '',
+    name: '',
+    department: '',
+    basic: '',
+    additionalIncentives: '0',
+    reductions: '0'
+  };
 
-  // Add this new function to fetch employee data
-  const fetchEmployeeData = async (employeeId) => {
-    if (!employeeId) return;
-    
-    setFetchingEmployee(true);
+  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+    setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8070/salary/employee/${employeeId}`);
-      const employeeData = response.data;
-      
-      // Auto-fill the form with employee data
-      setSalary(prev => ({
-        ...prev,
-        name: employeeData.name,
-        employeeId: employeeData.ID
-      }));
+      const salaryData = {
+        ...values,
+        basic: parseFloat(values.basic),
+        additionalIncentives: parseFloat(values.additionalIncentives),
+        reductions: parseFloat(values.reductions)
+      };
+
+      const response = await axios.post('http://localhost:8070/salary/add', salaryData);
+      alert('Salary record added successfully!✅');
+      setSubmitted(true);
+      resetForm();
     } catch (error) {
-      if (error.response?.status === 404) {
-        alert("Employee not found!");
-      } else {
-        console.error("Error fetching employee:", error);
-        alert("Error fetching employee data");
-      }
+      alert('Error adding salary record: ' + error.message);
+      console.error('Error adding salary:', error);
     } finally {
-      setFetchingEmployee(false);
+      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setSalary(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // If employee ID field changes, fetch employee data
-    if (name === "employeeId" && value.length > 0) {
-      fetchEmployeeData(value);
-    }
-  }
-
-  async function addSalaryData(e) {
-    e.preventDefault();
-    setLoading(true);
-
-    const salaryData = {
-      ...salary,
-      paidHours: parseFloat(salary.paidHours) || 0,
-      grossPay: parseFloat(salary.grossPay) || 0,
-      deductions: parseFloat(salary.deductions) || 0,
-      netPay: parseFloat(salary.netPay) || 0,
-    };
-
+  const lookupEmployee = async (employeeId, setFieldValue) => {
     try {
-      await axios.post("http://localhost:8070/salary/add", salaryData);
-      alert("Salary Added Successfully! ✅");
-      navigate("/HRDashboard/fetchSalary");
-    } catch (err) {
-      console.error("Error:", err.response?.data || err.message);
-      alert("Error adding salary: " + (err.response?.data?.message || err.message));
-    } finally {
-      setLoading(false);
+      const response = await axios.get(`http://localhost:8070/salary/employee/${employeeId}`);
+      if (response.data) {
+        // Populate relevant fields only
+        setFieldValue('name', response.data.name);
+        setFieldValue('employeeId', response.data.ID);
+        setFieldValue('department', response.data.department);
+        setHasValidEmployee(true);
+      }
+    } catch (error) {
+      console.error('Error fetching employee details:', error);
+      alert('Employee not found with this ID');
+      // Clear form fields if employee is not found
+      setFieldValue('name', '');
+      setFieldValue('department', '');
+      setHasValidEmployee(false);
     }
-  }
+  };
 
-  // Modified input field for Employee ID with debounce
-  const employeeIdInput = (
-    <div style={styles.formGroup}>
-      <label style={styles.label}>Employee ID</label>
-      <div style={styles.inputGroup}>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter Employee ID"
-          name="employeeId"
-          value={salary.employeeId}
-          onChange={handleChange}
-          style={styles.input}
-        />
-        {fetchingEmployee && (
-          <div style={styles.spinner}>
-            <div className="spinner-border spinner-border-sm" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
+  const formFields = [
+    { 
+      name: "employeeId", 
+      label: "Employee ID", 
+      type: "text",
+      style: field => ({
+        backgroundColor: hasValidEmployee ? "#e9ecef" : "white",
+        cursor: hasValidEmployee ? "not-allowed" : "text"
+      })
+    },
+    { 
+      name: "name", 
+      label: "Employee Name", 
+      type: "text", 
+      readOnly: true,
+      style: {
+        backgroundColor: "#e9ecef",
+        cursor: "not-allowed"
+      }
+    },
+    { 
+      name: "department", 
+      label: "Department", 
+      type: "text", 
+      readOnly: true,
+      style: {
+        backgroundColor: "#e9ecef",
+        cursor: "not-allowed"
+      }
+    },
+    { name: "basic", label: "Basic Salary (Rs)", type: "number" },
+    { name: "additionalIncentives", label: "Additional Incentives (Rs)", type: "number" },
+    { name: "reductions", label: "Reductions (Rs)", type: "number" }
+  ];
+
+  return (
+    <div style={styles.mainContent}>
+      <div style={styles.formContainer}>
+        {submitted ? (
+          <div style={styles.successContainer}>
+            <div style={styles.successIcon}>✓</div>
+            <h3 style={styles.successTitle}>Salary Record Added</h3>
+            <p style={styles.successText}>
+              The salary record has been successfully added to the system.
+            </p>
+            <button
+              onClick={() => setSubmitted(false)}
+              style={styles.submitButton}
+            >
+              Add Another Salary Record
+            </button>
           </div>
+        ) : (
+          <Formik
+            initialValues={initialValues}
+            validationSchema={ValidationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ errors, touched, isSubmitting, setFieldValue }) => (
+              <Form>
+                <h2 style={styles.header}>
+                  Add Salary Record
+                  <span style={styles.headerUnderline}></span>
+                </h2>
+
+                {formFields.map((field) => (
+                  <div key={field.name} style={styles.formGroup}>
+                    <label htmlFor={field.name} style={styles.label}>
+                      {field.label}
+                      <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+                    </label>
+
+                    <Field
+                      type={field.type}
+                      name={field.name}
+                      onBlur={(e) => {
+                        if (field.name === "employeeId" && e.target.value) {
+                          lookupEmployee(e.target.value, setFieldValue);
+                        }
+                      }}
+                      readOnly={field.readOnly || (field.name === "employeeId" && hasValidEmployee)}
+                      style={{
+                        ...styles.input,
+                        ...(typeof field.style === 'function' ? field.style(field) : field.style),
+                        borderColor:
+                          errors[field.name] && touched[field.name]
+                            ? "#dc3545"
+                            : "#ced4da"
+                      }}
+                    />
+
+                    {errors[field.name] && touched[field.name] && (
+                      <div style={styles.errorMessage}>{errors[field.name]}</div>
+                    )}
+                  </div>
+                ))}
+
+                <div style={styles.buttonGroup}>
+                  <button
+                    type="submit"
+                    style={{
+                      ...styles.submitButton,
+                      opacity: (isSubmitting || !hasValidEmployee) ? 0.7 : 1,
+                    }}
+                    disabled={isSubmitting || isLoading || !hasValidEmployee}
+                  >
+                    {isSubmitting ? "Submitting..." : hasValidEmployee ? "Add Salary Record" : "Enter Employee ID First"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.history.back()}
+                    style={styles.cancelButton}
+                    disabled={isSubmitting || isLoading}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
         )}
       </div>
     </div>
   );
+};
 
-  const formFields = [
-    { label: "Name", name: "name", type: "text", placeholder: "Enter Name", readOnly: true },
-    { label: "Paid Hours", name: "paidHours", type: "number", placeholder: "Paid Hours" },
-    { label: "Statutory Pay", name: "statutoryPay", type: "text", placeholder: "Enter Statutory Pay" },
-    { label: "Gross Pay", name: "grossPay", type: "number", placeholder: "Gross Pay" },
-    { label: "Deductions", name: "deductions", type: "number", placeholder: "Deductions" },
-    { label: "Net Pay", name: "netPay", type: "number", placeholder: "Net Pay", readOnly: true }
-  ];
-
-  return (
-    <div style={styles.pageContainer}>
-      <div style={styles.container}>
-        <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <h2 style={styles.title}>Add Salary Details</h2>
-          </div>
-          
-          <div style={styles.cardBody}>
-            <form onSubmit={addSalaryData}>
-              {employeeIdInput}
-              {formFields.map((field) => (
-                <div key={field.name} style={styles.formGroup}>
-                  <label style={styles.label}>{field.label}</label>
-                  <input
-                    type={field.type}
-                    className="form-control"
-                    placeholder={field.placeholder}
-                    name={field.name}
-                    value={salary[field.name]}
-                    onChange={handleChange}
-                    style={styles.input}
-                    readOnly={field.readOnly}
-                  />
-                </div>
-              ))}
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Status</label>
-                <select
-                  className="form-control"
-                  name="status"
-                  value={salary.status}
-                  onChange={handleChange}
-                  style={styles.input}
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Paid">Paid</option>
-                </select>
-              </div>
-
-              <div style={styles.buttonGroup}>
-                <button
-                  type="submit"
-                  style={styles.submitButton}
-                  disabled={loading || !salary.employeeId || !salary.grossPay}
-                >
-                  {loading ? "Adding..." : "Add Salary"}
-                </button>
-                <button
-                  type="button"
-                  style={styles.cancelButton}
-                  onClick={() => navigate("/HRDashboard/fetchSalary")}
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Add these new styles to your existing styles object
 const styles = {
-  pageContainer: {
+  mainContent: {
     marginLeft: "250px",
-    padding: "20px",
-    transition: "margin-left 0.3s ease",
-    width: "calc(100% - 250px)",
-    minHeight: "calc(100vh - 60px)",
-    backgroundColor: "#f5f5f5",
-    marginTop: "60px"
+    marginTop: "70px",
+    padding: "25px",
+    minHeight: "calc(100vh - 70px)",
+    backgroundColor: "#f8f9fa",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start"
   },
-  container: {
-    maxWidth: "800px",
-    margin: "0 auto",
-    padding: "20px"
+  formContainer: {
+    width: "600px",
+    backgroundColor: "#ffffff",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+    padding: "2.5rem"
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
-    overflow: "hidden"
+  header: {
+    color: "#2c3e50",
+    textAlign: "center",
+    marginBottom: "2rem",
+    fontSize: "1.8rem",
+    position: "relative",
+    paddingBottom: "0.75rem"
   },
-  cardHeader: {
-    backgroundColor: "#ff7043",
-    padding: "20px",
-    color: "#fff"
-  },
-  title: {
-    margin: 0,
-    fontSize: "24px",
-    fontWeight: "500"
-  },
-  cardBody: {
-    padding: "30px"
+  headerUnderline: {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "80px",
+    height: "3px",
+    backgroundColor: "#fc6625"
   },
   formGroup: {
-    marginBottom: "20px"
+    marginBottom: "1.5rem"
   },
   label: {
     display: "block",
-    marginBottom: "8px",
-    color: "#455a64",
-    fontWeight: "600"
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
-    border: "2px solid #e0e0e0",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    "&:focus": {
-      borderColor: "#ff7043",
-      outline: "none"
-    }
-  },
-  buttonGroup: {
-    display: "flex",
-    gap: "10px",
-    marginTop: "30px"
-  },
-  submitButton: {
-    flex: "1",
-    padding: "12px",
-    backgroundColor: "#ff7043",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "600",
-    transition: "background-color 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#f4511e"
-    },
-    "&:disabled": {
-      backgroundColor: "#cccccc",
-      cursor: "not-allowed"
-    }
-  },
-  cancelButton: {
-    flex: "1",
-    padding: "12px",
-    backgroundColor: "#fff",
-    color: "#455a64",
-    border: "2px solid #e0e0e0",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "600",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#f5f5f5"
-    },
-    "&:disabled": {
-      backgroundColor: "#f5f5f5",
-      cursor: "not-allowed"
-    }
+    marginBottom: "0.5rem",
+    color: "#474747",
+    fontWeight: 500
   },
   inputGroup: {
     position: "relative",
     display: "flex",
-    alignItems: "center",
+    alignItems: "center"
   },
-  spinner: {
+  currencyPrefix: {
     position: "absolute",
-    right: "10px",
+    left: "12px",
     top: "50%",
     transform: "translateY(-50%)",
+    color: "#666",
+    zIndex: 1,
+    fontSize: "14px",
+    fontWeight: "500"
   },
+  input: {
+    width: "100%",
+    padding: "0.75rem",
+    borderRadius: "6px",
+    border: "1px solid #ced4da",
+    transition: "all 0.2s ease-in-out",
+    "&:focus": {
+      borderColor: "#fc6625",
+      outline: "none"
+    }
+  },
+  errorMessage: {
+    color: "#dc3545",
+    fontSize: "0.875rem",
+    marginTop: "0.25rem"
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "1rem",
+    marginTop: "2rem"
+  },
+  submitButton: {
+    flex: 1,
+    padding: "0.75rem",
+    backgroundColor: "#fc6625",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      backgroundColor: "#e55a1c"
+    },
+    "&:disabled": {
+      backgroundColor: "#ffa07a",
+      cursor: "not-allowed"
+    }
+  },
+  cancelButton: {
+    flex: 1,
+    padding: "0.75rem",
+    backgroundColor: "white",
+    color: "#6c757d",
+    border: "1px solid #6c757d",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      backgroundColor: "#f8f9fa"
+    },
+    "&:disabled": {
+      opacity: 0.7,
+      cursor: "not-allowed"
+    }
+  },
+  successContainer: {
+    textAlign: "center",
+    padding: "2rem"
+  },
+  successIcon: {
+    width: "70px",
+    height: "70px",
+    margin: "0 auto 1.5rem",
+    backgroundColor: "#2ecc71",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "white",
+    fontSize: "2rem"
+  },
+  successTitle: {
+    color: "#474747",
+    fontSize: "1.5rem",
+    marginBottom: "1rem"
+  },
+  successText: {
+    color: "#8f9491",
+    marginBottom: "1.5rem"
+  }
 };
+
+const ValidationSchema = Yup.object().shape({
+  employeeId: Yup.string()
+    .required('Employee ID is required')
+    .matches(/^[A-Za-z0-9-]+$/, 'Employee ID can only contain letters, numbers and hyphens'),
+
+  name: Yup.string()
+    .required('Employee name is required')
+    .min(2, 'Name must be at least 2 characters')
+    .matches(
+      /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
+      'Name can only contain letters, spaces and simple punctuation'
+    ),
+
+  basic: Yup.number()
+    .required('Basic salary is required')
+    .min(10000, 'Basic salary must be at least Rs. 10,000')
+    .max(500000, 'Basic salary cannot exceed Rs. 500,000'),
+
+  additionalIncentives: Yup.number()
+    .min(0, 'Incentives cannot be negative')
+    .max(100000, 'Incentives cannot exceed Rs. 100,000'),
+
+  reductions: Yup.number()
+    .min(0, 'Reductions cannot be negative')
+    .max(Yup.ref('basic'), 'Reductions cannot exceed basic salary')
+});
+
+export default AddSalary;

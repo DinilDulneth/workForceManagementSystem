@@ -13,11 +13,9 @@ Dear ${userData.name},
 Welcome to WorkSync! Your account has been successfully created.
 
 Your login credentials are:
-Email: ${userData.email}
 Password: ${userData.password}
 
 Role Details:
-Position: ${userData.position}
 Department: ${userData.department}
 Role Type: ${
     userData.status === "1"
@@ -48,9 +46,7 @@ export default function AccessF() {
 
   const initialValues = {
     name: "",
-    email: "",
     password: "",
-    position: "",
     department: "",
     salary: "",
     status: "",
@@ -84,9 +80,7 @@ export default function AccessF() {
 
   const formFields = [
     { name: "name", label: "Name", type: "text" },
-    { name: "email", label: "Email", type: "email" },
     { name: "password", label: "Password", type: "password" },
-    { name: "position", label: "Position", type: "text" },
     { name: "department", label: "Department", type: "text" },
     { name: "salary", label: "Salary", type: "text" },
     {
@@ -336,14 +330,6 @@ const ValidationSchema = Yup.object().shape({
       "Name can only contain letters, spaces and simple punctuation"
     ),
 
-  email: Yup.string()
-    .email("Invalid email format")
-    .required("Email is required")
-    .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "Invalid email format"
-    ),
-
   password: Yup.string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters")
@@ -351,10 +337,6 @@ const ValidationSchema = Yup.object().shape({
       /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/,
       "Password must contain at least one letter and one number"
     ),
-
-  position: Yup.string()
-    .required("Position is required")
-    .min(2, "Position must be at least 2 characters"),
 
   department: Yup.string()
     .required("Department is required")
