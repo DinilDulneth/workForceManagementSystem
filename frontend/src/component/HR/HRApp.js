@@ -27,13 +27,13 @@ export default function HRApp() {
   const links = [
     {
       link: "/HRDashboard/AccessV",
-      name: "Access Form",
+      name: "Access View Table",
       icon: "bi-file-earmark",
     },
 
     {
       link: "/HRDashboard/AccessF",
-      name: "Access View Table",
+      name: "Access Form",
       icon: "bi-file-earmark",
     },
 
