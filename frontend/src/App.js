@@ -10,6 +10,10 @@ import ManagerApp from "./component/Manager/ManagerApp";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Test from "./component/Test";
+import RegisterPage from "./component/RegisterPage";
+import EmployeeRegisterForm from "./component/EmployeeRegisterForm";
+import HRRegisterForm from "./component/HRRegisterForm";
+import ManagerRegisterForm from "./component/ManagerRegisterForm";
 
 function App() {
   return (
@@ -22,6 +26,10 @@ function App() {
         <Route path="/EmployeeHome/*" element={<EmployeeApp />} />
         <Route path="/About" element={<About />} />
         <Route path="/ContactUs" element={<ContactUs />} />
+        <Route path="/register" element={<RegisterPage/>}/>
+        <Route path="/employee-register" element={<EmployeeRegisterForm/>}/>
+        <Route path="/hr-register" element={<HRRegisterForm/>}/>
+        <Route path="/manager-register" element={<ManagerRegisterForm/>}/>
 
         {/* test */}
         <Route path="/test" element={<Test />} />
