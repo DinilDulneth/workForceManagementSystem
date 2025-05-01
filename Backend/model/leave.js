@@ -27,6 +27,10 @@ const leaveSchema = new Schema(
       type: String,
       required: true,
       default: "pending"
+    },
+    imagePath: {
+      type: String,
+      required: false
     }
   },
   {

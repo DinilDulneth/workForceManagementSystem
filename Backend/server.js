@@ -77,12 +77,11 @@ app.use("/salary", salaryRoutes);
 const gmailRoutes = require("./routes/gmailRoute");
 app.use("/api/gmail", gmailRoutes); // this is the link name
 
-
-
 const accessTableRoutes = require("./routes/accessTable");
 app.use("/access", accessTableRoutes); // this is the link name
 
-
+const uploadRoutes = require("./routes/upload");
+app.use("/upload", uploadRoutes); // this is the link name
 
 // Start the server
 app.listen(PORT, () => {
