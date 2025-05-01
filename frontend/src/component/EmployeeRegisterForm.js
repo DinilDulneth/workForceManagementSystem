@@ -9,8 +9,9 @@ import userIcon from "../assets/images/2.jpg";
 export default function EmployeeRegisterForm() {
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
 
-  // Initial form values
+  // Initial form values - matching exactly with your MongoDB schema
   const initialValues = {
     name: "",
     email: "",
@@ -18,36 +19,39 @@ export default function EmployeeRegisterForm() {
     department: "",
     phone: "",
     dateOfJoining: "",
-    availability: "",
+    availability: "1", // Default to active
     position: "",
   };
 
   const formFields = [
-    { type: "text", id: "name", placeholder: "Name" },
+    { type: "text", id: "name", placeholder: "Full Name" },
     { type: "email", id: "email", placeholder: "Email" },
     { type: "password", id: "password", placeholder: "Password" },
-    { 
-      type: "select", 
-      id: "department", 
+    {
+      type: "select",
+      id: "department",
       placeholder: "Department",
       options: [
         { value: "", label: "Select Department" },
         { value: "HR", label: "HR" },
         { value: "IT", label: "IT" },
-        { value: "General Employee", label: "General Employee" }
-      ]
+        { value: "Finance", label: "Finance" },
+        { value: "Operations", label: "Operations" },
+        { value: "General Employee", label: "General Employee" },
+      ],
     },
-    { type: "text", id: "phone", placeholder: "Phone" },
+    { type: "text", id: "phone", placeholder: "Phone (e.g., 0771234567)" },
     { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
-    { 
-      type: "select", 
-      id: "availability", 
+    {
+      type: "select",
+      id: "availability",
       placeholder: "Availability",
       options: [
         { value: "", label: "Select Availability" },
         { value: "1", label: "Active" },
-        { value: "0", label: "Inactive" }
-      ]
+        { value: "2", label: "On Leave" },
+        { value: "3", label: "Inactive" },
+      ],
     },
     { type: "text", id: "position", placeholder: "Position" },
   ];
@@ -84,13 +88,27 @@ WorkSync`;
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     setIsLoading(true);
+    setServerError("");
+    
     try {
+      // Format the data to match exactly what your backend expects
+      const formattedData = {
+        ...values,
+        // Ensure dateOfJoining is a string as required in your schema
+        dateOfJoining: values.dateOfJoining instanceof Date 
+          ? values.dateOfJoining.toISOString().split('T')[0] 
+          : values.dateOfJoining
+      };
+
+      console.log("Submitting data:", formattedData);
+      
+      // Make sure to use the correct endpoint (addEmp)
       const response = await axios.post(
-        "http://localhost:8070/registration/addEmp",
-        values
+        "http://localhost:8070/employee/addEmp",
+        formattedData
       );
 
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 201 || response.status === 200) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
         alert("Employee Registered Successfully!✅");
@@ -98,8 +116,25 @@ WorkSync`;
         resetForm();
       }
     } catch (err) {
-      alert("Error registering employee: " + err.message);
       console.error("Registration error:", err);
+      
+      // Detailed error handling
+      if (err.response) {
+        // The server responded with an error status
+        const errorMsg = err.response.data.message || 
+                         err.response.data.error || 
+                         "Server error. Please try again.";
+        setServerError(errorMsg);
+        alert(`Error: ${errorMsg}`);
+      } else if (err.request) {
+        // The request was made but no response was received
+        setServerError("No response from server. Check your connection.");
+        alert("No response from server. Please check your connection.");
+      } else {
+        // Error setting up the request
+        setServerError(err.message);
+        alert(`Error: ${err.message}`);
+      }
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -146,6 +181,10 @@ WorkSync`;
                   >
                     {({ errors, touched, isSubmitting }) => (
                       <Form style={styles.form}>
+                        {serverError && (
+                          <div style={styles.serverError}>{serverError}</div>
+                        )}
+                        
                         {formFields.map((field) => (
                           <FormGroup key={field.id}>
                             {field.type === "select" ? (
@@ -166,7 +205,10 @@ WorkSync`;
                                 }}
                               >
                                 {field.options.map((option) => (
-                                  <option key={option.value} value={option.value}>
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
                                     {option.label}
                                   </option>
                                 ))}
@@ -209,7 +251,7 @@ WorkSync`;
                           <Button
                             type="button"
                             style={styles.cancelButton}
-                            onClick={() => window.location.href='/register'}
+                            onClick={() => (window.location.href = "/register")}
                             disabled={isLoading || isSubmitting}
                           >
                             Cancel
@@ -243,6 +285,14 @@ const styles = {
     marginBottom: "10px",
     paddingLeft: "5px",
   },
+  serverError: {
+    color: "white",
+    backgroundColor: "#e74c3c",
+    padding: "10px",
+    borderRadius: "5px",
+    marginBottom: "20px",
+    textAlign: "center",
+  },
   formContainer: {
     backgroundColor: "#fff",
     borderRadius: "10px",
@@ -256,6 +306,9 @@ const styles = {
     width: "50%",
     display: "none",
     backgroundColor: "#e6e6e6",
+    "@media (min-width: 768px)": {
+      display: "block",
+    },
   },
   image: {
     width: "100%",
@@ -374,49 +427,46 @@ const styles = {
   },
 };
 
+// Validation schema simplified to match exactly with your MongoDB model
 const ValidationSchema = Yup.object().shape({
   name: Yup.string()
     .required("Name is required")
     .min(2, "Name must be at least 2 characters")
-    .matches(/^[a-zA-Z\s]*$/, "Name can only contain letters and spaces"),
+    .max(50, "Name cannot exceed 50 characters")
+    .trim(),
 
   email: Yup.string()
-    .email("Invalid email address")
     .required("Email is required")
-    .matches(
-      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-      "Invalid email format"
-    ),
+    .email("Invalid email format")
+    .trim(),
 
   password: Yup.string()
     .required("Password is required")
-    .min(6, "Password must be at least 6 characters")
-    .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-    ),
+    .min(6, "Password must be at least 6 characters"),
 
   department: Yup.string()
-    .required("Department is required")
-    .oneOf(["HR", "IT", "General Employee"], "Please select a valid department"),
+    .required("Department is required"),
 
   phone: Yup.string()
     .required("Phone number is required")
     .matches(
       /^(?:\+94|0)?[0-9]{9,10}$/,
-      "Invalid phone number format. Use +94 or 0 prefix"
+      "Phone number must be a valid Sri Lankan number"
     ),
 
   dateOfJoining: Yup.date()
     .required("Date of joining is required")
-    .max(new Date(), "Date cannot be in the future")
-    .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
+    .max(new Date(), "Date of joining cannot be in the future"),
 
   availability: Yup.string()
-    .required("Availability is required")
-    .oneOf(["0", "1"], "Please select a valid availability status"),
+    .required("Availability status is required")
+    .oneOf(
+      ["1", "2", "3"],
+      "Please select a valid availability status"
+    ),
 
   position: Yup.string()
     .required("Position is required")
     .min(2, "Position must be at least 2 characters")
-}); 
+    .max(50, "Position cannot exceed 50 characters"),
+});
