@@ -14,7 +14,6 @@ import ResignationDemp from "./component/ResignationDemp";
 import ResignationUemp from "./component/ResignationUemp";
 import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
-
 import FetchInquiry from "./component/fetchinquiry";
 import FetchAnnouncement from "./component/fetchAnnouncement";
 import AccessF from "./component/accessF";
@@ -26,15 +25,14 @@ import UpdateHR from "./component/UpdateHR";
 
 export default function HRApp() {
   const links = [
-    // { link: "/", name: "Dashboard", icon: "bi-house-door" },
     {
-      link: "/HRDashboard/AccessF",
+      link: "/HRDashboard/AccessV",
       name: "Access Form",
       icon: "bi-file-earmark",
     },
 
     {
-      link: "/HRDashboard/AccessV",
+      link: "/HRDashboard/AccessF",
       name: "Access View Table",
       icon: "bi-file-earmark",
     },
@@ -52,7 +50,7 @@ export default function HRApp() {
       name: "View Manager",
       icon: "bi-person-badge",
     },
-     {
+    {
       link: "/HRDashboard/fetchInquiry",
       name: "Employee Inquiries",
       icon: "bi-question-circle",
@@ -101,7 +99,7 @@ export default function HRApp() {
     <>
       <DashboardTemp ArrLinkList={links} />
       <Routes>
-        <Route path="/" element={<DashboardHR />} />
+        <Route path="/accessV" element={<AccessV />} />
         <Route path="/FetchEmp" element={<FetchEmp />} />
         <Route path="/fetchHR" element={<FetchHR />} />
         <Route path="/fetchManager" element={<FetchManager />} />
@@ -122,9 +120,8 @@ export default function HRApp() {
         <Route path="/updateHR/:id" element={<UpdateHR />} />
         <Route path="/fetchInquiry" element={<FetchInquiry />} />
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
-       <Route path="/accessF" element={<AccessF />} />
-       <Route path="/accessV" element={<AccessV />} />
-       <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
+        <Route path="/accessF" element={<AccessF />} />
+        <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
       </Routes>
     </>
   );

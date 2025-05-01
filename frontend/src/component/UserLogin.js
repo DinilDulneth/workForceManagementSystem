@@ -31,7 +31,7 @@ const UserLogin = () => {
       switch (data.role) {
         case "HR":
           await getHrID(email);
-          navigate("/HRDashboard");
+          navigate("/HRDashboard/AccessV");
           break;
 
         case "Manager":
@@ -138,10 +138,7 @@ const UserLogin = () => {
           <div style={styles.backToHome}>
             <p style={styles.backToHomeText}>
               Back to{" "}
-              <Link
-                to="/"
-                style={styles.homeLink}
-              >
+              <Link to="/" style={styles.homeLink}>
                 Home
               </Link>
             </p>
@@ -237,7 +234,7 @@ const styles = {
     flexDirection: "column",
     gap: "10px",
     marginTop: "20px",
-    width: "100%"
+    width: "100%",
   },
   registerButton: {
     width: "100%",
@@ -252,7 +249,7 @@ const styles = {
     textAlign: "center",
     "&:hover": {
       backgroundColor: "#555",
-    }
+    },
   },
   backToHome: {
     marginTop: "20px",
