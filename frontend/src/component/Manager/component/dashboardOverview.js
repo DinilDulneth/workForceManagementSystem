@@ -397,6 +397,7 @@ export default function DashboardOverView() {
                 <th>Description</th>
                 <th>Status</th>
                 <th>Employee ID</th>
+                <th>Attachment</th>
                 <th>Deadline</th>
                 <th>Start Date</th>
                 <th>End Date</th>
@@ -422,6 +423,20 @@ export default function DashboardOverView() {
                   </td>
 
                   <td>{task.empID}</td>
+                  <td>
+                    {task.attachmentPath ? (
+                      <a
+                        href={task.attachmentPath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary"
+                      >
+                        View Attachment
+                      </a>
+                    ) : (
+                      "Attachment not available"
+                    )}
+                  </td>
                   <td>{new Date(task.deadLine).toLocaleDateString()}</td>
                   <td>{new Date(task.startDate).toLocaleDateString()}</td>
                   <td>

@@ -26,7 +26,6 @@ const EmployeeSchema = new mongoose.Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   phone: { type: String, required: true },
-  salary: { type: String, required: true },
   dateOfJoining: { type: String, required: true },
   availability: { type: String, required: true }
 });
