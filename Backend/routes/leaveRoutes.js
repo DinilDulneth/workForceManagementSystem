@@ -4,13 +4,14 @@ const Leave = require("../model/leave");
 
 // Add new leave request
 router.route("/add").post((req, res) => {
-    const { id, department, leavetype, date, medicalCertificate } = req.body;
+    const { id, department, leavetype, date, session, medicalCertificate } = req.body;
 
     const newLeave = new Leave({
         id,
         department,
         leavetype,
         date,
+        session,
         medicalCertificate
     });
 
@@ -50,11 +51,11 @@ router.route("/update/:id").put(async (req, res) => {
             return res.status(403).json({ error: "Cannot update leave after 24 hours of creation" });
         }
 
-        const { id, department, leavetype, date, medicalCertificate } = req.body;
+        const { id, department, leavetype, date, session, medicalCertificate } = req.body;
 
         const updatedLeave = await Leave.findByIdAndUpdate(
             req.params.id,
-            { id, department, leavetype, date, medicalCertificate },
+            { id, department, leavetype, date, session, medicalCertificate },
             { new: true }
         );
 
