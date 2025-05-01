@@ -17,6 +17,7 @@ import SendIcon from "@mui/icons-material/Send";
 import TitleIcon from "@mui/icons-material/Title";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AnnouncementIcon from "@mui/icons-material/Campaign";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 export default function AddAnnouncement() {
   const navigate = useNavigate();
@@ -52,18 +53,22 @@ export default function AddAnnouncement() {
   function sendAnnData(e) {
     e.preventDefault();
 
-    if (!formData.title || !formData.message) {
-      setSnackbar({
-        open: true,
-        message: "Please fill in all required fields",
-        severity: "error",
-      });
-      return;
-    }
+    const announcementData = {
+      title: formData.title, // Change to match schema case
+      message: formData.message,
+      sender: formData.sender,
+      date: formData.date,
+    };
+
+    console.log("Sending announcement data:", announcementData); // Add this log
 
     axios
-      .post("http://localhost:8070/api/announcement/addAnnouncement", formData)
+      .post(
+        "http://localhost:8070/api/announcement/addAnnouncement",
+        announcementData
+      )
       .then((response) => {
+        console.log("Server response:", response.data); // Add this log
         if (response.status === 201) {
           setSnackbar({
             open: true,
@@ -163,7 +168,7 @@ export default function AddAnnouncement() {
             >
               <TextField
                 fullWidth
-                label="Title"
+                label="title"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
@@ -263,6 +268,35 @@ export default function AddAnnouncement() {
                 }}
               >
                 Publish Announcement
+              </Button>
+            </motion.div>
+
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 500, damping: 15 }}
+            >
+              <Button
+                variant="contained"
+                fullWidth
+                size="large"
+                endIcon={<VisibilityIcon />}
+                onClick={() => navigate("/ManagerDashboard/fetchAnnouncement")}
+                sx={{
+                  height: 56,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  background: `linear-gradient(45deg, #fc6625 30%, #e55a1c 90%)`,
+                  boxShadow: "0 3px 15px rgba(252, 102, 37, 0.3)",
+                  "&:hover": {
+                    background: `linear-gradient(45deg, #e55a1c 30%, #fc6625 90%)`,
+                    boxShadow: "0 5px 20px rgba(252, 102, 37, 0.4)",
+                  },
+                }}
+              >
+                View Announcements
               </Button>
             </motion.div>
           </Box>

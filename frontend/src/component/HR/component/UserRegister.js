@@ -383,4 +383,6 @@ const ValidationSchema = Yup.object().shape({
   position: Yup.string()
     .required("Position is required")
     .min(2, "Position must be at least 2 characters")
+
 });
+
