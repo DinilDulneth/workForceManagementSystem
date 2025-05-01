@@ -15,12 +15,29 @@ import ResignationDemp from "./component/ResignationDemp";
 import ResignationUemp from "./component/ResignationUemp";
 import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
+
 import FetchInquiry from "./component/fetchinquiry";
 import FetchAnnouncement from "./component/fetchAnnouncement";
+import AccessF from "./component/accessF";
+import AccessV from "./component/accessV";
+import AccessUpdate from "./component/accessU";
+
 
 export default function HRApp() {
   const links = [
     // { link: "/", name: "Dashboard", icon: "bi-house-door" },
+    {
+      link: "/HRDashboard/AccessF",
+      name: "Access Form",
+      icon: "bi-file-earmark",
+    },
+
+    {
+      link: "/HRDashboard/AccessV",
+      name: "Access View Table",
+      icon: "bi-file-earmark",
+    },
+
     {
       link: "/HRDashboard/ResignationVemp",
       name: "Resignation View",
@@ -33,6 +50,16 @@ export default function HRApp() {
       link: "/HRDashboard/fetchManager",
       name: "View Manager",
       icon: "bi-person-badge",
+    },
+     {
+      link: "/HRDashboard/fetchInquiry",
+      name: "Employee Inquiries",
+      icon: "bi-question-circle",
+    },
+    {
+      link: "/HRDashboard/fetchAnnouncement",
+      name: "Announcements",
+      icon: "bi-megaphone",
     },
 
     {
@@ -55,16 +82,6 @@ export default function HRApp() {
       link: "/HRDashboard/HRRegistration",
       name: "HR Registration",
       icon: "bi-person-lines-fill",
-    },
-    {
-      link: "/HRDashboard/fetchInquiry",
-      name: "Employee Inquiries",
-      icon: "bi-question-circle",
-    },
-    {
-      link: "/HRDashboard/fetchAnnouncement",
-      name: "Announcements",
-      icon: "bi-megaphone",
     },
 
     {
@@ -104,6 +121,9 @@ export default function HRApp() {
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />
         <Route path="/fetchInquiry" element={<FetchInquiry />} />
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
+       <Route path="/accessF" element={<AccessF />} />
+       <Route path="/accessV" element={<AccessV />} />
+       <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
       </Routes>
     </>
   );
