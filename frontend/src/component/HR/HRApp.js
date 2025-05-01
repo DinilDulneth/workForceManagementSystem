@@ -26,12 +26,7 @@ import UpdateHR from "./component/UpdateHR";
 export default function HRApp() {
   const links = [
     {
-      link: "/HRDashboard",
-      name: "Access View Table",
-      icon: "bi-file-earmark",
-    },
-
-    {
+<<<<<<<<< Temporary merge branch 1
       link: "/HRDashboard/AccessF",
       name: "Access Form",
       icon: "bi-file-earmark"
@@ -40,7 +35,18 @@ export default function HRApp() {
     {
       link: "/HRDashboard/AccessV",
       name: "Access View Table",
+      icon: "bi-file-earmark"
+=========
+      link: "/HRDashboard",
+      name: "Access View Table",
       icon: "bi-file-earmark",
+    },
+
+    {
+      link: "/HRDashboard/AccessF",
+      name: "Access Form",
+      icon: "bi-file-earmark",
+>>>>>>>>> Temporary merge branch 2
     },
 
     {
@@ -125,9 +131,12 @@ export default function HRApp() {
         <Route path="/updateHR/:id" element={<UpdateHR />} />
         <Route path="/fetchInquiry" element={<FetchInquiry />} />
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
-       <Route path="/accessF" element={<AccessF />} />
-       <Route path="/accessV" element={<AccessV />} />
-       <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
+        <Route path="/accessF" element={<AccessF />} />
+<<<<<<<<< Temporary merge branch 1
+        <Route path="/accessV" element={<AccessV />} />
+=========
+>>>>>>>>> Temporary merge branch 2
+        <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
       </Routes>
     </>
   );
