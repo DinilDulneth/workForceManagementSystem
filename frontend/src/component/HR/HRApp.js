@@ -28,14 +28,14 @@ export default function HRApp() {
   const links = [
     // { link: "/", name: "Dashboard", icon: "bi-house-door" },
     {
-      link: "/HRDashboard/AccessF",
-      name: "Access Form",
+      link: "/HRDashboard",
+      name: "Access View Table",
       icon: "bi-file-earmark",
     },
 
     {
-      link: "/HRDashboard/AccessV",
-      name: "Access View Table",
+      link: "/HRDashboard/AccessF",
+      name: "Access Form",
       icon: "bi-file-earmark",
     },
 
@@ -128,7 +128,7 @@ export default function HRApp() {
         <Route path="/fetchInquiry" element={<FetchInquiry />} />
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
         <Route path="/accessF" element={<AccessF />} />
-        <Route path="/accessV" element={<AccessV />} />
+
         <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
         <Route path="/approved-leaves" element={<ApprovedLeaves />} />
       </Routes>

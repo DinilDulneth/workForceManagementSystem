@@ -2,51 +2,54 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Formik, Form, Field } from "formik";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import * as Yup from 'yup';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import * as Yup from "yup";
 import registerImg from "../assets/images/3.jpg";
 import userIcon from "../assets/images/2.jpg";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function ManagerRegisterForm() {
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Initial form values
   const initialValues = {
-    name: '',
-    department: '',
-    email: '',
-    phone: '',
-    password: '',
-    dateOfJoining: '',
-    active: true  // Default to active
+    name: "",
+    department: "",
+    email: "",
+    phone: "",
+    password: "",
+    dateOfJoining: "",
+    active: true // Default to active
   };
 
   // Form fields configuration
   const formFields = [
-    { type: 'text', id: 'name', placeholder: 'Name' },
-    { 
-      type: 'select', 
-      id: 'department', 
-      placeholder: 'Department',
+    { type: "text", id: "name", placeholder: "Name" },
+    {
+      type: "select",
+      id: "department",
+      placeholder: "Department",
       options: [
-        { value: '', label: 'Select Department' },
-        { value: 'IT', label: 'IT' },
-        { value: 'General Manager', label: 'General Manager' }
+        { value: "", label: "Select Department" },
+        { value: "IT", label: "IT" },
+        { value: "General Manager", label: "General Manager" }
       ]
     },
-    { type: 'email', id: 'email', placeholder: 'Email' },
-    { type: 'text', id: 'phone', placeholder: 'Phone' },
-    { type: 'password', id: 'password', placeholder: 'Password' },
-    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining' },
-    { 
-      type: 'select', 
-      id: 'active', 
-      placeholder: 'Status',
+    { type: "email", id: "email", placeholder: "Email" },
+    { type: "text", id: "phone", placeholder: "Phone" },
+    { type: "password", id: "password", placeholder: "Password" },
+    { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
+    {
+      type: "select",
+      id: "active",
+      placeholder: "Status",
       options: [
-        { value: true, label: 'Active' },
-        { value: false, label: 'Inactive' }
+        { value: true, label: "Active" },
+        { value: false, label: "Inactive" }
       ]
     }
   ];
@@ -80,25 +83,61 @@ WorkSync`;
     };
   };
 
+  // Function to check email access
+  const checkEmailAccess = async (email) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8070/access/getAccess"
+      );
+      const accessList = response.data;
+      const hasAccess = accessList.some(
+        (access) => access.email === email && access.status === "1"
+      );
+      return hasAccess;
+    } catch (error) {
+      console.error("Error checking email access:", error);
+      throw error;
+    }
+  };
+
   // Form submission handler
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     setIsLoading(true);
     try {
+      // Check email access first
+      const hasAccess = await checkEmailAccess(values.email);
+
+      if (!hasAccess) {
+        Swal.fire({
+          icon: "error",
+          title: "Access Denied",
+          text: "You do not have permission to register. Please contact HR department.",
+          confirmButtonColor: "#d33"
+        }).then(() => {
+          navigate("/");
+        });
+        return;
+      }
+
+      // If email has access, proceed with registration
       const response = await axios.post(
-        'http://localhost:8070/manager/addManager',
+        "http://localhost:8070/manager/addManager",
         values
       );
 
       if (response.status === 200 || response.status === 201) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        toast.success("Manager Registered Successfully!✅");
+        Swal("Success!", "Manager registered successfully!", "success");
         setSubmitted(true);
         resetForm();
+        setTimeout(() => {
+          navigate("/UserLogin");
+        }, 3000);
       }
-    } catch (err) {
-      toast.error("Error registering manager: " + err.message);
-      console.error("Registration error:", err);
+    } catch (error) {
+      toast.error("Error registering manager: " + error.message);
+      console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -120,7 +159,7 @@ WorkSync`;
                 <div style={styles.userIconWrapper}>
                   <img src={userIcon} alt="User" style={styles.userIcon} />
                 </div>
-                
+
                 <h2 style={styles.title}>Register Manager</h2>
 
                 {submitted ? (
@@ -147,7 +186,7 @@ WorkSync`;
                       <Form style={styles.form}>
                         {formFields.map((field) => (
                           <FormGroup key={field.id}>
-                            {field.type === 'select' ? (
+                            {field.type === "select" ? (
                               <Field
                                 as="select"
                                 name={field.id}
@@ -161,11 +200,14 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc",
+                                      : "#ccc"
                                 }}
                               >
                                 {field.options.map((option) => (
-                                  <option key={option.value} value={option.value}>
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
                                     {option.label}
                                   </option>
                                 ))}
@@ -185,7 +227,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc",
+                                      : "#ccc"
                                 }}
                               />
                             )}
@@ -208,7 +250,7 @@ WorkSync`;
                           <Button
                             type="button"
                             style={styles.cancelButton}
-                            onClick={() => window.location.href='/register'}
+                            onClick={() => (window.location.href = "/register")}
                             disabled={isLoading || isSubmitting}
                           >
                             Cancel
@@ -236,11 +278,11 @@ const styles = {
     justifyContent: "center"
   },
   errorMessage: {
-    color: 'red',
-    fontSize: '0.75rem',
-    marginTop: '-10px',
-    marginBottom: '10px',
-    paddingLeft: '5px'
+    color: "red",
+    fontSize: "0.75rem",
+    marginTop: "-10px",
+    marginBottom: "10px",
+    paddingLeft: "5px"
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -298,11 +340,11 @@ const styles = {
     border: "1px solid #ccc",
     outline: "none",
     transition: "border-color 0.3s",
-    '&.is-invalid': {
-      borderColor: 'red',
-      '&:focus': {
-        borderColor: 'red',
-        boxShadow: '0 0 0 0.2rem rgba(255, 0, 0, 0.25)'
+    "&.is-invalid": {
+      borderColor: "red",
+      "&:focus": {
+        borderColor: "red",
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)"
       }
     }
   },
@@ -381,7 +423,10 @@ const ValidationSchema = Yup.object().shape({
 
   phone: Yup.string()
     .required("Phone number is required")
-    .matches(/^(?:\+94|0)?[0-9]{9,10}$/, "Invalid phone number format. Use +94 or 0 prefix"),
+    .matches(
+      /^(?:\+94|0)?[0-9]{9,10}$/,
+      "Invalid phone number format. Use +94 or 0 prefix"
+    ),
 
   password: Yup.string()
     .required("Password is required")
@@ -397,4 +442,4 @@ const ValidationSchema = Yup.object().shape({
     .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
 
   active: Yup.boolean()
-}); 
+});
