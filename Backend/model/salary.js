@@ -1,14 +1,11 @@
 const mongoose = require("mongoose");
 
 const salarySchema = new mongoose.Schema({
+  employeeId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  employeeId: { type: String, required: true, unique: true }, // Unique Employee ID
-  paidHours: { type: String, required: true },
-  grossPay: { type: String, required: true },
-  statutoryPay: { type: String, required: true },
-  deductions: { type: String, required: true },
-  netPay: { type: String, required: true },
-  status: { type: String, required: true }
+  basic: { type: Number, required: true },
+  additionalIncentives: { type: Number, default: 0 },
+  reductions: { type: Number, default: 0 }
 });
 
 const Salary = mongoose.model("Salary", salarySchema);

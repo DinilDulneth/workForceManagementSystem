@@ -83,6 +83,24 @@ router.route("/updateEmp/:id").put(async (req, res) => {
   }
 });
 
+// Update employee's active status
+router.patch("/updateActiveStatus/:id", async (req, res) => {
+  try {
+    const { availability } = req.body;
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { availability },
+      { new: true }
+    );
+    if (!employee) {
+      return res.status(404).send({ error: "Employee not found" });
+    }
+    res.status(200).send(employee);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
 // Delete an employee by ID
 router.route("/deleteEmp/:id").delete(async (req, res) => {
   try {

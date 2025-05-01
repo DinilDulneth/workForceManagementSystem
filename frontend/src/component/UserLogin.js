@@ -124,6 +124,17 @@ const UserLogin = () => {
           <button type="submit" style={styles.button}>
             Login
           </button>
+          <div style={styles.registrationButtons}>
+            <Link to="/UserRegister" style={styles.registerButton}>
+              Register Employee
+            </Link>
+            <Link to="/HRRegistration" style={styles.registerButton}>
+              Register HR
+            </Link>
+            <Link to="/ManagerRegistration" style={styles.registerButton}>
+              Register Manager
+            </Link>
+          </div>
           <div style={styles.backToHome}>
             <p style={styles.backToHomeText}>
               Back to{" "}
@@ -142,8 +153,6 @@ const UserLogin = () => {
 };
 
 const styles = {
-
-
   authWrapper: {
     position: "relative", // Add this
     display: "flex",
@@ -223,7 +232,28 @@ const styles = {
     color: "red",
     marginBottom: "10px",
   },
-
+  registrationButtons: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "20px",
+    width: "100%"
+  },
+  registerButton: {
+    width: "100%",
+    padding: "10px",
+    backgroundColor: "#333",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+    textDecoration: "none",
+    textAlign: "center",
+    "&:hover": {
+      backgroundColor: "#555",
+    }
+  },
   backToHome: {
     marginTop: "20px",
     textAlign: "center",
