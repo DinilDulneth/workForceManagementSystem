@@ -25,7 +25,8 @@ const ManagerSchema = new mongoose.Schema({
   email: { type: String, required: true },
   phone: { type: String, required: true },
   password: { type: String, required: true },
-  dateOfJoining: { type: Date, required: true }
+  dateOfJoining: { type: Date, required: true },
+  active: { type: Boolean, default: true }  // Adding active status field with default value true
 });
 // Pre-save middleware to auto-generate employee ID
 ManagerSchema.pre("save", async function (next) {

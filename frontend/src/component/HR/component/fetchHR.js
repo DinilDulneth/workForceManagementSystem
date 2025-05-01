@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf ,faTrash} from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFilter, faFilePdf, faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useNavigate } from 'react-router-dom';
 
 export default function FetchHR() {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -157,20 +159,6 @@ export default function FetchHR() {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={styles.pageContainer}>
-        <div style={styles.loadingContainer}>
-          <p style={styles.title}>HR Employees Data</p>
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p style={styles.loadingText}>Loading HR employee data...</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this HR employee?')) {
       axios.delete(`http://localhost:8070/hr/deleteHR/${id}`)
@@ -184,6 +172,42 @@ export default function FetchHR() {
         });
     }
   };
+
+  const handleStatusChange = (id, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
+    
+    if (window.confirm('Are you sure you want to change this HR officer\'s status?')) {
+      axios.patch(`http://localhost:8070/hr/updateActiveStatus/${id}`, {
+        availability: newStatus === 'active' ? "1" : "0"
+      })
+        .then(() => {
+          toast.success('HR officer status updated successfully');
+          getHR(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Status update error:', err);
+          toast.error('Failed to update HR officer status');
+        });
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/HRDashboard/updateHR/${id}`);
+  };
+
+  if (loading) {
+    return (
+      <div style={styles.pageContainer}>
+        <div style={styles.loadingContainer}>
+          <p style={styles.title}>HR Employees Data</p>
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p style={styles.loadingText}>Loading HR employee data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.pageContainer}>
@@ -264,17 +288,25 @@ export default function FetchHR() {
             filteredEmployees.map((employee) => (
               <div key={employee._id} style={styles.employeeCard}>
                 <div style={styles.card}>
-                <div style={styles.cardHeader}>
-  <div style={styles.cardHeaderContent}>
-    <h6 style={{ margin: 0 }}>{employee.name}</h6>
-    <FontAwesomeIcon 
-      icon={faTrash} 
-      style={styles.deleteIcon}
-      onClick={() => handleDelete(employee._id)}
-      title="Delete HR Officer"
-    />
-  </div>
-</div>
+                  <div style={styles.cardHeader}>
+                    <div style={styles.cardHeaderContent}>
+                      <h6 style={{ margin: 0 }}>{employee.name}</h6>
+                      <div style={styles.iconContainer}>
+                        <FontAwesomeIcon 
+                          icon={faEdit} 
+                          style={styles.editIcon}
+                          onClick={() => handleEdit(employee._id)}
+                          title="Edit HR Officer"
+                        />
+                        <FontAwesomeIcon 
+                          icon={faTrash} 
+                          style={styles.deleteIcon}
+                          onClick={() => handleDelete(employee._id)}
+                          title="Delete HR Officer"
+                        />
+                      </div>
+                    </div>
+                  </div>
                   <div style={styles.cardBody}>
                     {cardFields.map((field) => (
                       <p key={field.label} style={styles.cardField}>
@@ -282,6 +314,25 @@ export default function FetchHR() {
                         {field.getValue(employee)}
                       </p>
                     ))}
+                    <p style={styles.cardField}>
+                      <strong style={styles.fieldLabel}>Status:</strong>{" "}
+                      <select
+                        value={(employee.availability === "1" || employee.availability === 1) ? 'active' : 'inactive'}
+                        onChange={(e) => handleStatusChange(
+                          employee._id, 
+                          (employee.availability === "1" || employee.availability === 1) ? 'active' : 'inactive',
+                          e.target.value
+                        )}
+                        style={{
+                          ...styles.statusSelect,
+                          backgroundColor: (employee.availability === "1" || employee.availability === 1) ? "#2ecc71" : "#e74c3c",
+                          color: "white"
+                        }}
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -514,6 +565,38 @@ deleteIcon: {
   },
   "&:active": {
     transform: "scale(0.95)"
+  }
+},
+editIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
+  }
+},
+iconContainer: {
+  display: "flex",
+  gap: "10px"
+},
+statusSelect: {
+  padding: "5px 10px",
+  borderRadius: "5px",
+  border: "none",
+  outline: "none",
+  cursor: "pointer",
+  fontSize: "14px",
+  fontWeight: "500",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    opacity: "0.9"
   }
 }
 

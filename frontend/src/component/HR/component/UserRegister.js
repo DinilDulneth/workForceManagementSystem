@@ -18,21 +18,38 @@ export default function EmployeeRegister() {
     password: "",
     department: "",
     phone: "",
-    salary: "",
     dateOfJoining: "",
     availability: "",
     position: "",
   };
 
   const formFields = [
-    { type: "text", id: "name", placeholder: "Name" }, // Changed 'name' to 'id'
+    { type: "text", id: "name", placeholder: "Name" },
     { type: "email", id: "email", placeholder: "Email" },
     { type: "password", id: "password", placeholder: "Password" },
-    { type: "text", id: "department", placeholder: "Department" },
+    { 
+      type: "select", 
+      id: "department", 
+      placeholder: "Department",
+      options: [
+        { value: "", label: "Select Department" },
+        { value: "HR", label: "HR" },
+        { value: "IT", label: "IT" },
+        { value: "General Employee", label: "General Employee" }
+      ]
+    },
     { type: "text", id: "phone", placeholder: "Phone" },
-    { type: "number", id: "salary", placeholder: "Salary" },
     { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
-    { type: "text", id: "availability", placeholder: "Availability" },
+    { 
+      type: "select", 
+      id: "availability", 
+      placeholder: "Availability",
+      options: [
+        { value: "", label: "Select Availability" },
+        { value: "1", label: "Active" },
+        { value: "0", label: "Inactive" }
+      ]
+    },
     { type: "text", id: "position", placeholder: "Position" },
   ];
 
@@ -132,23 +149,48 @@ WorkSync`;
                       <Form style={styles.form}>
                         {formFields.map((field) => (
                           <FormGroup key={field.id}>
-                            <Field
-                              type={field.type}
-                              name={field.id}
-                              placeholder={field.placeholder}
-                              className={`form-control ${
-                                errors[field.id] && touched[field.id]
-                                  ? "is-invalid"
-                                  : ""
-                              }`}
-                              style={{
-                                ...styles.input,
-                                borderColor:
+                            {field.type === "select" ? (
+                              <Field
+                                as="select"
+                                name={field.id}
+                                className={`form-control ${
                                   errors[field.id] && touched[field.id]
-                                    ? "red"
-                                    : "#ccc",
-                              }}
-                            />
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                style={{
+                                  ...styles.input,
+                                  borderColor:
+                                    errors[field.id] && touched[field.id]
+                                      ? "red"
+                                      : "#ccc",
+                                }}
+                              >
+                                {field.options.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </Field>
+                            ) : (
+                              <Field
+                                type={field.type}
+                                name={field.id}
+                                placeholder={field.placeholder}
+                                className={`form-control ${
+                                  errors[field.id] && touched[field.id]
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                style={{
+                                  ...styles.input,
+                                  borderColor:
+                                    errors[field.id] && touched[field.id]
+                                      ? "red"
+                                      : "#ccc",
+                                }}
+                              />
+                            )}
                             {errors[field.id] && touched[field.id] && (
                               <div style={styles.errorMessage}>
                                 {errors[field.id]}
@@ -356,7 +398,7 @@ const ValidationSchema = Yup.object().shape({
 
   department: Yup.string()
     .required("Department is required")
-    .min(2, "Department must be at least 2 characters"),
+    .oneOf(["HR", "IT", "General Employee"], "Please select a valid department"),
 
   phone: Yup.string()
     .required("Phone number is required")
@@ -365,20 +407,14 @@ const ValidationSchema = Yup.object().shape({
       "Invalid phone number format. Use +94 or 0 prefix"
     ),
 
-  salary: Yup.number()
-    .required("Salary is required")
-    .positive("Salary must be positive")
-    .min(1000, "Salary must be at least 1000")
-    .max(1000000, "Salary cannot exceed 1000000"),
-
   dateOfJoining: Yup.date()
-  .required("Date of joining is required")
+    .required("Date of joining is required")
     .max(new Date(), "Date cannot be in the future")
     .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
 
   availability: Yup.string()
     .required("Availability is required")
-    .min(2, "Availability must be at least 2 characters"),
+    .oneOf(["0", "1"], "Please select a valid availability status"),
 
   position: Yup.string()
     .required("Position is required")

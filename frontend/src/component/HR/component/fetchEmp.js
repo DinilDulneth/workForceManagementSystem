@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf,faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFilter, faFilePdf, faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useNavigate } from 'react-router-dom';
 
 export default function FetchEmp() {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,6 +57,8 @@ export default function FetchEmp() {
     const term = searchTerm.toLowerCase();
 
     switch (searchField) {
+      case "id":
+        return employee.ID?.toLowerCase().includes(term);
       case "name":
         return employee.name?.toLowerCase().includes(term);
       case "email":
@@ -91,23 +95,23 @@ export default function FetchEmp() {
       doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
 
       const tableColumn = [
+        "Employee ID",
         "Name",
         "Position",
         "Department",
         "Email",
         "Phone",
-        "Salary",
         "JoinDate",
         "Status"
       ];
 
       const tableRows = filteredEmployees.map(employee => [
+        employee.ID || "N/A",
         employee.name || "N/A",
         employee.position || "N/A",
         employee.department || "N/A",
         employee.email || "N/A",
         employee.phone || "N/A",
-        employee.salary ? `$${employee.salary.toLocaleString()}` : "N/A",
         employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString() : "N/A",
         employee.availability === "1" || employee.availability === 1 ? "Active" : "Inactive"
       ]);
@@ -131,14 +135,14 @@ export default function FetchEmp() {
           fillColor: [245, 245, 245]
         },
         columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 25 },
-          3: { cellWidth: 30 },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 20 },
-          6: { cellWidth: 20 },
-          7: { cellWidth: 20 }
+          0: { cellWidth: 25 },  // Employee ID
+          1: { cellWidth: 25 },  // Name
+          2: { cellWidth: 25 },  // Position
+          3: { cellWidth: 25 },  // Department
+          4: { cellWidth: 30 },  // Email
+          5: { cellWidth: 20 },  // Phone
+          6: { cellWidth: 20 },  // JoinDate
+          7: { cellWidth: 20 }   // Status
         },
         margin: { top: 35 }
       });
@@ -157,6 +161,24 @@ export default function FetchEmp() {
         position: "top-right",
         autoClose: 3000
       });
+    }
+  };
+
+  const handleStatusChange = (id, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
+    
+    if (window.confirm('Are you sure you want to change this employee\'s status?')) {
+      axios.patch(`http://localhost:8070/employee/updateActiveStatus/${id}`, {
+        availability: newStatus === 'active' ? "1" : "0"
+      })
+        .then(() => {
+          toast.success('Employee status updated successfully');
+          getEmployee(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Status update error:', err);
+          toast.error('Failed to update employee status');
+        });
     }
   };
 
@@ -189,6 +211,10 @@ export default function FetchEmp() {
           toast.error('Failed to delete employee');
         });
     }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/HRDashboard/updateEmployee/${id}`);
   };
 
   return (
@@ -245,6 +271,7 @@ export default function FetchEmp() {
               style={styles.searchSelect}
             >
               <option value="all">All Fields</option>
+              <option value="id">Employee ID</option>
               <option value="name">Name</option>
               <option value="email">Email</option>
               <option value="position">Position</option>
@@ -276,17 +303,28 @@ export default function FetchEmp() {
               onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               <div style={styles.cardHeader}>
-              <div style={styles.cardHeaderContent}>
-                <h6 style={{ margin: 0 }}>{employee.name}</h6>
-                <FontAwesomeIcon 
-      icon={faTrash} 
-      style={styles.deleteIcon}
-      onClick={() => handleDelete(employee._id)}
-      title="Delete Employee"
-    />
-    </div>
+                <div style={styles.cardHeaderContent}>
+                  <h6 style={{ margin: 0 }}>{employee.name}</h6>
+                  <div style={styles.headerActions}>
+                    <FontAwesomeIcon 
+                      icon={faEdit} 
+                      style={styles.editIcon}
+                      onClick={() => handleEdit(employee._id)}
+                      title="Edit Employee"
+                    />
+                    <FontAwesomeIcon 
+                      icon={faTrash} 
+                      style={styles.deleteIcon}
+                      onClick={() => handleDelete(employee._id)}
+                      title="Delete Employee"
+                    />
+                  </div>
+                </div>
               </div>
               <div style={styles.cardBody}>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Employee ID:</strong> {employee.ID}
+                </p>
                 <p style={styles.infoRow}>
                   <strong style={styles.infoLabel}>Position:</strong> {employee.position}
                 </p>
@@ -297,9 +335,6 @@ export default function FetchEmp() {
                   <strong style={styles.infoLabel}>Phone:</strong> {employee.phone}
                 </p>
                 <p style={styles.infoRow}>
-                  <strong style={styles.infoLabel}>Salary:</strong> ${employee.salary?.toLocaleString() || "N/A"}
-                </p>
-                <p style={styles.infoRow}>
                   <strong style={styles.infoLabel}>Joined:</strong>{" "}
                   {employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString() : "N/A"}
                 </p>
@@ -308,13 +343,22 @@ export default function FetchEmp() {
                 </p>
                 <p style={styles.infoRow}>
                   <strong style={styles.infoLabel}>Status:</strong>{" "}
-                  <span
+                  <select
+                    value={(employee.availability === "1" || employee.availability === 1) ? 'active' : 'inactive'}
+                    onChange={(e) => handleStatusChange(
+                      employee._id, 
+                      (employee.availability === "1" || employee.availability === 1) ? 'active' : 'inactive',
+                      e.target.value
+                    )}
                     style={{
-                      ...styles.statusIndicator,
-                      backgroundColor: employee.availability === "1" || employee.availability === 1 ? "#2ecc71" : "#e74c3c"
+                      ...styles.statusSelect,
+                      backgroundColor: (employee.availability === "1" || employee.availability === 1) ? "#2ecc71" : "#e74c3c",
+                      color: "white"
                     }}
-                  ></span>
-                  {employee.availability === "1" || employee.availability === 1 ? "Active" : "Inactive"}
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </p>
               </div>
             </div>
@@ -477,17 +521,17 @@ const styles = {
     }
   },
   cardHeaderContent: {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  width: "100%"
-},
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%"
+  },
 
-cardTitle: {
-  margin: 0,
-  fontSize: "1.1rem",
-  fontWeight: "600"
-},
+  cardTitle: {
+    margin: 0,
+    fontSize: "1.1rem",
+    fontWeight: "600"
+  },
 
   pdfButton: {
     padding: "10px 20px",
@@ -509,22 +553,54 @@ cardTitle: {
       backgroundColor: "#cccccc",
       cursor: "not-allowed",
       opacity: 0.7
-    },
-  
-
-   deleteIcon: {
-  fontSize: "16px",
-  color: "#ffffff",
-  opacity: "0.8",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  padding: "4px",
-  "&:hover": {
-    opacity: "1",
-    transform: "scale(1.1)"
+    }
   },
-  "&:active": {
-    transform: "scale(0.95)"
+  deleteIcon: {
+    fontSize: "16px",
+    color: "#ffffff",
+    opacity: "0.8",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    padding: "4px",
+    "&:hover": {
+      opacity: "1",
+      transform: "scale(1.1)"
+    },
+    "&:active": {
+      transform: "scale(0.95)"
+    }
+  },
+  statusSelect: {
+    padding: "5px 10px",
+    borderRadius: "5px",
+    border: "none",
+    outline: "none",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      opacity: "0.9"
+    }
+  },
+  headerActions: {
+    display: "flex",
+    gap: "15px",
+    alignItems: "center"
+  },
+  editIcon: {
+    fontSize: "16px",
+    color: "#ffffff",
+    opacity: "0.8",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    padding: "4px",
+    "&:hover": {
+      opacity: "1",
+      transform: "scale(1.1)"
+    },
+    "&:active": {
+      transform: "scale(0.95)"
+    }
   }
-}}
 };
