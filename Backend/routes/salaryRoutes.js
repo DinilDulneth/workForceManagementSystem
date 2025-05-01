@@ -82,6 +82,7 @@ router.put("/update/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 // Get a single salary record by ID
 router.get("/:id", async (req, res) => {
   try {
@@ -97,6 +98,21 @@ router.get("/:id", async (req, res) => {
     res.status(200).json(salary);
   } catch (error) {
     console.error("Error fetching salary record:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// @route   GET /salaries/employee/:employeeId
+// @desc    Get employee data by employee ID
+router.get("/employee/:employeeId", async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ employeeId: req.params.employeeId });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    res.json(employee);
+  } catch (error) {
+    console.error("Error fetching employee:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

@@ -77,6 +77,24 @@ router.patch("/updateHR/:id", async (req, res) => {
   }
 });
 
+// Update HR's active status
+router.patch("/updateActiveStatus/:id", async (req, res) => {
+  try {
+    const { availability } = req.body;
+    const hr = await HR.findByIdAndUpdate(
+      req.params.id,
+      { availability },
+      { new: true }
+    );
+    if (!hr) {
+      return res.status(404).send({ error: "HR officer not found" });
+    }
+    res.status(200).send(hr);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
 // Delete an HR by ID
 router.delete("/deleteHR/:id", async (req, res) => {
   try {

@@ -23,7 +23,8 @@ const HRSchema = new mongoose.Schema({
   email: { type: String, required: true },
   phone: { type: String, required: true },
   password: { type: String, required: true },
-  dateOfJoining: { type: Date, required: true }
+  dateOfJoining: { type: Date, required: true },
+  availability: { type: String, default: "1" }  // Adding availability field with default active status
 });
 // Pre-save middleware to auto-generate employee ID
 HRSchema.pre("save", async function (next) {

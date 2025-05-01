@@ -1,20 +1,65 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf,faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFilter, faFilePdf, faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 export default function FetchManager() {
+  const navigate = useNavigate();
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchField, setSearchField] = useState("all");
   const [advancedSearch, setAdvancedSearch] = useState(false);
+
+  const handleStatusChange = (id, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
+    
+    if (window.confirm('Are you sure you want to change this manager\'s status?')) {
+      axios.patch(`http://localhost:8070/manager/updateActiveStatus/${id}`, {
+        active: newStatus === 'active'
+      })
+        .then(() => {
+          toast.success('Manager status updated successfully');
+          getManagers(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Status update error:', err);
+          toast.error('Failed to update manager status');
+        });
+    }
+  };
+
+  const cardFields = [
+    { label: 'Department', getValue: (emp) => emp.department },
+    { label: 'Phone', getValue: (emp) => emp.phone },
+    { label: 'Salary', getValue: (emp) => `$${emp.salary ? emp.salary.toLocaleString() : 'N/A'}` },
+    { label: 'Joined', getValue: (emp) => emp.dateOfJoining ? new Date(emp.dateOfJoining).toLocaleDateString() : 'N/A' },
+    { label: 'Email', getValue: (emp) => emp.email },
+    { 
+      label: 'Status', 
+      getValue: (emp) => (
+        <select
+          value={emp.active ? 'active' : 'inactive'}
+          onChange={(e) => handleStatusChange(emp._id, emp.active ? 'active' : 'inactive', e.target.value)}
+          style={{
+            ...styles.statusSelect,
+            backgroundColor: emp.active ? "#2ecc71" : "#e74c3c",
+            color: "white"
+          }}
+        >
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      )
+    }
+  ];
 
   useEffect(() => {
     getManagers();
@@ -91,7 +136,6 @@ export default function FetchManager() {
 
       const tableColumn = [
         "Name",
-        "Position",
         "Department",
         "Email",
         "Phone",
@@ -102,7 +146,6 @@ export default function FetchManager() {
 
       const tableRows = filteredManagers.map(manager => [
         manager.name || "N/A",
-        manager.position || "N/A",
         manager.department || "N/A",
         manager.email || "N/A",
         manager.phone || "N/A",
@@ -272,22 +315,30 @@ export default function FetchManager() {
               onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-             <div style={styles.cardHeader}>
-  <div style={styles.cardHeaderContent}>
-    <h6 style={{ margin: 0 }}>{manager.name}</h6>
-    <FontAwesomeIcon 
-      icon={faTrash} 
-      style={styles.deleteIcon}
-      onClick={() => handleDelete(manager._id)}
-      title="Delete Manager"
-    />
-  </div>
-</div>
+              <div style={styles.cardHeader}>
+                <div style={styles.cardHeaderContent}>
+                  <h6 style={{ margin: 0 }}>{manager.name}</h6>
+                  <div style={styles.iconContainer}>
+                    <FontAwesomeIcon 
+                      icon={faEdit} 
+                      style={styles.editIcon}
+                      onClick={() => navigate(`/HRDashboard/updateManager/${manager._id}`)}
+                      title="Update Manager"
+                    />
+                    <FontAwesomeIcon 
+                      icon={faTrash} 
+                      style={styles.deleteIcon}
+                      onClick={() => handleDelete(manager._id)}
+                      title="Delete Manager"
+                    />
+                  </div>
+                </div>
+              </div>
               <div style={styles.cardBody}>
                 {cardFields.map((field) => (
                   <p key={field.label} style={styles.cardField}>
                     <strong style={styles.fieldLabel}>{field.label}:</strong>{" "}
-                    {field.getValue(manager)}
+                    {field.getValue(manager, getManagers)}
                   </p>
                 ))}
               </div>
@@ -302,31 +353,6 @@ export default function FetchManager() {
     </div>
   );
 }
-
-const cardFields = [
-  { label: 'Position', getValue: (emp) => emp.position },
-  { label: 'Department', getValue: (emp) => emp.department },
-  { label: 'Phone', getValue: (emp) => emp.phone },
-  { label: 'Salary', getValue: (emp) => `$${emp.salary ? emp.salary.toLocaleString() : 'N/A'}` },
-  { label: 'Joined', getValue: (emp) => emp.dateOfJoining ? new Date(emp.dateOfJoining).toLocaleDateString() : 'N/A' },
-  { label: 'Email', getValue: (emp) => emp.email },
-  { 
-    label: 'Status', 
-    getValue: (emp) => (
-      <span>
-        <span 
-          className={`status-indicator ${emp.availability === "1" || emp.availability === 1 ? "status-active" : "status-inactive"}`} 
-          style={{
-            ...styles.statusIndicator,
-            backgroundColor: emp.availability === "1" || emp.availability === 1 ? "#2ecc71" : "#e74c3c"
-          }}
-        ></span>
-        {emp.availability === "1" || emp.availability === 1 ? "Active" : "Inactive"}
-      </span>
-    )
-  }
-];
-
 
 const styles = {
   mainContent: {
@@ -511,24 +537,68 @@ const styles = {
     gridColumn: "1 / -1"
   },
   cardHeaderContent: {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  width: "100%"
-},
-deleteIcon: {
-  fontSize: "16px",
-  color: "#ffffff",
-  opacity: "0.8",
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-  padding: "4px",
-  "&:hover": {
-    opacity: "1",
-    transform: "scale(1.1)"
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%"
   },
-  "&:active": {
-    transform: "scale(0.95)"
+  deleteIcon: {
+    fontSize: "16px",
+    color: "#ffffff",
+    opacity: "0.8",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    padding: "4px",
+    "&:hover": {
+      opacity: "1",
+      transform: "scale(1.1)"
+    },
+    "&:active": {
+      transform: "scale(0.95)"
+    }
+  },
+  statusContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    cursor: 'pointer',
+    padding: '5px',
+    borderRadius: '15px',
+    transition: 'background-color 0.2s',
+    '&:hover': {
+      backgroundColor: '#f5f5f5'
+    }
+  },
+  statusSelect: {
+    padding: '5px 10px',
+    borderRadius: '15px',
+    border: 'none',
+    cursor: 'pointer',
+    fontWeight: '500',
+    transition: 'all 0.3s ease',
+    outline: 'none',
+    '&:hover': {
+      opacity: '0.9'
+    }
+  },
+  iconContainer: {
+    display: "flex",
+    gap: "15px",
+    alignItems: "center"
+  },
+  editIcon: {
+    fontSize: "16px",
+    color: "#ffffff",
+    opacity: "0.8",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    padding: "4px",
+    "&:hover": {
+      opacity: "1",
+      transform: "scale(1.1)"
+    },
+    "&:active": {
+      transform: "scale(0.95)"
+    }
   }
-}
 };

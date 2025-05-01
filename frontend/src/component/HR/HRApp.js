@@ -18,7 +18,9 @@ import DashboardTemp from "../../component/DashboardTemp";
 import AccessF from "./component/accessF";
 import AccessV from "./component/accessV";
 import AccessUpdate from "./component/accessU";
-
+import UpdateEmployee from "./component/UpdateEmployee";
+import UpdateManager from "./component/updateManager";
+import UpdateHR from "./component/UpdateHR";
 
 export default function HRApp() {
   const links = [
@@ -106,9 +108,12 @@ export default function HRApp() {
         <Route path="/addSalary" element={<AddSalary />} />
         <Route path="/fetchSalary" element={<FetchSalary />} />
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />
-       <Route path="/accessF" element={<AccessF />} />
-       <Route path="/accessV" element={<AccessV />} />
-       <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
+        <Route path="/accessF" element={<AccessF />} />
+        <Route path="/accessV" element={<AccessV />} />
+        <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
+        <Route path="/updateEmployee/:id" element={<UpdateEmployee />} />
+        <Route path="/updateManager/:id" element={<UpdateManager />} />
+        <Route path="/updateHR/:id" element={<UpdateHR />} />
       </Routes>
     </>
   );

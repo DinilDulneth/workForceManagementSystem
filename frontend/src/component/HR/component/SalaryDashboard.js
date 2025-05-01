@@ -1,69 +1,98 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-//import "./SalaryDashboard.css"; // Updated CSS file
 
 const SalaryDashboard = () => {
-  const [salaries, setSalaries] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:8070/api/salaries")
-      .then((res) => setSalaries(res.data))
-      .catch((err) => console.error("Error fetching salaries:", err));
+    axios.get("http://localhost:8070/employee")
+      .then((res) => setEmployees(res.data))
+      .catch((err) => console.error("Error fetching employees:", err));
   }, []);
 
-  const deleteSalary = (id) => {
-    axios.delete(`http://localhost:8070/api/salaries/${id}`)
-      .then(() => setSalaries(salaries.filter((salary) => salary._id !== id)))
-      .catch((err) => console.error("Error deleting salary:", err));
-  };
-
   return (
-    <div className="salary-container">
-      <h2>Salary Management</h2>
+    <div className="salary-container" style={styles.container}>
+      <h2 style={styles.title}>Employee Management</h2>
       <input 
         type="text" 
-        placeholder="Search Salary Record" 
-        className="search-bar" 
+        placeholder="Search Employee" 
+        className="search-bar"
+        style={styles.searchBar} 
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Salary No.</th>
-            <th>Paid Hours</th>
-            <th>Gross Pay</th>
-            <th>Statutory Pay</th>
-            <th>Deductions</th>
-            <th>Net Pay</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {salaries.filter(salary => salary.name.toLowerCase().includes(search.toLowerCase())).map((salary) => (
-            <tr key={salary._id}>
-              <td>{salary.name}</td>
-              <td>{salary.salaryNumber}</td>
-              <td>{salary.paidHours}</td>
-              <td>${salary.grossPay}</td>
-              <td>${salary.statutoryPay}</td>
-              <td className="deduction">-${salary.deductions}</td>
-              <td className="net-pay">${salary.netPay}</td>
-              <td className={`status ${salary.status.toLowerCase()}`}>{salary.status}</td>
-              <td>
-                <button className="delete-btn" onClick={() => deleteSalary(salary._id)}>Delete</button>
-                <button className="update-btn">Update</button> {/* Update logic to be added */}
-              </td>
+      <div style={styles.tableContainer}>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Employee ID</th>
+              <th>Department</th>
+              <th>Position</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Join Date</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {employees
+              .filter(employee => 
+                employee.name.toLowerCase().includes(search.toLowerCase()) ||
+                employee.department.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((employee) => (
+                <tr key={employee._id}>
+                  <td>{employee.name}</td>
+                  <td>{employee.ID}</td>
+                  <td>{employee.department}</td>
+                  <td>{employee.position}</td>
+                  <td>{employee.email}</td>
+                  <td>{employee.phone}</td>
+                  <td>{new Date(employee.dateOfJoining).toLocaleDateString()}</td>
+                  <td className={employee.availability === "1" ? "active" : "inactive"}>
+                    {employee.availability === "1" ? "Active" : "Inactive"}
+                  </td>
+                </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    padding: '20px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    marginLeft: '250px',
+    marginTop: '70px'
+  },
+  title: {
+    color: '#333',
+    marginBottom: '20px',
+    textAlign: 'center'
+  },
+  searchBar: {
+    width: '100%',
+    padding: '10px',
+    marginBottom: '20px',
+    borderRadius: '5px',
+    border: '1px solid #ddd'
+  },
+  tableContainer: {
+    overflowX: 'auto'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    backgroundColor: '#fff',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+  }
 };
 
 export default SalaryDashboard;

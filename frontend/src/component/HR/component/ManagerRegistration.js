@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
-import { Link } from "react-router-dom";
 import { Formik, Form, Field } from 'formik';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
 import * as Yup from 'yup';
@@ -20,17 +21,36 @@ export default function ManagerRegistration() {
     email: '',
     phone: '',
     password: '',
-    dateOfJoining: ''
+    dateOfJoining: '',
+    active: true  // Add default value for active status
   };
 
   // Form fields configuration
   const formFields = [
     { type: 'text', id: 'name', placeholder: 'Name' },
-    { type: 'text', id: 'department', placeholder: 'Department' },
+    { 
+      type: 'select', 
+      id: 'department', 
+      placeholder: 'Department',
+      options: [
+        { value: '', label: 'Select Department' },
+        { value: 'IT', label: 'IT' },
+        { value: 'General Manager', label: 'General Manager' }
+      ]
+    },
     { type: 'email', id: 'email', placeholder: 'Email' },
     { type: 'text', id: 'phone', placeholder: 'Phone' },
     { type: 'password', id: 'password', placeholder: 'Password' },
-    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining' }
+    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining' },
+    { 
+      type: 'select', 
+      id: 'active', 
+      placeholder: 'Status',
+      options: [
+        { value: true, label: 'Active' },
+        { value: false, label: 'Inactive' }
+      ]
+    }
   ];
 
   // Email content generator
@@ -74,12 +94,12 @@ WorkSync`;
       if (response.status === 200 || response.status === 201) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        alert("Manager Registered Successfully!✅");
+        toast.success("Manager Registered Successfully!✅");
         setSubmitted(true);
         resetForm();
       }
     } catch (err) {
-      alert("Error registering manager: " + err.message);
+      toast.error("Error registering manager: " + err.message);
       console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
@@ -89,6 +109,7 @@ WorkSync`;
 
   return (
     <section style={styles.section}>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Container>
         <Row>
           <Col lg="8" className="m-auto">
@@ -128,23 +149,48 @@ WorkSync`;
                       <Form style={styles.form}>
                         {formFields.map((field) => (
                           <FormGroup key={field.id}>
-                            <Field
-                              type={field.type}
-                              name={field.id}
-                              placeholder={field.placeholder}
-                              className={`form-control ${
-                                errors[field.id] && touched[field.id]
-                                  ? "is-invalid"
-                                  : ""
-                              }`}
-                              style={{
-                                ...styles.input,
-                                borderColor:
+                            {field.type === 'select' ? (
+                              <Field
+                                as="select"
+                                name={field.id}
+                                className={`form-control ${
                                   errors[field.id] && touched[field.id]
-                                    ? "red"
-                                    : "#ccc",
-                              }}
-                            />
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                style={{
+                                  ...styles.input,
+                                  borderColor:
+                                    errors[field.id] && touched[field.id]
+                                      ? "red"
+                                      : "#ccc",
+                                }}
+                              >
+                                {field.options.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </Field>
+                            ) : (
+                              <Field
+                                type={field.type}
+                                name={field.id}
+                                placeholder={field.placeholder}
+                                className={`form-control ${
+                                  errors[field.id] && touched[field.id]
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                style={{
+                                  ...styles.input,
+                                  borderColor:
+                                    errors[field.id] && touched[field.id]
+                                      ? "red"
+                                      : "#ccc",
+                                }}
+                              />
+                            )}
                             {errors[field.id] && touched[field.id] && (
                               <div style={styles.errorMessage}>
                                 {errors[field.id]}
@@ -324,7 +370,46 @@ const styles = {
     color: "#007bff",
     textDecoration: "none",
     fontWeight: "bold"
-  }
+  },
+  toggleContainer: {
+    marginBottom: '15px',
+  },
+  toggleLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    cursor: 'pointer',
+  },
+  toggle: {
+    width: '40px',
+    height: '20px',
+    appearance: 'none',
+    backgroundColor: '#ddd',
+    borderRadius: '20px',
+    position: 'relative',
+    cursor: 'pointer',
+    '&:checked': {
+      backgroundColor: '#2ecc71',
+    },
+    '&:before': {
+      content: '""',
+      width: '18px',
+      height: '18px',
+      backgroundColor: 'white',
+      borderRadius: '50%',
+      position: 'absolute',
+      top: '1px',
+      left: '1px',
+      transition: '0.3s',
+    },
+    '&:checked:before': {
+      left: '21px',
+    },
+  },
+  toggleStatus: {
+    fontSize: '14px',
+    color: '#666',
+  },
 };
 
 const ValidationSchema = Yup.object().shape({
@@ -357,5 +442,7 @@ const ValidationSchema = Yup.object().shape({
   dateOfJoining: Yup.date()
     .required("Date of joining is required")
     .max(new Date(), "Date cannot be in the future")
-    .min(new Date(2000, 0, 1), "Date cannot be before year 2000")
+    .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
+
+  active: Yup.boolean(),
 });
