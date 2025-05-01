@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
@@ -128,11 +127,12 @@ const UserLogin = () => {
           <div style={styles.backToHome}>
             <p style={styles.backToHomeText}>
               Back to{" "}
-              <Link
-                to="/"
-                style={styles.homeLink}
-              >
+              <Link to="/" style={styles.homeLink}>
                 Home
+              </Link>
+              {" | "}
+              <Link to="/register" style={styles.homeLink}>
+                Register
               </Link>
             </p>
           </div>
@@ -143,8 +143,6 @@ const UserLogin = () => {
 };
 
 const styles = {
-
-
   authWrapper: {
     position: "relative", // Add this
     display: "flex",
@@ -224,7 +222,6 @@ const styles = {
     color: "red",
     marginBottom: "10px",
   },
-
   backToHome: {
     marginTop: "20px",
     textAlign: "center",
