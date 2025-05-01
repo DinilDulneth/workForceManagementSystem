@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 
 // Announcement Schema
 const announcementSchema = new mongoose.Schema({
-  Title: String,
+  title: {
+    type: String,
+    required: true,
+  },
   message: String,
   sender: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
   date: { type: Date, default: Date.now },

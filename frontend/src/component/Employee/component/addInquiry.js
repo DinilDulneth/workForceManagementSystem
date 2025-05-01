@@ -20,12 +20,14 @@ import SendIcon from "@mui/icons-material/Send";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import BusinessIcon from "@mui/icons-material/Business";
 import BadgeIcon from "@mui/icons-material/Badge";
+import TitleIcon from "@mui/icons-material/Title"; // Added for title icon
 import HistoryIcon from "@mui/icons-material/History"; // Added HistoryIcon
 
 export default function AddInquiry() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     inquiry: "",
+    title: "", // Added title field
     employeeId: "",
     sender: "",
     date: "",
@@ -66,13 +68,13 @@ export default function AddInquiry() {
   };
 
   const handleViewPastInquiries = () => {
-    navigate("/EmployeeDashboard/fetchInquiry");
+    navigate("/EmployeeHome/fetchInquiry");
   };
 
   function sendInquiryData(e) {
     e.preventDefault();
 
-    if (!formData.inquiry || !formData.department) {
+    if (!formData.inquiry || !formData.department || !formData.title) {
       setSnackbar({
         open: true,
         message: "Please fill in all required fields",
@@ -89,7 +91,7 @@ export default function AddInquiry() {
           message: "Inquiry Added Successfully! ✅",
           severity: "success",
         });
-        setTimeout(() => navigate("/EmployeeDashboard/fetchInquiry"), 2000);
+        setTimeout(() => navigate("/EmployeeHome/fetchInquiry"), 2000);
       })
       .catch((err) => {
         setSnackbar({
@@ -149,7 +151,6 @@ export default function AddInquiry() {
             onSubmit={sendInquiryData}
             sx={{ display: "flex", flexDirection: "column", gap: 3 }}
           >
-            {/* Existing form fields remain unchanged */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <TextField
                 fullWidth
@@ -160,6 +161,23 @@ export default function AddInquiry() {
                 InputProps={{
                   startAdornment: (
                     <BadgeIcon sx={{ mr: 1, color: "#fc6625" }} />
+                  ),
+                }}
+              />
+            </motion.div>
+
+            {/* Add title field */}
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <TextField
+                fullWidth
+                label="Inquiry Title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <TitleIcon sx={{ mr: 1, color: "#fc6625" }} />
                   ),
                 }}
               />

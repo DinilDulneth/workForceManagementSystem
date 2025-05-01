@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import UpdateIcon from "@mui/icons-material/Update";
 import PersonIcon from "@mui/icons-material/Person";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import TitleIcon from "@mui/icons-material/Title"; // Added for title icon
 
 function UpdateInquiry() {
   const { id } = useParams();
@@ -22,6 +23,7 @@ function UpdateInquiry() {
   const [inquiry, setInquiry] = useState({
     employeeId: "",
     inquiry: "",
+    title: "", // Added title field
     sender: "",
     department: "",
   });
@@ -39,12 +41,14 @@ function UpdateInquiry() {
         const {
           employeeId,
           inquiry: inquiryText,
+          title, // Include title from API response
           sender,
           department,
         } = res.data;
         setInquiry({
           employeeId,
           inquiry: inquiryText,
+          title: title || "", // Set title with fallback
           sender,
           department,
         });
@@ -156,6 +160,22 @@ function UpdateInquiry() {
                 InputProps={{
                   startAdornment: (
                     <PersonIcon sx={{ mr: 1, color: "#fc6625" }} />
+                  ),
+                }}
+              />
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <TextField
+                fullWidth
+                label="Title"
+                name="title"
+                value={inquiry.title}
+                onChange={handleChange}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <TitleIcon sx={{ mr: 1, color: "#fc6625" }} />
                   ),
                 }}
               />
