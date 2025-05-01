@@ -15,6 +15,8 @@ import ResignationDemp from "./component/ResignationDemp";
 import ResignationUemp from "./component/ResignationUemp";
 import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
+import FetchInquiry from "./component/fetchinquiry";
+import FetchAnnouncement from "./component/fetchAnnouncement";
 
 export default function HRApp() {
   const links = [
@@ -22,60 +24,64 @@ export default function HRApp() {
     {
       link: "/HRDashboard/ResignationVemp",
       name: "Resignation View",
-      icon: "bi-file-earmark"
+      icon: "bi-file-earmark",
     },
-    
+
     { link: "/HRDashboard/FetchEmp", name: "Employees", icon: "bi-people" },
 
     {
       link: "/HRDashboard/fetchManager",
       name: "View Manager",
-      icon: "bi-person-badge"
-    
+      icon: "bi-person-badge",
     },
 
     {
       link: "/HRDashboard/FetchHR",
       name: "HR Records",
-      icon: "bi-clipboard-data"
+      icon: "bi-clipboard-data",
     },
 
     {
       link: "/HRDashboard/UserRegister",
       name: "User Registration",
-      icon: "bi-person-plus"
+      icon: "bi-person-plus",
     },
     {
       link: "/HRDashboard/ManagerRegistration",
       name: "Manager Registration",
-      icon: "bi-person-workspace"
+      icon: "bi-person-workspace",
     },
     {
       link: "/HRDashboard/HRRegistration",
       name: "HR Registration",
-      icon: "bi-person-lines-fill"
-
-
+      icon: "bi-person-lines-fill",
     },
-
-
-
+    {
+      link: "/HRDashboard/fetchInquiry",
+      name: "Employee Inquiries",
+      icon: "bi-question-circle",
+    },
+    {
+      link: "/HRDashboard/fetchAnnouncement",
+      name: "Announcements",
+      icon: "bi-megaphone",
+    },
 
     {
       link: "/HRDashboard/addSalary",
       name: "Add Salary",
-      icon: "bi-cash-coin"
+      icon: "bi-cash-coin",
     },
     {
       link: "/HRDashboard/fetchSalary",
       name: "View Salary",
-      icon: "bi-wallet2"
+      icon: "bi-wallet2",
     },
     {
       link: "/HRDashboard/SalaryDashboard",
       name: "Salary Dashboard",
-      icon: "bi-bar-chart"
-    }
+      icon: "bi-bar-chart",
+    },
   ];
 
   return (
@@ -96,6 +102,8 @@ export default function HRApp() {
         <Route path="/addSalary" element={<AddSalary />} />
         <Route path="/fetchSalary" element={<FetchSalary />} />
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />
+        <Route path="/fetchInquiry" element={<FetchInquiry />} />
+        <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
       </Routes>
     </>
   );
