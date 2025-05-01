@@ -124,22 +124,15 @@ const UserLogin = () => {
           <button type="submit" style={styles.button}>
             Login
           </button>
-          <div style={styles.registrationButtons}>
-            <Link to="/UserRegister" style={styles.registerButton}>
-              Register Employee
-            </Link>
-            <Link to="/HRRegistration" style={styles.registerButton}>
-              Register HR
-            </Link>
-            <Link to="/ManagerRegistration" style={styles.registerButton}>
-              Register Manager
-            </Link>
-          </div>
           <div style={styles.backToHome}>
             <p style={styles.backToHomeText}>
               Back to{" "}
               <Link to="/" style={styles.homeLink}>
                 Home
+              </Link>
+              {" | "}
+              <Link to="/register" style={styles.homeLink}>
+                Register
               </Link>
             </p>
           </div>
@@ -234,7 +227,7 @@ const styles = {
     flexDirection: "column",
     gap: "10px",
     marginTop: "20px",
-    width: "100%",
+    width: "100%"
   },
   registerButton: {
     width: "100%",
@@ -249,7 +242,7 @@ const styles = {
     textAlign: "center",
     "&:hover": {
       backgroundColor: "#555",
-    },
+    }
   },
   backToHome: {
     marginTop: "20px",

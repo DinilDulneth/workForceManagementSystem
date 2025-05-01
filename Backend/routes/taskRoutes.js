@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Task = require("../model/task");
 const WorkingH = require("../model/workingH");
+const cloudinary = require("../config/cloudinary");
+const taskAttachment = require("../middleware/taskAttachmentUploadMulter");
 
 // Add new task
 router.route("/add").post((req, res) => {
@@ -102,8 +104,8 @@ router.put("/updateStatus/:id", async (req, res) => {
     });
   }
 });
-//delete task
 
+//delete task
 router.route("/delete/:id").put(async (req, res) => {
   try {
     let taskId = req.params.id;
@@ -387,5 +389,82 @@ router.route("/overallProgressEachDayByID/:id").get(async (req, res) => {
       .send({ status: "Error calculating progress", error: err.message });
   }
 });
+
+// Update task attachment file only
+router.put(
+  "/uploadTaskAttachment/:id",
+  taskAttachment.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "No file uploaded"
+        });
+      }
+
+      const taskId = req.params.id;
+
+      // Delete existing attachment from Cloudinary if it exists
+      const existingTask = await Task.findById(taskId);
+      if (existingTask && existingTask.attachmentPublicId) {
+        await cloudinary.uploader.destroy(existingTask.attachmentPublicId);
+      }
+
+      // Upload new file to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "auto",
+            folder: "task-attachments",
+            public_id: `task_${taskId}_${Date.now()}`
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+
+        // Create buffer stream and pipe to Cloudinary
+        const bufferStream = new require("stream").PassThrough();
+        bufferStream.end(req.file.buffer);
+        bufferStream.pipe(uploadStream);
+      });
+
+      // Update task with new attachment details
+      const updatedTask = await Task.findByIdAndUpdate(
+        taskId,
+        {
+          attachmentPath: result.secure_url,
+          attachmentPublicId: result.public_id
+        },
+        { new: true }
+      );
+
+      if (!updatedTask) {
+        // If task not found, delete uploaded file
+        await cloudinary.uploader.destroy(result.public_id);
+        return res.status(404).json({
+          success: false,
+          message: "Task not found"
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "File uploaded successfully",
+        task: updatedTask,
+        attachmentPath: result.secure_url
+      });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error uploading file",
+        error: error.message
+      });
+    }
+  }
+);
 
 module.exports = router;
