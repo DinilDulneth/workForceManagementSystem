@@ -9,6 +9,7 @@ import registerImg from "../assets/images/3.jpg";
 import userIcon from "../assets/images/2.jpg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 export default function ManagerRegisterForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -23,7 +24,7 @@ export default function ManagerRegisterForm() {
     phone: "",
     password: "",
     dateOfJoining: "",
-    active: true // Default to active
+    active: true, // Default to active
   };
 
   // Form fields configuration
@@ -36,8 +37,8 @@ export default function ManagerRegisterForm() {
       options: [
         { value: "", label: "Select Department" },
         { value: "IT", label: "IT" },
-        { value: "General Manager", label: "General Manager" }
-      ]
+        { value: "General Manager", label: "General Manager" },
+      ],
     },
     { type: "email", id: "email", placeholder: "Email" },
     { type: "text", id: "phone", placeholder: "Phone" },
@@ -49,9 +50,9 @@ export default function ManagerRegisterForm() {
       placeholder: "Status",
       options: [
         { value: true, label: "Active" },
-        { value: false, label: "Inactive" }
-      ]
-    }
+        { value: false, label: "Inactive" },
+      ],
+    },
   ];
 
   // Email content generator
@@ -79,7 +80,7 @@ WorkSync`;
 
     return {
       subject: encodeURIComponent(subject),
-      body: encodeURIComponent(body)
+      body: encodeURIComponent(body),
     };
   };
 
@@ -91,7 +92,7 @@ WorkSync`;
       );
       const accessList = response.data;
       const hasAccess = accessList.some(
-        (access) => access.email === email && access.status === "1"
+        (access) => access.email === email && access.status === "2"
       );
       return hasAccess;
     } catch (error) {
@@ -108,14 +109,13 @@ WorkSync`;
       const hasAccess = await checkEmailAccess(values.email);
 
       if (!hasAccess) {
-        Swal.fire({
+        await Swal.fire({
           icon: "error",
           title: "Access Denied",
           text: "You do not have permission to register. Please contact HR department.",
-          confirmButtonColor: "#d33"
-        }).then(() => {
-          navigate("/");
+          confirmButtonColor: "#d33",
         });
+        navigate("/");
         return;
       }
 
@@ -128,12 +128,15 @@ WorkSync`;
       if (response.status === 200 || response.status === 201) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        Swal("Success!", "Manager registered successfully!", "success");
+
+        await Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Manager registered successfully!",
+        });
         setSubmitted(true);
         resetForm();
-        setTimeout(() => {
-          navigate("/UserLogin");
-        }, 3000);
+        navigate("/UserLogin");
       }
     } catch (error) {
       toast.error("Error registering manager: " + error.message);
@@ -200,7 +203,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc"
+                                      : "#ccc",
                                 }}
                               >
                                 {field.options.map((option) => (
@@ -227,7 +230,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc"
+                                      : "#ccc",
                                 }}
                               />
                             )}
@@ -275,14 +278,14 @@ const styles = {
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   errorMessage: {
     color: "red",
     fontSize: "0.75rem",
     marginTop: "-10px",
     marginBottom: "10px",
-    paddingLeft: "5px"
+    paddingLeft: "5px",
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -291,24 +294,24 @@ const styles = {
     overflow: "hidden",
     display: "flex",
     width: "100%",
-    maxWidth: "900px"
+    maxWidth: "900px",
   },
   imageSection: {
     width: "50%",
     display: "none",
-    backgroundColor: "#e6e6e6"
+    backgroundColor: "#e6e6e6",
   },
   image: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   formSection: {
     width: "100%",
     padding: "40px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"
+    alignItems: "center",
   },
   userIconWrapper: {
     width: "100px",
@@ -316,21 +319,21 @@ const styles = {
     marginBottom: "20px",
     borderRadius: "50%",
     overflow: "hidden",
-    border: "3px solid #333"
+    border: "3px solid #333",
   },
   userIcon: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   title: {
     color: "#333",
     marginBottom: "20px",
     paddingBottom: "10px",
-    borderBottom: "3px solid #fc6625"
+    borderBottom: "3px solid #fc6625",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   input: {
     width: "100%",
@@ -344,14 +347,14 @@ const styles = {
       borderColor: "red",
       "&:focus": {
         borderColor: "red",
-        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)"
-      }
-    }
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)",
+      },
+    },
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "1rem"
+    marginTop: "1rem",
   },
   submitButton: {
     width: "100%",
@@ -363,8 +366,8 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#555"
-    }
+      backgroundColor: "#555",
+    },
   },
   cancelButton: {
     width: "100%",
@@ -376,12 +379,12 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
-    }
+      backgroundColor: "#f5f5f5",
+    },
   },
   successMessage: {
     textAlign: "center",
-    padding: "2rem 1rem"
+    padding: "2rem 1rem",
   },
   checkmark: {
     width: "70px",
@@ -393,17 +396,17 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    margin: "0 auto 1.5rem"
+    margin: "0 auto 1.5rem",
   },
   successTitle: {
     color: "#474747",
     fontSize: "1.5rem",
-    marginBottom: "1rem"
+    marginBottom: "1rem",
   },
   successText: {
     color: "#8f9491",
-    fontSize: "1rem"
-  }
+    fontSize: "1rem",
+  },
 };
 
 const ValidationSchema = Yup.object().shape({
@@ -441,5 +444,5 @@ const ValidationSchema = Yup.object().shape({
     .max(new Date(), "Date cannot be in the future")
     .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
 
-  active: Yup.boolean()
+  active: Yup.boolean(),
 });

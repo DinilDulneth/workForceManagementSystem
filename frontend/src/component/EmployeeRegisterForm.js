@@ -7,7 +7,7 @@ import registerImg from "../assets/images/3.jpg";
 import userIcon from "../assets/images/2.jpg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-
+import "sweetalert2/dist/sweetalert2.min.css";
 export default function EmployeeRegisterForm() {
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
@@ -23,7 +23,7 @@ export default function EmployeeRegisterForm() {
     phone: "",
     dateOfJoining: "",
     availability: "1", // Default to active
-    position: ""
+    position: "",
   };
 
   const formFields = [
@@ -40,8 +40,8 @@ export default function EmployeeRegisterForm() {
         { value: "IT", label: "IT" },
         { value: "Finance", label: "Finance" },
         { value: "Operations", label: "Operations" },
-        { value: "General Employee", label: "General Employee" }
-      ]
+        { value: "General Employee", label: "General Employee" },
+      ],
     },
     { type: "text", id: "phone", placeholder: "Phone (e.g., 0771234567)" },
     { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
@@ -53,10 +53,10 @@ export default function EmployeeRegisterForm() {
         { value: "", label: "Select Availability" },
         { value: "1", label: "Active" },
         { value: "2", label: "On Leave" },
-        { value: "3", label: "Inactive" }
-      ]
+        { value: "3", label: "Inactive" },
+      ],
     },
-    { type: "text", id: "position", placeholder: "Position" }
+    { type: "text", id: "position", placeholder: "Position" },
   ];
 
   // Email content generator
@@ -85,7 +85,7 @@ WorkSync`;
 
     return {
       subject: encodeURIComponent(subject),
-      body: encodeURIComponent(body)
+      body: encodeURIComponent(body),
     };
   };
 
@@ -119,7 +119,7 @@ WorkSync`;
           title: "Access Denied",
           text: "You do not have permission to register. Please contact HR department.",
           confirmButtonColor: "#d33",
-          allowOutsideClick: false
+          allowOutsideClick: false,
         });
         setTimeout(() => {
           navigate("/");
@@ -134,7 +134,7 @@ WorkSync`;
         dateOfJoining:
           values.dateOfJoining instanceof Date
             ? values.dateOfJoining.toISOString().split("T")[0]
-            : values.dateOfJoining
+            : values.dateOfJoining,
       };
 
       const response = await axios.post(
@@ -153,7 +153,7 @@ WorkSync`;
           confirmButtonColor: "#28a745",
           timer: 3000,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
 
         setSubmitted(true);
@@ -199,7 +199,7 @@ WorkSync`;
         confirmButtonText: "Try Again",
         showCancelButton: true,
         cancelButtonText: "Go Back",
-        allowOutsideClick: false
+        allowOutsideClick: false,
       }).then((result) => {
         if (result.isDismissed) {
           navigate("/");
@@ -273,7 +273,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc"
+                                      : "#ccc",
                                 }}
                               >
                                 {field.options.map((option) => (
@@ -300,7 +300,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc"
+                                      : "#ccc",
                                 }}
                               />
                             )}
@@ -348,14 +348,14 @@ const styles = {
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   errorMessage: {
     color: "red",
     fontSize: "0.75rem",
     marginTop: "-10px",
     marginBottom: "10px",
-    paddingLeft: "5px"
+    paddingLeft: "5px",
   },
   serverError: {
     color: "white",
@@ -363,7 +363,7 @@ const styles = {
     padding: "10px",
     borderRadius: "5px",
     marginBottom: "20px",
-    textAlign: "center"
+    textAlign: "center",
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -372,27 +372,27 @@ const styles = {
     overflow: "hidden",
     display: "flex",
     width: "100%",
-    maxWidth: "900px"
+    maxWidth: "900px",
   },
   imageSection: {
     width: "50%",
     display: "none",
     backgroundColor: "#e6e6e6",
     "@media (min-width: 768px)": {
-      display: "block"
-    }
+      display: "block",
+    },
   },
   image: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   formSection: {
     width: "100%",
     padding: "40px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"
+    alignItems: "center",
   },
   userIconWrapper: {
     width: "100px",
@@ -400,21 +400,21 @@ const styles = {
     marginBottom: "20px",
     borderRadius: "50%",
     overflow: "hidden",
-    border: "3px solid #333"
+    border: "3px solid #333",
   },
   userIcon: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   title: {
     color: "#333",
     marginBottom: "20px",
     paddingBottom: "10px",
-    borderBottom: "3px solid #fc6625"
+    borderBottom: "3px solid #fc6625",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   input: {
     width: "100%",
@@ -428,14 +428,14 @@ const styles = {
       borderColor: "red",
       "&:focus": {
         borderColor: "red",
-        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)"
-      }
-    }
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)",
+      },
+    },
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "1rem"
+    marginTop: "1rem",
   },
   submitButton: {
     width: "100%",
@@ -447,12 +447,12 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#555"
+      backgroundColor: "#555",
     },
     "&:disabled": {
       backgroundColor: "#999",
-      cursor: "not-allowed"
-    }
+      cursor: "not-allowed",
+    },
   },
   cancelButton: {
     width: "100%",
@@ -464,16 +464,16 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
+      backgroundColor: "#f5f5f5",
     },
     "&:disabled": {
       backgroundColor: "#eee",
-      cursor: "not-allowed"
-    }
+      cursor: "not-allowed",
+    },
   },
   successMessage: {
     textAlign: "center",
-    padding: "2rem 1rem"
+    padding: "2rem 1rem",
   },
   checkmark: {
     width: "70px",
@@ -485,26 +485,26 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    margin: "0 auto 1.5rem"
+    margin: "0 auto 1.5rem",
   },
   successTitle: {
     color: "#474747",
     fontSize: "1.5rem",
-    marginBottom: "1rem"
+    marginBottom: "1rem",
   },
   successText: {
     color: "#8f9491",
     fontSize: "1rem",
-    marginBottom: "1.5rem"
-  }
+    marginBottom: "1.5rem",
+  },
 };
 
-// Validation schema simplified to match exactly with your MongoDB model
+// Updated Validation schema with relaxed validation rules
 const ValidationSchema = Yup.object().shape({
   name: Yup.string()
     .required("Name is required")
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name cannot exceed 50 characters")
+    .min(1, "Name must be at least 1 character") // Reduced minimum characters
+    .max(100, "Name cannot exceed 100 characters") // Increased maximum characters
     .trim(),
 
   email: Yup.string()
@@ -514,20 +514,20 @@ const ValidationSchema = Yup.object().shape({
 
   password: Yup.string()
     .required("Password is required")
-    .min(6, "Password must be at least 6 characters"),
+    .min(4, "Password must be at least 4 characters"), // Reduced minimum password length
 
   department: Yup.string().required("Department is required"),
 
   phone: Yup.string()
     .required("Phone number is required")
     .matches(
-      /^(?:\+94|0)?[0-9]{9,10}$/,
-      "Phone number must be a valid Sri Lankan number"
+      /^[0-9]{9,10}$/, // Simplified phone number validation
+      "Phone number must be a valid number"
     ),
 
   dateOfJoining: Yup.date()
     .required("Date of joining is required")
-    .max(new Date(), "Date of joining cannot be in the future"),
+    .max(new Date(), "Date of joining cannot be in the future"), // This rule is kept to ensure valid dates
 
   availability: Yup.string()
     .required("Availability status is required")
@@ -535,6 +535,6 @@ const ValidationSchema = Yup.object().shape({
 
   position: Yup.string()
     .required("Position is required")
-    .min(2, "Position must be at least 2 characters")
-    .max(50, "Position cannot exceed 50 characters")
+    .min(1, "Position must be at least 1 character") // Reduced minimum characters
+    .max(100, "Position cannot exceed 100 characters"), // Increased maximum characters
 });

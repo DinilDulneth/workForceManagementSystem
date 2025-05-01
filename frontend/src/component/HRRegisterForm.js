@@ -9,6 +9,7 @@ import registerImg from "../assets/images/3.jpg";
 import userIcon from "../assets/images/2.jpg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 export default function HRRegisterForm() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function HRRegisterForm() {
     phone: "",
     password: "",
     dateOfJoining: "",
-    availability: "1" // Default to active
+    availability: "1",
   };
 
   // Form fields configuration
@@ -36,8 +37,8 @@ export default function HRRegisterForm() {
       options: [
         { value: "", label: "Select Department" },
         { value: "IT", label: "IT" },
-        { value: "HR", label: "HR" }
-      ]
+        { value: "HR", label: "HR" },
+      ],
     },
     { type: "email", id: "email", placeholder: "Email" },
     { type: "text", id: "phone", placeholder: "Phone" },
@@ -49,9 +50,9 @@ export default function HRRegisterForm() {
       placeholder: "Status",
       options: [
         { value: "1", label: "Active" },
-        { value: "0", label: "Inactive" }
-      ]
-    }
+        { value: "0", label: "Inactive" },
+      ],
+    },
   ];
 
   // Email content generator
@@ -79,7 +80,7 @@ WorkSync`;
 
     return {
       subject: encodeURIComponent(subject),
-      body: encodeURIComponent(body)
+      body: encodeURIComponent(body),
     };
   };
 
@@ -91,7 +92,7 @@ WorkSync`;
       );
       const accessList = response.data;
       return accessList.some(
-        (access) => access.email === email && access.status === "1"
+        (access) => access.email === email && access.status === "3"
       );
     } catch (error) {
       console.error("Error checking email access:", error);
@@ -107,13 +108,12 @@ WorkSync`;
       const hasAccess = await checkEmailAccess(values.email);
 
       if (!hasAccess) {
-        Swal(
-          "You don't have permission to register. Please contact administrator.",
-          "error"
-        );
-        setTimeout(() => {
-          navigate("/");
-        }, 3000);
+        await Swal.fire({
+          icon: "error",
+          title: "Access Denied",
+          text: "You don't have permission to register. Please contact administrator.",
+        });
+        navigate("/");
         return;
       }
 
@@ -126,13 +126,15 @@ WorkSync`;
       if (response.status === 201 || response.status === 200) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        Swal("Success!", "Registered successfully! Please login", "success");
+
+        await Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Registered successfully! Please login",
+        });
         setSubmitted(true);
         resetForm();
-
-        setTimeout(() => {
-          navigate("/UserLogin");
-        }, 3000);
+        navigate("/UserLogin");
       }
     } catch (error) {
       if (error.response?.status === 403) {
@@ -204,7 +206,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc"
+                                      : "#ccc",
                                 }}
                               >
                                 {field.options.map((option) => (
@@ -231,7 +233,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc"
+                                      : "#ccc",
                                 }}
                               />
                             )}
@@ -279,14 +281,14 @@ const styles = {
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   errorMessage: {
     color: "red",
     fontSize: "0.75rem",
     marginTop: "-10px",
     marginBottom: "10px",
-    paddingLeft: "5px"
+    paddingLeft: "5px",
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -295,24 +297,24 @@ const styles = {
     overflow: "hidden",
     display: "flex",
     width: "100%",
-    maxWidth: "900px"
+    maxWidth: "900px",
   },
   imageSection: {
     width: "50%",
     display: "none",
-    backgroundColor: "#e6e6e6"
+    backgroundColor: "#e6e6e6",
   },
   image: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   formSection: {
     width: "100%",
     padding: "40px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"
+    alignItems: "center",
   },
   userIconWrapper: {
     width: "100px",
@@ -320,21 +322,21 @@ const styles = {
     marginBottom: "20px",
     borderRadius: "50%",
     overflow: "hidden",
-    border: "3px solid #333"
+    border: "3px solid #333",
   },
   userIcon: {
     width: "100%",
     height: "100%",
-    objectFit: "cover"
+    objectFit: "cover",
   },
   title: {
     color: "#333",
     marginBottom: "20px",
     paddingBottom: "10px",
-    borderBottom: "3px solid #fc6625"
+    borderBottom: "3px solid #fc6625",
   },
   form: {
-    width: "100%"
+    width: "100%",
   },
   input: {
     width: "100%",
@@ -348,14 +350,14 @@ const styles = {
       borderColor: "red",
       "&:focus": {
         borderColor: "red",
-        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)"
-      }
-    }
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)",
+      },
+    },
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "1rem"
+    marginTop: "1rem",
   },
   submitButton: {
     width: "100%",
@@ -367,8 +369,8 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#555"
-    }
+      backgroundColor: "#555",
+    },
   },
   cancelButton: {
     width: "100%",
@@ -380,12 +382,12 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
-    }
+      backgroundColor: "#f5f5f5",
+    },
   },
   successMessage: {
     textAlign: "center",
-    padding: "2rem 1rem"
+    padding: "2rem 1rem",
   },
   checkmark: {
     width: "70px",
@@ -397,18 +399,18 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    margin: "0 auto 1.5rem"
+    margin: "0 auto 1.5rem",
   },
   successTitle: {
     color: "#474747",
     fontSize: "1.5rem",
-    marginBottom: "1rem"
+    marginBottom: "1rem",
   },
   successText: {
     color: "#8f9491",
     fontSize: "1rem",
-    marginBottom: "1.5rem"
-  }
+    marginBottom: "1.5rem",
+  },
 };
 
 const ValidationSchema = Yup.object().shape({
@@ -451,5 +453,5 @@ const ValidationSchema = Yup.object().shape({
 
   availability: Yup.string()
     .required("Status is required")
-    .oneOf(["0", "1"], "Invalid status value")
+    .oneOf(["0", "1"], "Invalid status value"),
 });
