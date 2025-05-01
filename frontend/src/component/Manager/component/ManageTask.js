@@ -420,6 +420,7 @@ export default function ManageTask() {
                   <th>Task Name</th>
                   <th>Description</th>
                   <th>Deadline</th>
+                  <th>Attachment</th>
                   <th>Priority</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -432,6 +433,20 @@ export default function ManageTask() {
                     <td>{task.tName}</td>
                     <td>{task.description}</td>
                     <td>{new Date(task.deadLine).toLocaleDateString()}</td>
+                    <td>
+                      {task.attachmentPath ? (
+                        <a
+                          href={task.attachmentPath}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary"
+                        >
+                          View Attachment
+                        </a>
+                      ) : (
+                        "Attachment not available"
+                      )}
+                    </td>
                     <td>{task.priority}</td>
                     <td>
                       <span

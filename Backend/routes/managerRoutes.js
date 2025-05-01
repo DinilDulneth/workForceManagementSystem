@@ -79,6 +79,35 @@ router.patch("/updateManager/:id", async (req, res) => {
   }
 });
 
+// Update manager's active status
+router.patch("/updateActiveStatus/:id", async (req, res) => {
+  try {
+    const { active } = req.body;
+    const manager = await Manager.findByIdAndUpdate(
+      req.params.id,
+      { active },
+      { new: true, runValidators: true }
+    );
+    if (!manager) {
+      return res.status(404).send({ error: "Manager not found" });
+    }
+    res.status(200).send(manager);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+// Get all active/inactive managers
+router.get("/getManagersByStatus", async (req, res) => {
+  try {
+    const { active } = req.query;
+    const managers = await Manager.find({ active: active === 'true' });
+    res.status(200).send(managers);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 // Delete a Manager by ID
 router.delete("/deleteManager/:id", async (req, res) => {
   try {

@@ -354,7 +354,7 @@ export default function EmployeeHome() {
                   <button
                     className="btn btn-warning w-100 d-flex align-items-center justify-content-center"
                     onClick={() =>
-                      (window.location.href = "/EmployeeHome/ViewTask")
+                      (window.location.href = "/EmployeeHome/TaskDetails")
                     }
                     style={{ height: "60px" }}
                   >
@@ -469,6 +469,7 @@ export default function EmployeeHome() {
                 <th>Task No.</th>
                 <th>Task Name</th>
                 <th>Description</th>
+                <th>Attachment</th>
                 <th>Status</th>
                 {/* <th>Employee ID</th> */}
                 <th>Deadline</th>
@@ -483,6 +484,20 @@ export default function EmployeeHome() {
                   <td>{index + 1}</td>
                   <td>{task.tName}</td>
                   <td>{task.description}</td>
+                  <td>
+                    {task.attachmentPath ? (
+                      <a
+                        href={task.attachmentPath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary"
+                      >
+                        View Attachment
+                      </a>
+                    ) : (
+                      "Attachment not available"
+                    )}
+                  </td>
                   <td>
                     <span
                       className="badge"

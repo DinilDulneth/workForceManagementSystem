@@ -61,4 +61,22 @@ router.post('/addAccess', async (req, res) => {
     }
   });
 
+
+  router.patch('/revokeAccess/:id', async (req, res) => {
+    try {
+      const accessTable = await AccessTable.findByIdAndUpdate(
+        req.params.id,
+        { status: "99", access: "99" },
+        { new: true }
+      );
+      if (!accessTable) {
+        return res.status(404).send();
+      }
+      res.status(200).send(accessTable);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
+  
   module.exports = router;
