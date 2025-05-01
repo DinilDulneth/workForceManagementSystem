@@ -45,6 +45,44 @@ router.get("/getFeedback", async (req, res) => {
   }
 });
 
+// Get feedback by employeeId (for employees to see their feedback)
+router.get("/getFeedbackByEmployeeId/:employeeId", async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find({
+      employeeId: req.params.employeeId,
+    }).lean();
+    const transformedFeedbacks = feedbacks.map((feedback) => ({
+      ...feedback,
+      _id: feedback._id.toString(),
+      date: new Date(feedback.date).toISOString(),
+    }));
+    res.status(200).json(transformedFeedbacks);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching feedbacks",
+      error: error.message,
+    });
+  }
+});
+
+// Get feedback by sender (for managers to see feedback they've sent)
+router.get("/getFeedbackBySender/:sender", async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find({ sender: req.params.sender }).lean();
+    const transformedFeedbacks = feedbacks.map((feedback) => ({
+      ...feedback,
+      _id: feedback._id.toString(),
+      date: new Date(feedback.date).toISOString(),
+    }));
+    res.status(200).json(transformedFeedbacks);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching feedbacks",
+      error: error.message,
+    });
+  }
+});
+
 // Update a Feedback by ID
 router.put("/updateFeedback/:id", async (req, res) => {
   try {

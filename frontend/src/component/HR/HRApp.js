@@ -14,6 +14,9 @@ import ResignationDemp from "./component/ResignationDemp";
 import ResignationUemp from "./component/ResignationUemp";
 import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
+
+import FetchInquiry from "./component/fetchinquiry";
+import FetchAnnouncement from "./component/fetchAnnouncement";
 import AccessF from "./component/accessF";
 import AccessV from "./component/accessV";
 import AccessUpdate from "./component/accessU";
@@ -48,6 +51,16 @@ export default function HRApp() {
       link: "/HRDashboard/fetchManager",
       name: "View Manager",
       icon: "bi-person-badge",
+    },
+     {
+      link: "/HRDashboard/fetchInquiry",
+      name: "Employee Inquiries",
+      icon: "bi-question-circle",
+    },
+    {
+      link: "/HRDashboard/fetchAnnouncement",
+      name: "Announcements",
+      icon: "bi-megaphone",
     },
 
     {
@@ -107,6 +120,11 @@ export default function HRApp() {
         <Route path="/updateEmployee/:id" element={<UpdateEmployee />} />
         <Route path="/updateManager/:id" element={<UpdateManager />} />
         <Route path="/updateHR/:id" element={<UpdateHR />} />
+        <Route path="/fetchInquiry" element={<FetchInquiry />} />
+        <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
+       <Route path="/accessF" element={<AccessF />} />
+       <Route path="/accessV" element={<AccessV />} />
+       <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
       </Routes>
     </>
   );

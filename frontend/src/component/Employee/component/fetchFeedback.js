@@ -5,7 +5,6 @@ import {
   Box,
   Card,
   Typography,
-  IconButton,
   Container,
   Alert,
   Snackbar,
@@ -13,11 +12,9 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
-import DeleteIcon from "@mui/icons-material/Delete";
 import PersonIcon from "@mui/icons-material/Person";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import MessageIcon from "@mui/icons-material/Message";
-import TitleIcon from "@mui/icons-material/Title";
 
 function FetchFeedback() {
   const navigate = useNavigate();
@@ -35,8 +32,13 @@ function FetchFeedback() {
 
   function getFeedbacks() {
     setLoading(true);
+    const employeeId = localStorage.getItem("ID");
+
+    // Use the new endpoint that filters by employeeId
     axios
-      .get("http://localhost:8070/api/feedback/getFeedback")
+      .get(
+        `http://localhost:8070/api/feedback/getFeedbackByEmployeeId/${employeeId}`
+      )
       .then((res) => {
         const formattedFeedbacks = res.data.map((feedback) => ({
           ...feedback,
@@ -162,38 +164,24 @@ function FetchFeedback() {
                 <Box
                   sx={{
                     display: "flex",
-                    justifyContent: "space-between",
+                    justifyContent: "flex-start",
                     alignItems: "flex-start",
                   }}
                 >
-                  <Box>
+                  <Box sx={{ width: "100%" }}>
                     <Typography
-                      variant="h6"
+                      variant="h5"
                       sx={{
-                        color: "#474747",
-                        fontWeight: 600,
-                        mb: 2,
+                        color: "#fc6625",
+                        fontWeight: 700,
+                        mb: 3,
                         display: "flex",
                         alignItems: "center",
                         gap: 1,
+                        borderBottom: "2px solid rgba(252, 102, 37, 0.2)",
+                        paddingBottom: 1,
                       }}
                     >
-                      <PersonIcon sx={{ color: "#fc6625" }} />
-                      Employee ID: {feedback.employeeId}
-                    </Typography>
-
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        color: "#474747",
-                        mb: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        fontWeight: 500,
-                      }}
-                    >
-                      <TitleIcon sx={{ color: "#fc6625" }} />
                       {feedback.title}
                     </Typography>
 
@@ -205,16 +193,17 @@ function FetchFeedback() {
                         display: "flex",
                         alignItems: "flex-start",
                         gap: 1,
+                        fontSize: "1.05rem",
                       }}
                     >
                       <MessageIcon sx={{ color: "#8f9491", mt: 0.5 }} />
                       {feedback.feedback}
                     </Typography>
 
-                    <Box sx={{ display: "flex", gap: 2 }}>
+                    <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
                       <Chip
                         icon={<PersonIcon />}
-                        label={`Sender: ${feedback.sender}`}
+                        label={`From: ${feedback.sender}`}
                         size="small"
                         sx={{
                           backgroundColor: "rgba(252, 102, 37, 0.1)",
@@ -238,21 +227,6 @@ function FetchFeedback() {
                       />
                     </Box>
                   </Box>
-
-                  <IconButton
-                    onClick={() => deleteFeedback(feedback._id)}
-                    sx={{
-                      color: "#fc6625",
-                      "&:hover": {
-                        transform: "scale(1.1)",
-                        color: "#e55a1c",
-                        background: "rgba(252, 102, 37, 0.1)",
-                      },
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
                 </Box>
               </Card>
             </motion.div>
