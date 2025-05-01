@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Formik, Form, Field } from "formik";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import * as Yup from 'yup';
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
@@ -18,17 +20,36 @@ export default function HRRegistration() {
     email: '',
     phone: '',
     password: '',
-    dateOfJoining: ''
+    dateOfJoining: '',
+    availability: "1"  // Default to active
   };
 
   // Form fields configuration
   const formFields = [
     { type: 'text', id: 'name', placeholder: 'Name' },
-    { type: 'text', id: 'department', placeholder: 'Department' },
+    { 
+      type: 'select', 
+      id: 'department', 
+      placeholder: 'Department',
+      options: [
+        { value: '', label: 'Select Department' },
+        { value: 'IT', label: 'IT' },
+        { value: 'HR', label: 'HR' }
+      ]
+    },
     { type: 'email', id: 'email', placeholder: 'Email' },
     { type: 'text', id: 'phone', placeholder: 'Phone' },
     { type: 'password', id: 'password', placeholder: 'Password' },
-    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining' }
+    { type: 'date', id: 'dateOfJoining', placeholder: 'Date of Joining' },
+    { 
+      type: 'select', 
+      id: 'availability', 
+      placeholder: 'Status',
+      options: [
+        { value: "1", label: 'Active' },
+        { value: "0", label: 'Inactive' }
+      ]
+    }
   ];
 
   // Email content generator
@@ -72,13 +93,13 @@ WorkSync`;
       if (response.status === 201 || response.status === 200) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        alert("HR Registered Successfully!✅");
+        toast.success("HR Registered Successfully!✅");
         setSubmitted(true);
         resetForm();
       }
     } catch (error) {
+      toast.error("Error registering HR: " + error.message);
       console.error("Registration error:", error);
-      alert("Error registering HR: " + error.message);
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -87,6 +108,7 @@ WorkSync`;
 
   return (
     <section style={styles.section}>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Container>
         <Row>
           <Col lg="8" className="m-auto">
@@ -127,23 +149,48 @@ WorkSync`;
                       <Form style={styles.form}>
                         {formFields.map((field) => (
                           <FormGroup key={field.id}>
-                            <Field
-                              type={field.type}
-                              name={field.id}
-                              placeholder={field.placeholder}
-                              className={`form-control ${
-                                errors[field.id] && touched[field.id]
-                                  ? "is-invalid"
-                                  : ""
-                              }`}
-                              style={{
-                                ...styles.input,
-                                borderColor:
+                            {field.type === 'select' ? (
+                              <Field
+                                as="select"
+                                name={field.id}
+                                className={`form-control ${
                                   errors[field.id] && touched[field.id]
-                                    ? "red"
-                                    : "#ccc",
-                              }}
-                            />
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                style={{
+                                  ...styles.input,
+                                  borderColor:
+                                    errors[field.id] && touched[field.id]
+                                      ? "red"
+                                      : "#ccc",
+                                }}
+                              >
+                                {field.options.map(option => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </Field>
+                            ) : (
+                              <Field
+                                type={field.type}
+                                name={field.id}
+                                placeholder={field.placeholder}
+                                className={`form-control ${
+                                  errors[field.id] && touched[field.id]
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                style={{
+                                  ...styles.input,
+                                  borderColor:
+                                    errors[field.id] && touched[field.id]
+                                      ? "red"
+                                      : "#ccc",
+                                }}
+                              />
+                            )}
                             {errors[field.id] && touched[field.id] && (
                               <div style={styles.errorMessage}>
                                 {errors[field.id]}
@@ -359,5 +406,9 @@ const ValidationSchema = Yup.object().shape({
   dateOfJoining: Yup.date()
     .required("Date of joining is required")
     .max(new Date(), "Date cannot be in the future")
-    .min(new Date(2000, 0, 1), "Date cannot be before year 2000")
+    .min(new Date(2000, 0, 1), "Date cannot be before year 2000"),
+
+  availability: Yup.string()
+    .required("Status is required")
+    .oneOf(["0", "1"], "Invalid status value"),
 });

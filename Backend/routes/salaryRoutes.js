@@ -1,9 +1,9 @@
 const express = require("express");
 const Salary = require("../model/salary");
+const Employee = require("../model/employee");
 const router = express.Router();
 
-// @route   GET /salaries/
-// @desc    Get all salary records
+// Get all salary records
 router.get("/", async (req, res) => {
   try {
     const salaries = await Salary.find();
@@ -14,60 +14,62 @@ router.get("/", async (req, res) => {
   }
 });
 
-// @route   POST /salaries/add
-// @desc    Add a new salary record
+// Get employee details for salary form
+router.get("/employee/:id", async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ ID: req.params.id });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    res.json(employee);
+  } catch (err) {
+    console.error("Error fetching employee:", err);
+    res.status(500).json({ message: "Error fetching employee details", error: err.message });
+  }
+});
+
+// Add new salary record
 router.post("/add", async (req, res) => {
   try {
-    const { name, employeeId, paidHours, grossPay, statutoryPay, deductions, netPay, status } = req.body;
+    const { employeeId, name, basic, additionalIncentives, reductions } = req.body;
 
-    // Validate required fields
-    if (!name || !employeeId || !paidHours || !grossPay || !statutoryPay || !deductions || !netPay || !status) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!employeeId || !name || !basic) {
+      return res.status(400).json({ message: "Employee ID, name, and basic salary are required" });
     }
 
-    // Prevent duplicate Employee ID entries
     const existingSalary = await Salary.findOne({ employeeId });
     if (existingSalary) {
       return res.status(400).json({ message: "Salary record for this Employee ID already exists" });
     }
 
-    // Create a new Salary Record
-    const newSalary = new Salary({ name, employeeId, paidHours, grossPay, statutoryPay, deductions, netPay, status });
+    const newSalary = new Salary({
+      employeeId,
+      name,
+      basic,
+      additionalIncentives: additionalIncentives || 0,
+      reductions: reductions || 0
+    });
+
     await newSalary.save();
-
     res.status(201).json({ message: "Salary record added successfully!", salary: newSalary });
-
   } catch (error) {
     console.error("Error adding salary record:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// @route   DELETE /salaries/delete/:id
-// @desc    Delete a salary record
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    const deletedSalary = await Salary.findByIdAndDelete(req.params.id);
-    if (!deletedSalary) {
-      return res.status(404).json({ message: "Salary record not found" });
-    }
-    res.json({ message: "Salary record deleted successfully" });
-
-  } catch (error) {
-    console.error("Error deleting salary record:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-// @route   PUT /salaries/update/:id
-// @desc    Update a salary record
+// Update salary record
 router.put("/update/:id", async (req, res) => {
   try {
-    const { name, employeeId, paidHours, grossPay, statutoryPay, deductions, netPay, status } = req.body;
+    const { basic, additionalIncentives, reductions } = req.body;
 
     const updatedSalary = await Salary.findByIdAndUpdate(
       req.params.id,
-      { name, employeeId, paidHours, grossPay, statutoryPay, deductions, netPay, status },
+      { 
+        basic,
+        additionalIncentives: additionalIncentives || 0,
+        reductions: reductions || 0
+      },
       { new: true, runValidators: true }
     );
 
@@ -76,25 +78,34 @@ router.put("/update/:id", async (req, res) => {
     }
 
     res.json({ message: "Salary record updated successfully", salary: updatedSalary });
-
   } catch (error) {
     console.error("Error updating salary record:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-// Get a single salary record by ID
+
+// Delete salary record
+router.delete("/delete/:id", async (req, res) => {
+  try {
+    const deletedSalary = await Salary.findByIdAndDelete(req.params.id);
+    if (!deletedSalary) {
+      return res.status(404).json({ message: "Salary record not found" });
+    }
+    res.json({ message: "Salary record deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting salary record:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get single salary record
 router.get("/:id", async (req, res) => {
   try {
-    const salaryId = req.params.id;
-    
-    // Find the salary record by ID
-    const salary = await Salary.findById(salaryId);
-    
+    const salary = await Salary.findById(req.params.id);
     if (!salary) {
       return res.status(404).json({ message: "Salary record not found" });
     }
-
-    res.status(200).json(salary);
+    res.json(salary);
   } catch (error) {
     console.error("Error fetching salary record:", error);
     res.status(500).json({ message: "Internal server error" });
