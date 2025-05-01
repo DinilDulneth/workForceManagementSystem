@@ -14,7 +14,6 @@ import ResignationDemp from "./component/ResignationDemp";
 import ResignationUemp from "./component/ResignationUemp";
 import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
-
 import FetchInquiry from "./component/fetchinquiry";
 import FetchAnnouncement from "./component/fetchAnnouncement";
 import AccessF from "./component/accessF";
@@ -26,17 +25,16 @@ import UpdateHR from "./component/UpdateHR";
 
 export default function HRApp() {
   const links = [
-    // { link: "/", name: "Dashboard", icon: "bi-house-door" },
     {
-      link: "/HRDashboard/AccessF",
-      name: "Access Form",
-      icon: "bi-file-earmark"
+      link: "/HRDashboard",
+      name: "Access View Table",
+      icon: "bi-file-earmark",
     },
 
     {
-      link: "/HRDashboard/AccessV",
-      name: "Access View Table",
-      icon: "bi-file-earmark"
+      link: "/HRDashboard/AccessF",
+      name: "Access Form",
+      icon: "bi-file-earmark",
     },
 
     {
@@ -101,7 +99,7 @@ export default function HRApp() {
     <>
       <DashboardTemp ArrLinkList={links} />
       <Routes>
-        <Route path="/" element={<DashboardHR />} />
+        <Route path="/" element={<AccessV />} />
         <Route path="/FetchEmp" element={<FetchEmp />} />
         <Route path="/fetchHR" element={<FetchHR />} />
         <Route path="/fetchManager" element={<FetchManager />} />
@@ -115,7 +113,6 @@ export default function HRApp() {
         <Route path="/fetchSalary" element={<FetchSalary />} />
         <Route path="/updateSalary/:id" element={<UpdateSalary />} />
         <Route path="/accessF" element={<AccessF />} />
-        <Route path="/accessV" element={<AccessV />} />
         <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
         <Route path="/updateEmployee/:id" element={<UpdateEmployee />} />
         <Route path="/updateManager/:id" element={<UpdateManager />} />
@@ -123,7 +120,7 @@ export default function HRApp() {
         <Route path="/fetchInquiry" element={<FetchInquiry />} />
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
         <Route path="/accessF" element={<AccessF />} />
-        <Route path="/accessV" element={<AccessV />} />
+
         <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
       </Routes>
     </>

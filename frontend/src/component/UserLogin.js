@@ -31,7 +31,7 @@ const UserLogin = () => {
       switch (data.role) {
         case "HR":
           await getHrID(email);
-          navigate("/HRDashboard");
+          navigate("/HRDashboard/AccessV");
           break;
 
         case "Manager":
@@ -221,6 +221,28 @@ const styles = {
   error: {
     color: "red",
     marginBottom: "10px",
+  },
+  registrationButtons: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "20px",
+    width: "100%",
+  },
+  registerButton: {
+    width: "100%",
+    padding: "10px",
+    backgroundColor: "#333",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+    textDecoration: "none",
+    textAlign: "center",
+    "&:hover": {
+      backgroundColor: "#555",
+    },
   },
   backToHome: {
     marginTop: "20px",
