@@ -429,6 +429,7 @@ export default function FetchEmp() {
                                   <th style={{ width: "30px" }}>#</th>
                                   <th style={{ width: "132px" }}>Task Name</th>
                                   <th>Description</th>
+                                  <th style={{ width: "90px" }}>Attachment</th>
                                   <th style={{ width: "112px" }}>Deadline</th>
                                   <th style={{ width: "112px" }}>Start Date</th>
                                   <th style={{ width: "70px" }}>Priority</th>
@@ -460,6 +461,23 @@ export default function FetchEmp() {
                                           />
                                         ) : (
                                           task.description
+                                        )}
+                                      </td>
+                                      <td style={{ width: "90px" }}>
+                                        <span
+                                          className="badge m-1"
+                                          style={{}}
+                                        ></span>
+                                        {task.attachmentPath ? (
+                                          <a
+                                            href={task.attachmentPath}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                          >
+                                            View Attachment
+                                          </a>
+                                        ) : (
+                                          "No Attachment"
                                         )}
                                       </td>
                                       <td style={{ width: "112px" }}>

@@ -54,6 +54,10 @@ const taskSchema = new Schema({
     type: Number,
     required: true,
     default: 1
+  },
+  attachmentPath: {
+    type: String,
+    required: false
   }
 });
 

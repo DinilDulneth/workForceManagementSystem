@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
@@ -13,6 +13,11 @@ export default function TaskDetails() {
   const [editedTask, setEditedTask] = useState({ status: "" });
   const [sortBy, setSortBy] = useState("startDate");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const fileInputRef = useRef(null);
+  const [loadingStates, setLoadingStates] = useState({});
 
   const sortOptions = [
     { value: "startDate", label: "Start Date" },
@@ -328,7 +333,181 @@ export default function TaskDetails() {
     }
   };
 
-  // First, add these styles at the top of your file
+  // Validate file
+  const validateFile = (file) => {
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "application/x-chess-pgn"
+    ];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid File Type",
+        text: "Please upload only PDF, JPG, PNG, or PGN files",
+        confirmButtonColor: "#3085d6"
+      });
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      Swal.fire({
+        icon: "error",
+        title: "File Too Large",
+        text: "File size should not exceed 5MB",
+        confirmButtonColor: "#3085d6"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle file selection
+  const handleFileChange = (e, taskId) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile && validateFile(selectedFile)) {
+      setFile(selectedFile);
+      setSelectedTaskId(taskId);
+      Swal.fire({
+        icon: "info",
+        title: "File Selected",
+        text: `Selected file: ${selectedFile.name}`,
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } else {
+      setFile(null);
+      setSelectedTaskId(null);
+      e.target.value = null;
+    }
+  };
+
+  // Handle attach file
+  const handleAttachFile = async (task) => {
+    if (!file || selectedTaskId !== task._id) {
+      Swal.fire({
+        icon: "warning",
+        title: "Invalid Selection",
+        text: "Please select a file for this task",
+        confirmButtonColor: "#3085d6"
+      });
+      return;
+    }
+
+    setLoadingStates((prev) => ({ ...prev, [task._id]: true }));
+    const formData = new FormData();
+    formData.append("file", file); // Append the file to the FormData object
+
+    try {
+      const loadingSwal = Swal.fire({
+        title: "Uploading...",
+        html: `
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
+      `,
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const response = await axios.put(
+        `http://localhost:8070/task/uploadTaskAttachment/${task._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            const progressBar = document.querySelector(".progress-bar");
+            if (progressBar) {
+              progressBar.style.width = `${percentCompleted}%`;
+              progressBar.textContent = `${percentCompleted}%`;
+            }
+          },
+          timeout: 30000
+        }
+      );
+
+      await loadingSwal.close();
+      await Swal.fire({
+        icon: "success",
+        title: "Attachment Uploaded!",
+        text: response.data.message,
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      // Update local state with new attachmentPath
+      setTasks((prevTasks) =>
+        prevTasks.map((t) =>
+          t._id === task._id
+            ? { ...t, attachmentPath: response.data.task.attachmentPath }
+            : t
+        )
+      );
+
+      // Reset file state
+      setFile(null);
+      setSelectedTaskId(null);
+      const fileInput = document.querySelector(
+        `input[data-task-id="${task._id}"]`
+      );
+      if (fileInput) {
+        fileInput.value = "";
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+      let errorMessage = "Something went wrong while uploading the attachment";
+
+      if (error.response) {
+        errorMessage =
+          error.response.data?.error ||
+          error.response.data?.message ||
+          `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        errorMessage =
+          "Could not reach the server. Please check your connection.";
+      } else if (error.code === "ECONNABORTED") {
+        errorMessage = "Upload timed out. Please try again.";
+      }
+
+      await Swal.fire({
+        icon: "error",
+        title: "Upload Failed",
+        text: errorMessage,
+        confirmButtonColor: "#3085d6",
+        showCancelButton: true,
+        cancelButtonText: "Close",
+        confirmButtonText: "Try Again",
+        allowOutsideClick: false
+      }).then((result) => {
+        if (result.isConfirmed) {
+          handleAttachFile(task);
+        }
+      });
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [task._id]: false }));
+    }
+  };
+
+  // Trigger file input click
+  const triggerFileInput = (taskId) => {
+    const fileInput = document.querySelector(`input[data-task-id="${taskId}"]`);
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
+
   const modernStyles = {
     container: {
       backgroundColor: "#f8f9fa",
@@ -359,7 +538,7 @@ export default function TaskDetails() {
       overflow: "hidden",
       "&:hover": {
         transform: "translateY(-5px)",
-        boxShadow: "0 8px 12px rgba(0, 0, 0, 0.26)"
+        boxShadow: "0 8px 12px rgb(114, 114, 114)"
       }
     },
     filterButton: {
@@ -386,7 +565,6 @@ export default function TaskDetails() {
     }
   };
 
-  // Update the return statement with modern styling
   return (
     <div style={modernStyles.container}>
       <h1 style={modernStyles.header}>Task Dashboard</h1>
@@ -509,6 +687,21 @@ export default function TaskDetails() {
                 </div>
               </div>
 
+              {/* Display current attachment */}
+              {task.attachmentPath && (
+                <div className="mt-2">
+                  <span>Attachment:</span>
+                  <a
+                    href={task.attachmentPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary"
+                  >
+                    View
+                  </a>
+                </div>
+              )}
+
               <div className="mt-3">
                 {editingTaskId === task._id ? (
                   <div className="d-flex gap-2">
@@ -532,6 +725,60 @@ export default function TaskDetails() {
                   >
                     Edit Status
                   </button>
+                )}
+              </div>
+
+              {/* File upload section */}
+              <div className="mt-3">
+                <input
+                  type="file"
+                  data-task-id={task._id}
+                  style={{ display: "none" }}
+                  onChange={(e) => handleFileChange(e, task._id)}
+                  accept=".pdf,.jpg,.jpeg,.png,.pgn"
+                  disabled={loadingStates[task._id] || false}
+                />
+                <button
+                  className="btn w-100 mb-2"
+                  onClick={() => triggerFileInput(task._id)}
+                  style={{
+                    backgroundColor: "#6c757d",
+                    color: "white"
+                  }}
+                  disabled={loadingStates[task._id] || false}
+                >
+                  {loadingStates[task._id] ? "Processing..." : "Attach File"}
+                </button>
+                {file && selectedTaskId === task._id && (
+                  <div className="mt-2">
+                    <small className="text-muted">Selected: {file.name}</small>
+                    <button
+                      className="btn btn-primary w-100 mt-2"
+                      onClick={() => handleAttachFile(task)}
+                      disabled={loadingStates[task._id] || false}
+                    >
+                      {loadingStates[task._id] ? (
+                        <span>
+                          <span className="spinner-border spinner-border-sm me-2" />
+                          Uploading...
+                        </span>
+                      ) : (
+                        "Upload File"
+                      )}
+                    </button>
+                  </div>
+                )}
+                {task.attachmentPath && (
+                  <div className="mt-2">
+                    <a
+                      href={task.attachmentPath}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline-primary w-100"
+                    >
+                      View Attachment
+                    </a>
+                  </div>
                 )}
               </div>
             </div>
