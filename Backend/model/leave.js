@@ -4,8 +4,10 @@ const Schema = mongoose.Schema;
 const leaveSchema = new Schema(
   {
     id: {
-      type: Number,
-      required: true
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      auto: true
     },
     department: {
       type: String,
@@ -18,6 +20,10 @@ const leaveSchema = new Schema(
     date: {
       type: Date,
       required: true
+    },
+    session: {
+      type: String,
+      required: false
     },
     medicalCertificate: {
       type: String,
