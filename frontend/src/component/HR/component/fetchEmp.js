@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faFilter, faFilePdf,faTrash } from "@fortawesome/free-solid-svg-icons";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function FetchEmp() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState("all");
+  const [advancedSearch, setAdvancedSearch] = useState(false);
 
   useEffect(() => {
     getEmployee();
@@ -15,17 +24,14 @@ export default function FetchEmp() {
     setLoading(true);
     setError(null);
 
-    // Try to fetch from API with timeout
     const fetchPromise = axios.get("http://localhost:8070/employee/getEmp", {
-      timeout: 5000 // 5 second timeout
+      timeout: 5000
     });
 
-    // Set a timeout promise
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("Request timed out")), 5000)
     );
 
-    // Race between fetch and timeout
     Promise.race([fetchPromise, timeoutPromise])
       .then((res) => {
         setEmployees(res.data);
@@ -33,19 +39,125 @@ export default function FetchEmp() {
       })
       .catch((err) => {
         console.error("Error fetching employees:", err);
-        setError("Could not connect to the server. Using sample data instead.");
+        setError("Could not connect to the server. Please try again.");
         setLoading(false);
       });
   }
 
-  // Function to retry API call
   const handleRetry = () => {
     getEmployee();
   };
 
-  // Function to determine status class
-  const getStatusClass = (status) => {
-    return status === "1" || status === 1 ? "status-active" : "status-inactive";
+  // Filter employees based on search criteria
+  const filteredEmployees = employees.filter((employee) => {
+    if (!searchTerm) return true;
+
+    const term = searchTerm.toLowerCase();
+
+    switch (searchField) {
+      case "name":
+        return employee.name?.toLowerCase().includes(term);
+      case "email":
+        return employee.email?.toLowerCase().includes(term);
+      case "position":
+        return employee.position?.toLowerCase().includes(term);
+      case "department":
+        return employee.department?.toLowerCase().includes(term);
+      case "all":
+      default:
+        return Object.values(employee).some((value) =>
+          String(value).toLowerCase().includes(term)
+        );
+    }
+  });
+
+  const downloadEmployeesAsPDF = () => {
+    try {
+      toast.info("Preparing employee list PDF...", {
+        position: "top-right",
+        autoClose: 2000
+      });
+
+      const doc = new jsPDF();
+
+      // Add title and header
+      doc.setFontSize(20);
+      doc.setTextColor(44, 62, 80);
+      doc.text("Employee List Report", 14, 15);
+
+      // Add date
+      doc.setFontSize(10);
+      doc.setTextColor(108, 117, 125);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
+
+      const tableColumn = [
+        "Name",
+        "Position",
+        "Department",
+        "Email",
+        "Phone",
+        "Salary",
+        "JoinDate",
+        "Status"
+      ];
+
+      const tableRows = filteredEmployees.map(employee => [
+        employee.name || "N/A",
+        employee.position || "N/A",
+        employee.department || "N/A",
+        employee.email || "N/A",
+        employee.phone || "N/A",
+        employee.salary ? `$${employee.salary.toLocaleString()}` : "N/A",
+        employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString() : "N/A",
+        employee.availability === "1" || employee.availability === 1 ? "Active" : "Inactive"
+      ]);
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 35,
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [252, 102, 37],
+          textColor: [255, 255, 255],
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245]
+        },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 20 }
+        },
+        margin: { top: 35 }
+      });
+
+      doc.save(`Employee_List_${new Date().toISOString().split('T')[0]}.pdf`);
+      //doc.save(`HR_Officer_${new Date().toISOString().split('T')[0]}.pdf`);
+
+
+      toast.success("PDF downloaded successfully!", {
+        position: "top-right",
+        autoClose: 2000
+      });
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+      toast.error("Failed to generate PDF. Please try again.", {
+        position: "top-right",
+        autoClose: 3000
+      });
+    }
   };
 
   if (loading) {
@@ -59,13 +171,25 @@ export default function FetchEmp() {
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
-          <p style={{ marginTop: "20px", color: "#666" }}>
-            Loading employee data...
-          </p>
+          <p style={{ marginTop: "20px", color: "#666" }}>Loading employee data...</p>
         </div>
       </div>
     );
   }
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      axios.delete(`http://localhost:8070/employee/deleteEmp/${id}`)
+        .then(() => {
+          toast.success('Employee deleted successfully');
+          getEmployee(); // Refresh the list
+        })
+        .catch(err => {
+          console.error('Delete error:', err);
+          toast.error('Failed to delete employee');
+        });
+    }
+  };
 
   return (
     <div style={styles.mainContent}>
@@ -74,18 +198,66 @@ export default function FetchEmp() {
         <span style={styles.headerUnderline}></span>
       </h2>
 
-      {error && (
-        <div
-          className="alert alert-warning alert-dismissible fade show"
-          role="alert"
-        >
-          <strong>Note:</strong> {error}
+      <div style={styles.searchContainer}>
+        <div style={styles.searchControls}>
           <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="alert"
-            aria-label="Close"
-          ></button>
+            style={{
+              ...styles.advancedSearchButton,
+              backgroundColor: advancedSearch ? "#fc6625" : "#fff",
+              color: advancedSearch ? "#fff" : "#666"
+            }}
+            onClick={() => setAdvancedSearch(!advancedSearch)}
+          >
+            <FontAwesomeIcon icon={faFilter} style={styles.filterIcon} />
+            Filter
+          </button>
+
+          <div style={styles.searchWrapper}>
+            <FontAwesomeIcon icon={faSearch} style={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder={`Search ${searchField === "all" ? "employees" : searchField}...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
+
+          <button
+            onClick={downloadEmployeesAsPDF}
+            style={{
+              ...styles.pdfButton,
+              opacity: filteredEmployees.length === 0 ? 0.7 : 1,
+              cursor: filteredEmployees.length === 0 ? 'not-allowed' : 'pointer'
+            }}
+            disabled={filteredEmployees.length === 0}
+          >
+            <FontAwesomeIcon icon={faFilePdf} style={styles.filterIcon} />
+            Export PDF
+          </button>
+        </div>
+
+        {advancedSearch && (
+          <div style={styles.searchOptions}>
+            <select
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value)}
+              style={styles.searchSelect}
+            >
+              <option value="all">All Fields</option>
+              <option value="name">Name</option>
+              <option value="email">Email</option>
+              <option value="position">Position</option>
+              <option value="department">Department</option>
+            </select>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="alert alert-warning alert-dismissible fade show" role="alert">
+          <strong>Note:</strong> {error}
+          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           <div className="mt-2">
             <button className="btn btn-sm btn-primary" onClick={handleRetry}>
               Retry Connection
@@ -95,66 +267,63 @@ export default function FetchEmp() {
       )}
 
       <div style={styles.cardContainer}>
-        {employees.map((employee) => (
-          <div
-            key={employee._id}
-            style={styles.employeeCard}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-5px)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0)")
-            }
-          >
-            <div style={styles.cardHeader}>
-              <h6 style={{ margin: 0 }}>{employee.name}</h6>
+        {filteredEmployees.length > 0 ? (
+          filteredEmployees.map((employee) => (
+            <div
+              key={employee._id}
+              style={styles.employeeCard}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+            >
+              <div style={styles.cardHeader}>
+              <div style={styles.cardHeaderContent}>
+                <h6 style={{ margin: 0 }}>{employee.name}</h6>
+                <FontAwesomeIcon 
+      icon={faTrash} 
+      style={styles.deleteIcon}
+      onClick={() => handleDelete(employee._id)}
+      title="Delete Employee"
+    />
+    </div>
+              </div>
+              <div style={styles.cardBody}>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Position:</strong> {employee.position}
+                </p>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Department:</strong> {employee.department}
+                </p>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Phone:</strong> {employee.phone}
+                </p>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Salary:</strong> ${employee.salary?.toLocaleString() || "N/A"}
+                </p>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Joined:</strong>{" "}
+                  {employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString() : "N/A"}
+                </p>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Email:</strong> {employee.email}
+                </p>
+                <p style={styles.infoRow}>
+                  <strong style={styles.infoLabel}>Status:</strong>{" "}
+                  <span
+                    style={{
+                      ...styles.statusIndicator,
+                      backgroundColor: employee.availability === "1" || employee.availability === 1 ? "#2ecc71" : "#e74c3c"
+                    }}
+                  ></span>
+                  {employee.availability === "1" || employee.availability === 1 ? "Active" : "Inactive"}
+                </p>
+              </div>
             </div>
-            <div style={styles.cardBody}>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Position:</strong>{" "}
-                {employee.position}
-              </p>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Department:</strong>{" "}
-                {employee.department}
-              </p>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Phone:</strong>{" "}
-                {employee.phone}
-              </p>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Salary:</strong> $
-                {employee.salary?.toLocaleString() || "N/A"}
-              </p>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Joined:</strong>{" "}
-                {employee.dateOfJoining
-                  ? new Date(employee.dateOfJoining).toLocaleDateString()
-                  : "N/A"}
-              </p>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Email:</strong>{" "}
-                {employee.email}
-              </p>
-              <p style={styles.infoRow}>
-                <strong style={styles.infoLabel}>Status:</strong>{" "}
-                <span
-                  style={{
-                    ...styles.statusIndicator,
-                    backgroundColor:
-                      employee.availability === "1" ||
-                      employee.availability === 1
-                        ? "#2ecc71"
-                        : "#e74c3c"
-                  }}
-                ></span>
-                {employee.availability === "1" || employee.availability === 1
-                  ? "Active"
-                  : "Inactive"}
-              </p>
-            </div>
+          ))
+        ) : (
+          <div style={styles.noResults}>
+            <p>No employees found matching your search criteria.</p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -231,5 +400,131 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "calc(100vh - 70px)"
+  },
+  searchContainer: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "30px",
+    padding: "0 20px"
+  },
+  searchWrapper: {
+    position: "relative",
+    width: "100%",
+    maxWidth: "500px"
+  },
+  searchIcon: {
+    position: "absolute",
+    left: "15px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "#666"
+  },
+  searchInput: {
+    width: "100%",
+    padding: "12px 20px 12px 45px",
+    fontSize: "16px",
+    border: "2px solid #ddd",
+    borderRadius: "25px",
+    outline: "none",
+    transition: "border-color 0.3s ease",
+    "&:focus": {
+      borderColor: "#fc6625"
+    }
+  },
+  searchControls: {
+    display: "flex",
+    gap: "15px",
+    width: "100%",
+    maxWidth: "700px"
+  },
+
+  advancedSearchButton: {
+    padding: "10px 20px",
+    borderRadius: "25px",
+    border: "2px solid #ddd",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.3s ease",
+    fontSize: "14px",
+    fontWeight: "500"
+  },
+
+  filterIcon: {
+    fontSize: "12px"
+  },
+
+  searchOptions: {
+    marginTop: "15px",
+    display: "flex",
+    justifyContent: "center",
+    gap: "15px",
+    width: "100%",
+    maxWidth: "700px"
+  },
+  searchSelect: {
+    padding: "8px 15px",
+    borderRadius: "20px",
+    border: "2px solid #ddd",
+    outline: "none",
+    fontSize: "14px",
+    cursor: "pointer",
+    backgroundColor: "#fff",
+    transition: "border-color 0.3s ease",
+    "&:focus": {
+      borderColor: "#fc6625"
+    }
+  },
+  cardHeaderContent: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%"
+},
+
+cardTitle: {
+  margin: 0,
+  fontSize: "1.1rem",
+  fontWeight: "600"
+},
+
+  pdfButton: {
+    padding: "10px 20px",
+    borderRadius: "25px",
+    border: "none",
+    backgroundColor: "#fc6625",
+    color: "#ffffff",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.3s ease",
+    fontSize: "14px",
+    fontWeight: "500",
+    "&:hover": {
+      backgroundColor: "#e55a1c"
+    },
+    "&:disabled": {
+      backgroundColor: "#cccccc",
+      cursor: "not-allowed",
+      opacity: 0.7
+    },
+  
+
+   deleteIcon: {
+  fontSize: "16px",
+  color: "#ffffff",
+  opacity: "0.8",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  padding: "4px",
+  "&:hover": {
+    opacity: "1",
+    transform: "scale(1.1)"
+  },
+  "&:active": {
+    transform: "scale(0.95)"
   }
+}}
 };

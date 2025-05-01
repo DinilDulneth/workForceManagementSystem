@@ -19,6 +19,7 @@
     "express": "^4.21.2",
     "jwt-decode": "^4.0.0",
     "mongoose": "^8.10.1",
+    "nodemailer": "^6.10.1",
     "nodemon": "^3.1.9",
     "react-chartjs-2": "^5.3.0"
   }

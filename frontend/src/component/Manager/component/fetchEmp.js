@@ -8,6 +8,7 @@ import "jspdf-autotable";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import "react-confirm-alert/src/react-confirm-alert.css";
+// import sendTaskNotification from "../../../services/sendEmails"; // Import the sendGmail function
 
 export default function FetchEmp() {
   // Retrieve user data from localStorage
@@ -180,6 +181,19 @@ export default function FetchEmp() {
     axios
       .post("http://localhost:8070/task/add", newTask)
       .then((res) => {
+        // Find employee email from employees array
+        const employee = employees.find((emp) => emp._id === id);
+        if (employee && employee.email) {
+          // Send email notification
+          sendTaskNotification(newTask, employee.email)
+            .then(() => {
+              console.log("Task notification email sent");
+            })
+            .catch((error) => {
+              console.error("Failed to send task notification:", error);
+            });
+        }
+
         Swal.fire("Success!", "Task Added Successfully! ✅", "success");
         setName("");
         setdescription("");
@@ -193,6 +207,31 @@ export default function FetchEmp() {
       });
     console.log(newTask);
   }
+
+  const sendTaskNotification = async (taskDetails, employeeEmail) => {
+    try {
+      const response = await fetch(
+        "http://localhost:8070/api/gmail/send-task-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ taskDetails, employeeEmail })
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log(result.message);
+      } else {
+        console.error("Error:", result.error);
+      }
+    } catch (error) {
+      console.error("Error sending task notification:", error);
+    }
+  };
+
   function handleEditClick(task) {
     setEditingTaskId(task._id);
     setEditedTask({ ...task });
@@ -618,14 +657,16 @@ export default function FetchEmp() {
                                   />
                                   <input
                                     type="date"
-                                    className=" mb-0 form-control"
+                                    className="mb-0 form-control"
                                     placeholder="Task Deadline..."
                                     value={deadLine}
                                     onChange={(e) =>
                                       setdeadLine(e.target.value)
                                     }
+                                    min={new Date().toISOString().split("T")[0]}
                                     required
                                   />
+
                                   <input
                                     type="text"
                                     className="mb-0 form-control"

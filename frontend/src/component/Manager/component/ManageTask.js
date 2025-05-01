@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import logo from "../../../assets/images/logo1.png";
 
 export default function ManageTask() {
   // Retrieve user data from localStorage
@@ -131,6 +132,18 @@ export default function ManageTask() {
     axios
       .post("http://localhost:8070/task/add", newTask)
       .then((res) => {
+        // Find employee email from employees array
+        const employee = employees.find((emp) => emp._id === empID);
+        if (employee && employee.email) {
+          // Send email notification
+          sendTaskNotification(newTask, employee.email)
+            .then(() => {
+              console.log("Task notification email sent");
+            })
+            .catch((error) => {
+              console.error("Failed to send task notification:", error);
+            });
+        }
         Swal.fire("Success!", "Task Added Successfully! ✅", "success");
         setName("");
         setdescription("");
@@ -144,6 +157,29 @@ export default function ManageTask() {
       });
     console.log(newTask);
   }
+  const sendTaskNotification = async (taskDetails, employeeEmail) => {
+    try {
+      const response = await fetch(
+        "http://localhost:8070/api/gmail/send-task-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ taskDetails, employeeEmail })
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log(result.message);
+      } else {
+        console.error("Error:", result.error);
+      }
+    } catch (error) {
+      console.error("Error sending task notification:", error);
+    }
+  };
 
   function handleEditClick(task) {
     setEditingTaskId(task._id);
@@ -219,7 +255,6 @@ export default function ManageTask() {
   });
 
   const downloadTasksAsPDF = () => {
-    // Show a toast notification for starting the download
     toast.info("Preparing your PDF...", {
       position: "top-right",
       autoClose: 2000
@@ -227,54 +262,102 @@ export default function ManageTask() {
 
     const doc = new jsPDF();
 
-    // Title
-    doc.setFontSize(18);
-    doc.text("Recent Tasks List", 10, 10);
+    const img = new Image();
+    img.src = logo;
+    img.onload = function () {
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const imgWidth = 50;
+      const imgHeight = 30;
+      const padding = 10;
 
-    // Table
-    const tableColumn = [
-      "Task No.",
-      "Task Name",
-      "Description",
-      "Status",
-      "Employee ID",
-      "Deadline",
-      "Start Date",
-      "End Date",
-      "Priority"
-    ];
-    const tableRows = [];
+      doc.addImage(img, "PNG", padding, padding, imgWidth, imgHeight);
 
-    filteredTasks.forEach((task, index) => {
-      const taskData = [
-        index + 1,
-        task.tName,
-        task.description,
-        getTaskStatusLabel(task.status),
-        task.empID,
-        new Date(task.deadLine).toLocaleDateString(),
-        new Date(task.startDate).toLocaleDateString(),
-        task.endDate ? new Date(task.endDate).toLocaleDateString() : "N/A",
-        task.priority
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      doc.text("Recent Tasks List", pageWidth / 2, padding + imgHeight / 2, {
+        align: "center"
+      });
+
+      const currentDate = new Date().toLocaleDateString();
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Date: ${currentDate}`, pageWidth - padding, padding + 10, {
+        align: "right"
+      });
+
+      doc.setDrawColor(0); // Black color
+      doc.setLineWidth(0.5);
+      doc.line(
+        padding,
+        padding + imgHeight + 5,
+        pageWidth - padding,
+        padding + imgHeight + 5
+      );
+
+      // Table
+      const tableColumn = [
+        "Task No.",
+        "Task Name",
+        "Description",
+        "Status",
+        "Employee ID",
+        "Deadline",
+        "Start Date",
+        "End Date",
+        "Priority"
       ];
-      tableRows.push(taskData);
-    });
+      const tableRows = [];
 
-    // Add table to the PDF
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20
-    });
+      filteredTasks.forEach((task, index) => {
+        const taskData = [
+          index + 1,
+          task.tName,
+          task.description,
+          getTaskStatusLabel(task.status),
+          task.empID,
+          new Date(task.deadLine).toLocaleDateString(),
+          new Date(task.startDate).toLocaleDateString(),
+          task.endDate ? new Date(task.endDate).toLocaleDateString() : "N/A",
+          task.priority
+        ];
+        tableRows.push(taskData);
+      });
 
-    // Save the PDF
-    doc.save("Recent_Tasks_List.pdf");
+      const startY = padding + imgHeight + 15;
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: startY,
+        styles: { fontSize: 10 },
+        theme: "grid"
+      });
 
-    // Show a toast notification for successful download
-    toast.success("PDF downloaded successfully!", {
-      position: "top-right",
-      autoClose: 2000
-    });
+      // Footer
+      const footerText = "Confidential - Company Name";
+      const addFooter = (pageNum, totalPages) => {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.text(
+          `Page ${pageNum} of ${totalPages} | ${footerText}`,
+          pageWidth / 2,
+          pageHeight - padding,
+          { align: "center" }
+        );
+      };
+
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        addFooter(i, totalPages);
+      }
+      doc.save("Recent_Tasks_List.pdf");
+
+      toast.success("PDF downloaded successfully!", {
+        position: "top-right",
+        autoClose: 2000
+      });
+    };
   };
   return (
     <div

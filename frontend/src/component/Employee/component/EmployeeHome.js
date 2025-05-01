@@ -17,6 +17,7 @@ export default function EmployeeHome() {
   const [progressData, setProgressData] = useState({});
   const [workingHData, setWorkingHData] = useState({});
   const [selectedStatus, setSelectedStatus] = useState("");
+
   const downloadTasksAsPDF = () => {
     // Show a toast notification for starting the download
     toast.info("Preparing your PDF...", {
