@@ -12,30 +12,23 @@ import {
   Chip,
   LinearProgress,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   FormControl,
   Select,
   MenuItem,
   InputLabel,
+  TextField,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import PersonIcon from "@mui/icons-material/Person";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import BusinessIcon from "@mui/icons-material/Business";
 import MessageIcon from "@mui/icons-material/Message";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import TitleIcon from "@mui/icons-material/Title";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 function FetchInquiry() {
   const navigate = useNavigate();
@@ -46,14 +39,6 @@ function FetchInquiry() {
     open: false,
     message: "",
     severity: "success",
-  });
-  const [editDialog, setEditDialog] = useState(false);
-  const [editingInquiry, setEditingInquiry] = useState({
-    _id: "",
-    inquiry: "",
-    title: "",
-    department: "",
-    employeeId: "",
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -79,7 +64,6 @@ function FetchInquiry() {
       .finally(() => setLoading(false));
   }
 
-  // Filter out HR department inquiries
   const filterNonHRInquiries = (inquiries) => {
     return inquiries.filter((inq) => inq.department !== "HR");
   };
@@ -109,59 +93,6 @@ function FetchInquiry() {
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === "newest" ? "oldest" : "newest");
   };
-
-  function handleDelete(id) {
-    if (window.confirm("Are you sure you want to delete this inquiry?")) {
-      axios
-        .delete(`http://localhost:8070/api/inquiry/deleteInquiry/${id}`)
-        .then(() => {
-          setSnackbar({
-            open: true,
-            message: "Inquiry deleted successfully!",
-            severity: "success",
-          });
-          getInquiry();
-        })
-        .catch((error) => {
-          console.error("Error deleting inquiry:", error);
-          setSnackbar({
-            open: true,
-            message: "Error deleting inquiry: " + error.message,
-            severity: "error",
-          });
-        });
-    }
-  }
-
-  function handleUpdate() {
-    axios
-      .put(
-        `http://localhost:8070/api/inquiry/updateInquiry/${editingInquiry._id}`,
-        {
-          inquiry: editingInquiry.inquiry,
-          title: editingInquiry.title,
-          department: editingInquiry.department,
-          employeeId: editingInquiry.employeeId,
-        }
-      )
-      .then((response) => {
-        setSnackbar({
-          open: true,
-          message: "Inquiry updated successfully!",
-          severity: "success",
-        });
-        getInquiry();
-        setEditDialog(false);
-      })
-      .catch((error) => {
-        console.error("Error updating inquiry:", error);
-        setSnackbar({
-          open: true,
-          message: "Error updating inquiry: " + error.message,
-          severity: "error",
-        });
-      });
-  }
 
   const sortedInquiries = sortInquiries(inquiry);
   const nonHRInquiries = filterNonHRInquiries(sortedInquiries);
@@ -429,58 +360,6 @@ function FetchInquiry() {
                         }}
                       />
                     </Box>
-
-                    <Box sx={{ display: "flex", gap: 2 }}>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          variant="outlined"
-                          startIcon={<EditIcon />}
-                          onClick={() => {
-                            setEditingInquiry({
-                              _id: inq._id,
-                              inquiry: inq.inquiry,
-                              title: inq.title || "",
-                              department: inq.department,
-                              employeeId: inq.employeeId,
-                            });
-                            setEditDialog(true);
-                          }}
-                          sx={{
-                            color: "#fc6625",
-                            borderColor: "#fc6625",
-                            "&:hover": {
-                              borderColor: "#e55a1c",
-                              backgroundColor: "rgba(252, 102, 37, 0.1)",
-                            },
-                          }}
-                        >
-                          Update
-                        </Button>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          variant="outlined"
-                          startIcon={<DeleteIcon />}
-                          onClick={() => handleDelete(inq._id)}
-                          sx={{
-                            color: "#e55a1c",
-                            borderColor: "#e55a1c",
-                            "&:hover": {
-                              borderColor: "#fc6625",
-                              backgroundColor: "rgba(229, 90, 28, 0.1)",
-                            },
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </motion.div>
-                    </Box>
                   </Box>
                 </Box>
               </Card>
@@ -488,88 +367,6 @@ function FetchInquiry() {
           ))}
         </AnimatePresence>
       </motion.div>
-
-      <Dialog
-        open={editDialog}
-        onClose={() => setEditDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ color: "#fc6625", fontWeight: 600 }}>
-          Edit Inquiry
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Title"
-            value={editingInquiry.title || ""}
-            onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                title: e.target.value,
-              })
-            }
-            sx={{ mt: 2, mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Inquiry"
-            value={editingInquiry.inquiry}
-            onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                inquiry: e.target.value,
-              })
-            }
-            multiline
-            rows={4}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Department"
-            value={editingInquiry.department}
-            onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                department: e.target.value,
-              })
-            }
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Employee ID"
-            value={editingInquiry.employeeId}
-            onChange={(e) =>
-              setEditingInquiry({
-                ...editingInquiry,
-                employeeId: e.target.value,
-              })
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setEditDialog(false)}
-            sx={{ color: "#8f9491" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpdate}
-            sx={{
-              backgroundColor: "#fc6625",
-              color: "white",
-              "&:hover": {
-                backgroundColor: "#e55a1c",
-              },
-            }}
-          >
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Snackbar
         open={snackbar.open}

@@ -259,38 +259,54 @@ export default function FetchAnnouncement() {
                       }}
                     />
                   </Box>
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <Button
-                      startIcon={<EditIcon />}
-                      onClick={() => {
-                        setEditingAnnouncement({
-                          _id: ann._id,
-                          title: ann.title,
-                          message: ann.message,
-                        });
-                        setEditDialog(true);
-                      }}
-                      sx={{
-                        color: "#fc6625",
-                        "&:hover": {
-                          backgroundColor: "rgba(252, 102, 37, 0.1)",
-                        },
-                      }}
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      Edit
-                    </Button>
-                    <Button
-                      startIcon={<DeleteIcon />}
-                      onClick={() => handleDelete(ann._id)}
-                      sx={{
-                        color: "#e55a1c",
-                        "&:hover": {
-                          backgroundColor: "rgba(229, 90, 28, 0.1)",
-                        },
-                      }}
+                      <Button
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        onClick={() => {
+                          setEditingAnnouncement({
+                            _id: ann._id,
+                            title: ann.title,
+                            message: ann.message,
+                          });
+                          setEditDialog(true);
+                        }}
+                        sx={{
+                          color: "#fc6625",
+                          borderColor: "#fc6625",
+                          "&:hover": {
+                            borderColor: "#e55a1c",
+                            backgroundColor: "rgba(252, 102, 37, 0.1)",
+                          },
+                        }}
+                      >
+                        Update
+                      </Button>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      Delete
-                    </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => handleDelete(ann._id)}
+                        sx={{
+                          color: "#e55a1c",
+                          borderColor: "#e55a1c",
+                          "&:hover": {
+                            borderColor: "#fc6625",
+                            backgroundColor: "rgba(229, 90, 28, 0.1)",
+                          },
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </motion.div>
                   </Box>
                 </Box>
               </Card>
