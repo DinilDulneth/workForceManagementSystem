@@ -26,10 +26,12 @@ function App() {
         <Route path="/EmployeeHome/*" element={<EmployeeApp />} />
         <Route path="/About" element={<About />} />
         <Route path="/ContactUs" element={<ContactUs />} />
-        <Route path="/register" element={<RegisterPage/>}/>
-        <Route path="/employee-register" element={<EmployeeRegisterForm/>}/>
-        <Route path="/hr-register" element={<HRRegisterForm/>}/>
-        <Route path="/manager-register" element={<ManagerRegisterForm/>}/>
+
+        {/* registration */}
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/employee-register" element={<EmployeeRegisterForm />} />
+        <Route path="/hr-register" element={<HRRegisterForm />} />
+        <Route path="/manager-register" element={<ManagerRegisterForm />} />
 
         {/* test */}
         <Route path="/test" element={<Test />} />
