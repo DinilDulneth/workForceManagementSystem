@@ -34,7 +34,7 @@ router.post("/send-task-notification", async (req, res) => {
   const mailOptions = {
     from: {
       name: "WorkSync",
-      address: process.env.EMAIL_USER || "dinildulnethl@gmail.com"
+      address: "dinildulnethl@gmail.com" //address: process.env.EMAIL_USER || "dinildulnethl@gmail.com"
     },
     to: "dinildulneth123@gmail.com",
     subject: "New Task Assignment",
@@ -137,7 +137,7 @@ router.post("/send-task-completed-notification", async (req, res) => {
   const mailOptions = {
     from: {
       name: "WorkSync",
-      address: process.env.EMAIL_USER
+      address: "dinildulnethl@gmail.com" //address: process.env.EMAIL_USER || "dinildulnethl@gmail.com"
     },
     to: "dinildulneth123@gmail.com",
     subject: "Task Completed Notification",
