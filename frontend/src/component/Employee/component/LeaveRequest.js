@@ -182,12 +182,33 @@ export default function LeaveRequest() {
 
   const handleUpdate = async (values, { resetForm, setSubmitting }) => {
     try {
-      const response = await axios.put(`/leave/update/${editId}`, {
-        ...values,
-        id: employeeId
+      console.log("Updating leave with values:", values);
+
+      const formData = new FormData();
+      formData.append('employeeId', employeeId);
+      formData.append('department', values.department);
+      formData.append('leavetype', values.leavetype);
+      formData.append('date', values.date);
+      formData.append('session', values.session || '');
+      formData.append('medicalCertificate', values.medicalCertificate || '');
+
+      // Add image if it's a sick leave and a new image is selected
+      if (values.leavetype === 'Sick Leave' && values.image) {
+        formData.append('image', values.image);
+      }
+
+      console.log("Sending update request to:", `/leave/update/${editId}`);
+
+      const response = await axios.put(`http://localhost:8070/leave/update/${editId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
+
+      console.log("Update response:", response.data);
+
       if (response.data) {
-        toast.success("Leave request updated successfully");
+        toast.success("Leave request updated successfully!");
         setIsEditing(false);
         setEditId(null);
         resetForm();
@@ -195,7 +216,22 @@ export default function LeaveRequest() {
       }
     } catch (error) {
       console.error("Error updating leave:", error);
-      toast.error("Failed to update leave request");
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+        toast.error(error.response.data.error || "Failed to update leave request");
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Error request:", error.request);
+        toast.error("No response received from server");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error message:", error.message);
+        toast.error("Error setting up the request");
+      }
     } finally {
       setSubmitting(false);
     }
