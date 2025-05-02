@@ -49,13 +49,15 @@ router.get("/getempRes", async (req, res) => {
 //   }
 // });
 
-// Fetch resignation by empID
+// Fetch resignation by ID
 router.get("/getempResByID/:id", async (req, res) => {
   try {
     const empId = req.params.id;
+    console.log("Searching for empId:", empId); // Add logging
 
     // Find resignations by empID
     const resignations = await empResignation.find({ empId: empId });
+    console.log("Found resignations:", resignations); // Add logging
 
     if (!resignations || resignations.length === 0) {
       return res
@@ -66,7 +68,35 @@ router.get("/getempResByID/:id", async (req, res) => {
     res.status(200).json(resignations);
   } catch (error) {
     console.error("Error fetching resignation records:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+// Get resignation by empId
+router.get("/getempResByEmpId/:empId", async (req, res) => {
+  try {
+    const empId = req.params.empId;
+    console.log("Searching for empId:", empId);
+
+    // Find resignation(s) by empId
+    const resignations = await empResignation.find({ empId: empId });
+    console.log("Found resignations:", resignations);
+
+    if (!resignations || resignations.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No resignation records found for this employee" });
+    }
+
+    // Return the first resignation
+    res.status(200).json(resignations[0]); // Or return resignations for all
+  } catch (error) {
+    console.error("Error fetching resignation record:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 

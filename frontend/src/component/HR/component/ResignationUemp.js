@@ -5,26 +5,30 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from "sweetalert2";
 
 export default function UpdateResignation() {
-  const { id } = useParams();
+  const { id } = useParams(); // Changed from id to empId
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resignation, setResignation] = useState({
     empId: "",
     Reason: "",
-    endDate: "",
+    endDate: ""
   });
 
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`http://localhost:8070/resignation/getempResByID/${id}`)
+      .get(`http://localhost:8070/resignation/getempResByEmpId/${id}`) // Update endpoint if using new route
       .then((res) => {
-        setResignation(res.data);
+        setResignation(res.data); // Assumes single object response
         setLoading(false);
       })
       .catch((err) => {
-        setError("Error fetching resignation: " + err.message);
+        const errorMessage =
+          err.response?.status === 404
+            ? "No resignation record found for this employee."
+            : "Error fetching resignation: " + err.message;
+        setError(errorMessage);
         setLoading(false);
       });
   }, [id]);
@@ -35,12 +39,12 @@ export default function UpdateResignation() {
     const updatedResignation = {
       empId: resignation.empId,
       Reason: resignation.Reason,
-      endDate: resignation.endDate,
+      endDate: resignation.endDate
     };
 
     axios
       .put(
-        `http://localhost:8070/resignation/updateempRes/${id}`,
+        `http://localhost:8070/resignation/updateempRes/${resignation._id}`, // Use _id for update
         updatedResignation
       )
       .then(() => {
@@ -49,7 +53,6 @@ export default function UpdateResignation() {
           "Resignation has been updated successfully.",
           "success"
         );
-
         navigate("/HRDashboard/ResignationVemp");
       })
       .catch((err) => {
@@ -61,7 +64,7 @@ export default function UpdateResignation() {
     const { name, value } = e.target;
     setResignation({
       ...resignation,
-      [name]: value,
+      [name]: value
     });
   }
 
@@ -152,6 +155,7 @@ export default function UpdateResignation() {
   );
 }
 
+// Styles (unchanged)
 const styles = {
   pageContainer: {
     marginLeft: "250px",
@@ -160,51 +164,51 @@ const styles = {
     width: "calc(100% - 250px)",
     minHeight: "calc(100vh - 60px)",
     backgroundColor: "#f5f5f5",
-    marginTop: "60px",
+    marginTop: "60px"
   },
   container: {
     maxWidth: "800px",
     margin: "0 auto",
-    padding: "20px",
+    padding: "20px"
   },
   loadingContainer: {
     textAlign: "center",
-    marginTop: "2rem",
+    marginTop: "2rem"
   },
   loadingText: {
     marginTop: "1rem",
-    color: "#666",
+    color: "#666"
   },
   card: {
     backgroundColor: "#fff",
     borderRadius: "8px",
     boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
-    overflow: "hidden",
+    overflow: "hidden"
   },
   cardHeader: {
     backgroundColor: "#ff7043",
     padding: "20px",
-    color: "#fff",
+    color: "#fff"
   },
   title: {
     margin: 0,
     fontSize: "24px",
-    fontWeight: "500",
+    fontWeight: "500"
   },
   cardBody: {
-    padding: "30px",
+    padding: "30px"
   },
   form: {
-    width: "100%",
+    width: "100%"
   },
   formGroup: {
-    marginBottom: "20px",
+    marginBottom: "20px"
   },
   label: {
     display: "block",
     marginBottom: "8px",
     color: "#333",
-    fontWeight: "500",
+    fontWeight: "500"
   },
   input: {
     width: "100%",
@@ -212,11 +216,7 @@ const styles = {
     borderRadius: "4px",
     border: "1px solid #ddd",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    "&:focus": {
-      borderColor: "#ff7043",
-      outline: "none",
-    },
+    transition: "border-color 0.3s ease"
   },
   textarea: {
     width: "100%",
@@ -226,16 +226,12 @@ const styles = {
     fontSize: "14px",
     minHeight: "100px",
     resize: "vertical",
-    transition: "border-color 0.3s ease",
-    "&:focus": {
-      borderColor: "#ff7043",
-      outline: "none",
-    },
+    transition: "border-color 0.3s ease"
   },
   buttonGroup: {
     display: "flex",
     gap: "10px",
-    marginTop: "20px",
+    marginTop: "20px"
   },
   submitButton: {
     flex: "1",
@@ -246,10 +242,7 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
     fontWeight: "500",
-    transition: "background-color 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#f4511e",
-    },
+    transition: "background-color 0.3s ease"
   },
   cancelButton: {
     flex: "1",
@@ -260,13 +253,10 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
     fontWeight: "500",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#f5f5f5",
-    },
+    transition: "all 0.3s ease"
   },
   alert: {
     margin: "20px",
-    borderRadius: "4px",
-  },
+    borderRadius: "4px"
+  }
 };
