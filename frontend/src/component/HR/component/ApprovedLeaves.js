@@ -160,7 +160,10 @@ export default function ApprovedLeaves() {
             <Toaster position="top-right" />
 
             <div className="card">
-                <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <div
+                    className="card-header text-white d-flex justify-content-between align-items-center"
+                    style={{ backgroundColor: '#D35400' }}
+                >
                     <h4 className="mb-0">Approved Leaves Dashboard</h4>
                     <button
                         className="btn btn-light btn-sm"

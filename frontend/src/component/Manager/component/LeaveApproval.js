@@ -123,7 +123,7 @@ export default function LeaveApproval() {
                 }
 
                 .alert-danger {
-                    border-left-color:rgb(28, 15, 81);
+                    border-left-color:rgb(216, 87, 13);
                 }
 
                 .table td {
@@ -146,7 +146,10 @@ export default function LeaveApproval() {
 
       {/* Notifications Panel */}
       <div className="card mb-4">
-        <div className="card-header bg-primary text-white">
+        <div
+          className="card-header text-white"
+          style={{ backgroundColor: '#D35400' }}
+        >
           <h5 className="mb-0">Notifications</h5>
         </div>
         <div className="card-body">
@@ -183,7 +186,10 @@ export default function LeaveApproval() {
 
       {/* Leave Requests Table */}
       <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
+        <div
+          className="card-header d-flex justify-content-between align-items-center"
+          style={{ backgroundColor: '#D35400', color: 'white' }}
+        >
           <h4 className="mb-0">Leave Requests</h4>
           <div>
             <span className="badge bg-warning me-2">
