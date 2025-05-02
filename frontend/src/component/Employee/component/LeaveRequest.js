@@ -371,7 +371,7 @@ export default function LeaveRequest() {
       {/* Employee ID Display Card */}
       {employeeId && (
         <div className="card mb-4">
-          <div className="card-header bg-primary text-white">
+          <div className="card-header text-white" style={{ backgroundColor: '#D35400' }}>
             <h5 className="mb-0">Your Employee ID</h5>
           </div>
           <div className="card-body">
@@ -396,7 +396,7 @@ export default function LeaveRequest() {
 
       {/* Leave Balance Card */}
       <div className="card mb-4">
-        <div className="card-header bg-primary text-white">
+        <div className="card-header text-white" style={{ backgroundColor: '#D35400' }}>
           <h5 className="mb-0">Leave Balance</h5>
         </div>
         <div className="card-body">
