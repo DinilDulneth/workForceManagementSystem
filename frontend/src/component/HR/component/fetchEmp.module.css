@@ -1,0 +1,301 @@
+/* Main layout */
+.mainContent {
+    width: calc(100vw - 250px);
+  margin-top: 70px;
+  margin-left: auto;
+  padding: 25px;
+  min-height: calc(100vh - 70px);
+  background-color: #f8f9fa;
+  max-width: calc(100vw - 250px);
+  overflow: auto;
+}
+
+/* Header section */
+.header {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.headerUnderline {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #fc6625;
+}
+
+/* Search section */
+.searchContainer {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.searchControls {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 15px;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 20px 12px 45px;
+  border-radius: 25px;
+  border: 2px solid #ddd;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #fc6625;
+}
+
+.advancedSearchButton {
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.advancedSearchButtonActive {
+  background-color: #fc6625;
+  color: white;
+  border-color: #fc6625;
+}
+
+.advancedSearchButtonInactive {
+  background-color: white;
+  color: #666;
+}
+
+.filterIcon {
+  margin-right: 5px;
+}
+
+.pdfButton {
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
+  background-color: #fc6625;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.pdfButton:hover {
+  background-color: #e55a1c;
+}
+
+.pdfButtonDisabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.searchOptions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.searchSelect {
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 2px solid #ddd;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.searchSelect:focus {
+  outline: none;
+  border-color: #fc6625;
+}
+
+/* Employee cards */
+.cardContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.employeeCard {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.employeeCard:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  background-color: #fc6625;
+  padding: 15px;
+  color: white;
+}
+
+.cardHeaderContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editIcon, .deleteIcon {
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.editIcon:hover, .deleteIcon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.cardBody {
+  padding: 20px;
+}
+
+.infoRow {
+  margin-bottom: 10px;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #2c3e50;
+  width: 90px;
+  display: inline-block;
+}
+
+.statusSelect {
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: none;
+  font-size: 13px;
+  color: white;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.statusSelectActive {
+  background-color: #2ecc71;
+}
+
+.statusSelectInactive {
+  background-color: #e74c3c;
+}
+
+/* Loading state */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 150px);
+}
+
+.loadingText {
+  margin-top: 20px;
+  color: #666;
+}
+
+/* No results */
+.noResults {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0;
+    max-width: 100%;
+  }
+  
+  .searchControls {
+    flex-direction: column;
+  }
+  
+  .cardContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .mainContent {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .searchContainer, .header, .headerActions {
+    display: none;
+  }
+  
+  .cardContainer {
+    display: block;
+  }
+  
+  .employeeCard {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}

@@ -13,6 +13,7 @@ Dear ${userData.name},
 Welcome to WorkSync! Your account has been successfully created.
 
 Your login credentials are:
+Email: ${userData.email}
 Password: ${userData.password}
 
 Role Details:
@@ -46,6 +47,7 @@ export default function AccessF() {
 
   const initialValues = {
     name: "",
+    email: "",
     password: "",
     department: "",
     salary: "",
@@ -80,6 +82,7 @@ export default function AccessF() {
 
   const formFields = [
     { name: "name", label: "Name", type: "text" },
+    { name: "email", label: "Email", type: "email" },
     { name: "password", label: "Password", type: "password" },
     { name: "department", label: "Department", type: "text" },
     { name: "salary", label: "Salary", type: "text" },
@@ -196,14 +199,16 @@ export default function AccessF() {
 
 const styles = {
   mainContent: {
-    marginLeft: "250px",
+    width: "calc(100vw - 250px)",
     marginTop: "70px",
+    marginLeft: "250px",
     padding: "25px",
     minHeight: "calc(100vh - 70px)",
     backgroundColor: "#f8f9fa",
+    maxWidth: "calc(100vw - 250px)",
+    overflow: "auto",
     display: "flex",
-    justifyContent: "center",
-    alignItems: "flex-start",
+    flexDirection: "column",
   },
   formContainer: {
     width: "600px",
@@ -211,6 +216,8 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     padding: "2.5rem",
+    maxWidth: "700px",
+    margin: "0 auto",
   },
   header: {
     color: "#2c3e50",
@@ -329,6 +336,10 @@ const ValidationSchema = Yup.object().shape({
       /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
       "Name can only contain letters, spaces and simple punctuation"
     ),
+
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
 
   password: Yup.string()
     .required("Password is required")

@@ -859,12 +859,16 @@ export default function AccessView() {
 const modernStyles = {
   // Main Layout
   mainContent: {
+    width: "calc(100vw - 250px)",
+    marginTop: "70px",
     marginLeft: "250px",
-    marginTop: "60px",
-    padding: "30px",
-    minHeight: "calc(100vh - 60px)",
-    backgroundColor: "#f5f7fa",
-    transition: "all 0.3s ease",
+    padding: "25px",
+    minHeight: "calc(100vh - 70px)",
+    backgroundColor: "#f8f9fa",
+    maxWidth: "calc(100vw - 250px)",
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column"
   },
   contentWrapper: {
     maxWidth: "1200px",
