@@ -76,21 +76,21 @@ export default function HRApp() {
       icon: "bi-clipboard-data",
     },
 
-    {
-      link: "/HRDashboard/UserRegister",
-      name: "User Registration",
-      icon: "bi-person-plus",
-    },
-    {
-      link: "/HRDashboard/ManagerRegistration",
-      name: "Manager Registration",
-      icon: "bi-person-workspace",
-    },
-    {
-      link: "/HRDashboard/HRRegistration",
-      name: "HR Registration",
-      icon: "bi-person-lines-fill",
-    },
+    // {
+    //   link: "/HRDashboard/UserRegister",
+    //   name: "User Registration",
+    //   icon: "bi-person-plus",
+    // },
+    // {
+    //   link: "/HRDashboard/ManagerRegistration",
+    //   name: "Manager Registration",
+    //   icon: "bi-person-workspace",
+    // },
+    // {
+    //   link: "/HRDashboard/HRRegistration",
+    //   name: "HR Registration",
+    //   icon: "bi-person-lines-fill",
+    // },
 
     {
       link: "/HRDashboard/addSalary",
