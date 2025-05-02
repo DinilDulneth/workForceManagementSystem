@@ -65,23 +65,55 @@ function FetchInquiry() {
 
   function getInquiry() {
     setLoading(true);
-    const employeeId = localStorage.getItem("ID");
+    const localEmployeeId = localStorage.getItem("ID");
 
+    if (!localEmployeeId) {
+      setSnackbar({
+        open: true,
+        message: "Please log in to view inquiries",
+        severity: "error",
+      });
+      setTimeout(() => navigate("/UserLogin"), 2000);
+      return;
+    }
+
+    // First fetch employee data from MongoDB
     axios
-      .get("http://localhost:8070/api/inquiry/getInquiry")
-      .then((res) => {
-        // Filter inquiries to only show those from the current employee
-        const filteredInquiries = res.data.filter(
-          (inq) => inq.employeeId === employeeId
-        );
-        setInquiry(filteredInquiries);
+      .get(`http://localhost:8070/employee/getEmpByID/${localEmployeeId}`)
+      .then((employeeResponse) => {
+        const employeeData = employeeResponse.data;
+        console.log("Employee data from DB:", employeeData);
+
+        // Always use the MongoDB IDs
+        const dbEmployeeId = employeeData.ID;
+
+        if (!dbEmployeeId) {
+          throw new Error("Invalid employee ID from database");
+        }
+
+        // Then fetch inquiries
+        return axios
+          .get("http://localhost:8070/api/inquiry/getInquiry")
+          .then((inquiryRes) => {
+            // Filter inquiries using ONLY the database employee ID
+            const filteredInquiries = inquiryRes.data.filter(
+              (inq) => inq.employeeId === dbEmployeeId
+            );
+
+            setInquiry(filteredInquiries);
+          });
       })
       .catch((err) => {
+        console.error("Error in getInquiry:", err);
+
         setSnackbar({
           open: true,
-          message: "Error fetching inquiries: " + err.message,
+          message: "Error fetching data from MongoDB. Please login again.",
           severity: "error",
         });
+
+        // Don't fall back to localStorage IDs - redirect to login
+        setTimeout(() => navigate("/UserLogin"), 2000);
       })
       .finally(() => setLoading(false));
   }

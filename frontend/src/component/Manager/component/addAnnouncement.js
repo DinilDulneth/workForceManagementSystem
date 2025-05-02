@@ -25,6 +25,7 @@ export default function AddAnnouncement() {
     title: "",
     message: "",
     sender: "",
+    senderName: "",
     date: "",
   });
 
@@ -34,17 +35,61 @@ export default function AddAnnouncement() {
     severity: "success",
   });
 
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      date: new Date().toISOString(),
-      sender: getCurrentUserId(),
-    }));
-  }, []);
+  const [loading, setLoading] = useState(false);
 
-  function getCurrentUserId() {
-    return "605c72ef2f799e2a4c8b4567";
-  }
+  useEffect(() => {
+    // Get manager ID from localStorage
+    const localManagerId = localStorage.getItem("ID");
+
+    if (!localManagerId) {
+      setSnackbar({
+        open: true,
+        message: "Please log in to create announcements",
+        severity: "error",
+      });
+      setTimeout(() => navigate("/ManagerLogin"), 2000);
+      return;
+    }
+
+    setLoading(true);
+
+    // Fetch manager data from MongoDB
+    axios
+      .get(`http://localhost:8070/manager/getManagerByID/${localManagerId}`)
+      .then((response) => {
+        const managerData = response.data;
+        console.log("Manager data from DB:", managerData);
+
+        // Use manager name directly as sender
+        setFormData((prev) => ({
+          ...prev,
+          date: new Date().toISOString(),
+          // Use the standard (non-MongoDB) ID and name as sender
+          sender: managerData.name || localStorage.getItem("Name") || "Manager",
+          // Store MongoDB ID separately but don't send it to the API
+          managerId: managerData.ID || localManagerId,
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching manager data:", error);
+
+        // Fallback to localStorage
+        setFormData((prev) => ({
+          ...prev,
+          date: new Date().toISOString(),
+          sender: localStorage.getItem("Name") || "Manager",
+          managerId: localManagerId,
+        }));
+
+        setSnackbar({
+          open: true,
+          message:
+            "Using local data for manager. Please check your connection.",
+          severity: "warning",
+        });
+      })
+      .finally(() => setLoading(false));
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,13 +99,15 @@ export default function AddAnnouncement() {
     e.preventDefault();
 
     const announcementData = {
-      title: formData.title, // Change to match schema case
+      title: formData.title,
       message: formData.message,
-      sender: formData.sender,
+      sender: formData.sender, // This is now just the manager's name
       date: formData.date,
+      // Don't include managerId in the request
     };
 
-    console.log("Sending announcement data:", announcementData); // Add this log
+    console.log("Sending announcement data:", announcementData);
+    setLoading(true);
 
     axios
       .post(
@@ -68,7 +115,7 @@ export default function AddAnnouncement() {
         announcementData
       )
       .then((response) => {
-        console.log("Server response:", response.data); // Add this log
+        console.log("Server response:", response.data);
         if (response.status === 201) {
           setSnackbar({
             open: true,
@@ -76,12 +123,11 @@ export default function AddAnnouncement() {
             severity: "success",
           });
           // Clear form
-          setFormData({
+          setFormData((prev) => ({
+            ...prev,
             title: "",
             message: "",
-            sender: getCurrentUserId(),
-            date: new Date().toISOString(),
-          });
+          }));
           // Navigate after success message is shown
           setTimeout(
             () => navigate("/ManagerDashboard/fetchAnnouncement"),
@@ -98,7 +144,8 @@ export default function AddAnnouncement() {
             (err.response?.data?.message || err.message),
           severity: "error",
         });
-      });
+      })
+      .finally(() => setLoading(false));
   }
 
   return (
@@ -302,6 +349,25 @@ export default function AddAnnouncement() {
           </Box>
         </Paper>
       </motion.div>
+
+      {loading && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(255,255,255,0.7)",
+            zIndex: 9999,
+          }}
+        >
+          <CircularProgress sx={{ color: "#fc6625" }} />
+        </Box>
+      )}
 
       <AnimatePresence>
         {snackbar.open && (

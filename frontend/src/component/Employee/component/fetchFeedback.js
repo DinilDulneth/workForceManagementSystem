@@ -32,13 +32,33 @@ function FetchFeedback() {
 
   function getFeedbacks() {
     setLoading(true);
-    const employeeId = localStorage.getItem("ID");
+    const localEmployeeId = localStorage.getItem("ID");
 
-    // Use the new endpoint that filters by employeeId
+    if (!localEmployeeId) {
+      setSnackbar({
+        open: true,
+        message: "Please log in to view feedback",
+        severity: "error",
+      });
+      setTimeout(() => navigate("/UserLogin"), 2000);
+      return;
+    }
+
+    // First validate employee exists in database and get correct ID
     axios
-      .get(
-        `http://localhost:8070/api/feedback/getFeedbackByEmployeeId/${employeeId}`
-      )
+      .get(`http://localhost:8070/employee/getEmpByID/${localEmployeeId}`)
+      .then((employeeResponse) => {
+        const employeeData = employeeResponse.data;
+        console.log("Employee validated:", employeeData);
+
+        // Get the correct ID from database
+        const dbEmployeeId = employeeData.ID || localEmployeeId;
+
+        // Fetch feedback with the validated ID
+        return axios.get(
+          `http://localhost:8070/api/feedback/getFeedbackByEmployeeId/${dbEmployeeId}`
+        );
+      })
       .then((res) => {
         const formattedFeedbacks = res.data.map((feedback) => ({
           ...feedback,
@@ -47,12 +67,34 @@ function FetchFeedback() {
         setFeedbacks(formattedFeedbacks);
       })
       .catch((err) => {
+        console.error("Error in validation or fetching feedback:", err);
+
+        // Fallback to using localStorage ID if validation fails
+        axios
+          .get(
+            `http://localhost:8070/api/feedback/getFeedbackByEmployeeId/${localEmployeeId}`
+          )
+          .then((res) => {
+            const formattedFeedbacks = res.data.map((feedback) => ({
+              ...feedback,
+              date: new Date(feedback.date),
+            }));
+            setFeedbacks(formattedFeedbacks);
+          })
+          .catch((fbErr) => {
+            setSnackbar({
+              open: true,
+              message: "Error fetching feedback: " + fbErr.message,
+              severity: "error",
+            });
+            console.error(fbErr);
+          });
+
         setSnackbar({
           open: true,
-          message: "Error fetching feedback: " + err.message,
-          severity: "error",
+          message: "Using local ID for feedback. Some feedback may not appear.",
+          severity: "warning",
         });
-        console.error(err);
       })
       .finally(() => setLoading(false));
   }

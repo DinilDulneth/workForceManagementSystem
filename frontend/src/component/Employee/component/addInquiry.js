@@ -32,6 +32,7 @@ export default function AddInquiry() {
     sender: "",
     date: "",
     department: "",
+    mongoDbId: "", // Added MongoDB ID field
   });
 
   const [snackbar, setSnackbar] = useState({
@@ -41,11 +42,9 @@ export default function AddInquiry() {
   });
 
   useEffect(() => {
-    // Get employee ID from the existing localStorage
-    const employeeId = localStorage.getItem("ID");
-    const employeeName = localStorage.getItem("Name");
+    const localEmployeeId = localStorage.getItem("ID");
 
-    if (!employeeId) {
+    if (!localEmployeeId) {
       setSnackbar({
         open: true,
         message: "Please log in to submit an inquiry",
@@ -55,12 +54,37 @@ export default function AddInquiry() {
       return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      date: new Date().toISOString(),
-      employeeId: employeeId,
-      sender: employeeName || employeeId,
-    }));
+    console.log("Attempting to fetch employee with ID:", localEmployeeId);
+
+    // Fetch employee data from MongoDB
+    axios
+      .get(`http://localhost:8070/employee/getEmpByID/${localEmployeeId}`)
+      .then((response) => {
+        const employeeData = response.data;
+        console.log("Employee data from DB:", employeeData);
+
+        // Always use the MongoDB-generated ID - this should be consistent across the application
+        setFormData((prev) => ({
+          ...prev,
+          date: new Date().toISOString(),
+          // Use MongoDB's ID field (the custom ID field, not the _id)
+          employeeId: employeeData.ID,
+          // Store the MongoDB _id as well for reference if needed
+          mongoDbId: employeeData._id,
+          sender: employeeData.name || "Employee",
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching employee data:", error);
+        // Don't fall back to localStorage IDs - this ensures we only use MongoDB IDs
+        setSnackbar({
+          open: true,
+          message:
+            "Error fetching employee data. Please try again or contact support.",
+          severity: "error",
+        });
+        setTimeout(() => navigate("/UserLogin"), 2000);
+      });
   }, [navigate]);
 
   const handleChange = (e) => {
