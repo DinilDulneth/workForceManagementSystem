@@ -7,7 +7,16 @@ const announcementSchema = new mongoose.Schema({
     required: true,
   },
   message: String,
-  sender: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
+  // Change the sender field to accept either ObjectId or String
+  sender: {
+    type: String, // Changed from ObjectId to String
+    required: true,
+  },
+  // Add a separate field for storing the sender's name
+  senderName: {
+    type: String,
+    default: "Admin",
+  },
   date: { type: Date, default: Date.now },
 });
 
