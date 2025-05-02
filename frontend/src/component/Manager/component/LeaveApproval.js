@@ -22,29 +22,33 @@ export default function LeaveApproval() {
 
   const handleApproval = async (id, status, employeeId, department) => {
     try {
-      await axios.put(`http://localhost:8070/leave/status/${id}`, { status });
+      const response = await axios.put(`http://localhost:8070/leave/status/${id}`, { status });
 
-      // Create notification message
-      const message =
-        status === "approved"
-          ? `Leave request for Employee #${employeeId} from ${department} has been approved`
-          : `Leave request for Employee #${employeeId} from ${department} has been rejected`;
+      if (response.data && response.data.message) {
+        // Create notification message
+        const message =
+          status === "approved"
+            ? `Leave request for Employee #${employeeId} from ${department} has been approved`
+            : `Leave request for Employee #${employeeId} from ${department} has been rejected`;
 
-      // Add notification to the list
-      setNotifications((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          message,
-          type: status === "approved" ? "success" : "danger",
-          timestamp: new Date()
-        }
-      ]);
+        // Add notification to the list
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            message,
+            type: status === "approved" ? "success" : "danger",
+            timestamp: new Date()
+          }
+        ]);
 
-      toast.success(`Leave request ${status}`);
-      fetchLeaveRequests();
+        toast.success(`Leave request ${status}`);
+        await fetchLeaveRequests(); // Refresh the list
+      }
     } catch (error) {
-      toast.error("Failed to update leave status");
+      console.error("Error updating leave status:", error);
+      const errorMessage = error.response?.data?.error || "Failed to update leave status";
+      toast.error(errorMessage);
     }
   };
 
@@ -141,8 +145,10 @@ export default function LeaveApproval() {
       <Toaster position="top-right" />
 
       {/* Notifications Panel */}
-      <div className="card mb-4 ml-5">
-        <div className="card-header bg-primary text-white"></div>
+      <div className="card mb-4">
+        <div className="card-header bg-primary text-white">
+          <h5 className="mb-0">Notifications</h5>
+        </div>
         <div className="card-body">
           {notifications.length > 0 ? (
             <div className="notification-list">
@@ -181,20 +187,13 @@ export default function LeaveApproval() {
           <h4 className="mb-0">Leave Requests</h4>
           <div>
             <span className="badge bg-warning me-2">
-              {
-                leaveRequests.filter(
-                  (req) => !req.status || req.status === "pending"
-                ).length
-              }{" "}
-              Pending
+              {leaveRequests.filter((req) => !req.status || req.status === "pending").length} Pending
             </span>
             <span className="badge bg-success me-2">
-              {leaveRequests.filter((req) => req.status === "approved").length}{" "}
-              Approved
+              {leaveRequests.filter((req) => req.status === "approved").length} Approved
             </span>
             <span className="badge bg-danger">
-              {leaveRequests.filter((req) => req.status === "rejected").length}{" "}
-              Rejected
+              {leaveRequests.filter((req) => req.status === "rejected").length} Rejected
             </span>
           </div>
         </div>
@@ -214,32 +213,22 @@ export default function LeaveApproval() {
               <tbody>
                 {leaveRequests.map((request) => (
                   <tr key={request._id}>
-                    <td>#{request.id}</td>
+                    <td>#{request.employeeId}</td>
                     <td>{request.department}</td>
                     <td>
-                      <span
-                        className={`badge bg-${
-                          request.leavetype === "Sick Leave"
-                            ? "danger"
-                            : request.leavetype === "Casual Leave"
-                            ? "warning"
-                            : "success"
-                        }`}
-                      >
+                      <span className={`badge bg-${request.leavetype === "Sick Leave" ? "danger" :
+                        request.leavetype === "Casual Leave" ? "warning" :
+                          "success"
+                        }`}>
                         {request.leavetype}
                       </span>
                     </td>
                     <td>{new Date(request.date).toLocaleDateString()}</td>
                     <td>
-                      <span
-                        className={`badge bg-${
-                          request.status === "approved"
-                            ? "primary"
-                            : request.status === "rejected"
-                            ? "danger"
-                            : "warning"
-                        }`}
-                      >
+                      <span className={`badge bg-${request.status === "approved" ? "success" :
+                        request.status === "rejected" ? "danger" :
+                          "warning"
+                        }`}>
                         {request.status || "pending"}
                       </span>
                     </td>
@@ -251,7 +240,7 @@ export default function LeaveApproval() {
                               handleApproval(
                                 request._id,
                                 "approved",
-                                request.id,
+                                request.employeeId,
                                 request.department
                               )
                             }
@@ -264,7 +253,7 @@ export default function LeaveApproval() {
                               handleApproval(
                                 request._id,
                                 "rejected",
-                                request.id,
+                                request.employeeId,
                                 request.department
                               )
                             }

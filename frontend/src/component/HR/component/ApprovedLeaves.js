@@ -137,10 +137,17 @@ export default function ApprovedLeaves() {
 
     // Filter leaves based on search term and department
     const filteredLeaves = leaves.filter(leave => {
+        if (!leave) return false;
+
+        const searchTermLower = (searchTerm || '').toLowerCase();
+        const employeeId = (leave.employeeId || '').toLowerCase();
+        const department = (leave.department || '').toLowerCase();
+        const leavetype = (leave.leavetype || '').toLowerCase();
+
         const matchesSearch =
-            leave.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            leave.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            leave.leavetype.toLowerCase().includes(searchTerm.toLowerCase());
+            employeeId.includes(searchTermLower) ||
+            department.includes(searchTermLower) ||
+            leavetype.includes(searchTermLower);
 
         const matchesDepartment =
             !filterDepartment || leave.department === filterDepartment;
@@ -218,7 +225,7 @@ export default function ApprovedLeaves() {
                                 <div className="card-body">
                                     <h5 className="card-title">Sick Leaves</h5>
                                     <h2 className="card-text">
-                                        {leaves.filter(leave => leave.leavetype === "Sick Leave").length}
+                                        {leaves.filter(leave => leave?.leavetype === "Sick Leave").length}
                                     </h2>
                                 </div>
                             </div>
@@ -228,7 +235,7 @@ export default function ApprovedLeaves() {
                                 <div className="card-body">
                                     <h5 className="card-title">Casual Leaves</h5>
                                     <h2 className="card-text">
-                                        {leaves.filter(leave => leave.leavetype === "Casual Leave").length}
+                                        {leaves.filter(leave => leave?.leavetype === "Casual Leave").length}
                                     </h2>
                                 </div>
                             </div>
@@ -238,7 +245,7 @@ export default function ApprovedLeaves() {
                                 <div className="card-body">
                                     <h5 className="card-title">Annual Leaves</h5>
                                     <h2 className="card-text">
-                                        {leaves.filter(leave => leave.leavetype === "Annual Leave").length}
+                                        {leaves.filter(leave => leave?.leavetype === "Annual Leave").length}
                                     </h2>
                                 </div>
                             </div>
@@ -261,21 +268,21 @@ export default function ApprovedLeaves() {
                             <tbody>
                                 {filteredLeaves.map((leave) => (
                                     <tr key={leave._id}>
-                                        <td>#{leave.id}</td>
-                                        <td>{leave.department}</td>
+                                        <td>#{leave.employeeId || 'N/A'}</td>
+                                        <td>{leave.department || 'N/A'}</td>
                                         <td>
                                             <span className={`badge bg-${leave.leavetype === "Sick Leave" ? "danger" :
                                                 leave.leavetype === "Casual Leave" ? "warning" :
                                                     "success"
                                                 }`}>
-                                                {leave.leavetype}
+                                                {leave.leavetype || 'N/A'}
                                             </span>
                                         </td>
-                                        <td>{leave.leavetype === "Half Day" ? leave.session : "-"}</td>
-                                        <td>{new Date(leave.date).toLocaleDateString()}</td>
+                                        <td>{leave.leavetype === "Half Day" ? (leave.session || 'N/A') : "-"}</td>
+                                        <td>{leave.date ? new Date(leave.date).toLocaleDateString() : 'N/A'}</td>
                                         <td>
                                             <span className="badge bg-success">
-                                                {leave.status}
+                                                {leave.status || 'N/A'}
                                             </span>
                                         </td>
                                     </tr>
