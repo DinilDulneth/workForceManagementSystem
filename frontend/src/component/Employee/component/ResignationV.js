@@ -141,6 +141,7 @@ export default function FetchResignations() {
                       style={{ ...styles.button, ...styles.editButton }}
                       onClick={() =>
                         navigate(
+
                           `/EmployeeHome/ResignationU/${resignation.empId}`
                         )
                       }

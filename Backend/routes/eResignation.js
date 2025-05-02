@@ -110,7 +110,7 @@ router.route("/updateempRes/:id").put(async (req, res) => {
       req.body,
       {
         new: true,
-        runValidators: true
+        runValidators: true,
       }
     );
     if (!empRes) {
@@ -132,6 +132,49 @@ router.delete("/deleteempRes/:id", async (req, res) => {
     res.status(200).send(empRes);
   } catch (error) {
     res.status(500).send(error);
+  }
+});
+
+router.get("/getempResByID/:id", async (req, res) => {
+  try {
+    const empId = req.params.id;
+
+    // Find resignations by empID
+    const resignations = await empResignation.find({ empId: empId });
+
+    if (!resignations || resignations.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No resignation records found for this employee" });
+    }
+
+    res.status(200).json(resignations);
+  } catch (error) {
+    console.error("Error fetching resignation records:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Add this new route to get a resignation by its _id
+router.get("/getResById/:id", async (req, res) => {
+  try {
+    const resId = req.params.id;
+
+    // Find resignation by _id directly
+    const resignation = await empResignation.findById(resId);
+
+    if (!resignation) {
+      return res
+        .status(404)
+        .json({ message: "No resignation record found with this ID" });
+    }
+
+    res.status(200).json(resignation);
+  } catch (error) {
+    console.error("Error fetching resignation record:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 
