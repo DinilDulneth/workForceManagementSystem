@@ -99,6 +99,31 @@ router.put("/updateFeedback/:id", async (req, res) => {
   }
 });
 
+// Mark feedback as viewed
+router.put("/markAsViewed/:id", async (req, res) => {
+  try {
+    const feedback = await Feedback.findByIdAndUpdate(
+      req.params.id,
+      { viewed: true },
+      { new: true }
+    );
+
+    if (!feedback) {
+      return res.status(404).json({ message: "Feedback not found" });
+    }
+
+    res.status(200).json({
+      message: "Feedback marked as viewed",
+      feedback,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error marking feedback as viewed",
+      error: error.message,
+    });
+  }
+});
+
 // Delete a Feedback by ID
 router.delete("/deleteFeedback/:id", async (req, res) => {
   try {

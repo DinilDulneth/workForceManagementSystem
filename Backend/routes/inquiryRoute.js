@@ -111,6 +111,33 @@ router.put("/updateInquiry/:id", async (req, res) => {
   }
 });
 
+// Update an inquiry's completion status
+router.put("/updateStatus/:id", async (req, res) => {
+  try {
+    const { completed } = req.body;
+
+    const inquiry = await Inquiry.findByIdAndUpdate(
+      req.params.id,
+      { completed },
+      { new: true }
+    );
+
+    if (!inquiry) {
+      return res.status(404).json({ message: "Inquiry not found" });
+    }
+
+    res.status(200).json({
+      message: `Inquiry marked as ${completed ? "completed" : "pending"}`,
+      inquiry,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating inquiry status",
+      error: error.message,
+    });
+  }
+});
+
 // Delete an inquiry by ID
 router.delete("/deleteInquiry/:id", async (req, res) => {
   try {
