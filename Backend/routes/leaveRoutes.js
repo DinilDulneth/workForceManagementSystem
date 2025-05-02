@@ -1,6 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const Leave = require("../model/leave");
+const multer = require("multer");
+const path = require("path");
+
+// Configure multer for image upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // Add new leave request
 router.route("/add").post((req, res) => {
@@ -38,29 +52,52 @@ router.route("/get/:id").get((req, res) => {
 });
 
 // Update leave request by ID with 24-hour expiration rule
-router.route("/update/:id").put(async (req, res) => {
+router.route("/update/:id").put(upload.single('image'), async (req, res) => {
   try {
+    console.log("Update request received:", req.params.id, req.body);
+
     const leave = await Leave.findById(req.params.id);
-    if (!leave) return res.status(404).json({ error: "Leave not found" });
+    if (!leave) {
+      console.log("Leave not found:", req.params.id);
+      return res.status(404).json({ error: "Leave not found" });
+    }
 
     const now = new Date();
     const timeDiff = now - leave.createdAt; // in ms
     const hoursPassed = timeDiff / (1000 * 60 * 60); // convert ms to hours
 
     if (hoursPassed > 24) {
+      console.log("Update attempt after 24 hours:", hoursPassed);
       return res.status(403).json({ error: "Cannot update leave after 24 hours of creation" });
     }
 
-    const { employeeId, department, leavetype, date, session, medicalCertificate } = req.body;
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date()
+    };
+
+    // If there's a new image, update the imagePath
+    if (req.file) {
+      updateData.imagePath = req.file.path;
+    }
+
+    console.log("Updating leave with data:", updateData);
 
     const updatedLeave = await Leave.findByIdAndUpdate(
       req.params.id,
-      { employeeId, department, leavetype, date, session, medicalCertificate },
+      updateData,
       { new: true }
     );
 
-    res.json({ message: "Leave updated", leave: updatedLeave });
+    if (!updatedLeave) {
+      console.log("Failed to update leave");
+      return res.status(500).json({ error: "Failed to update leave" });
+    }
+
+    console.log("Leave updated successfully:", updatedLeave);
+    res.json({ message: "Leave updated successfully", leave: updatedLeave });
   } catch (err) {
+    console.error("Error updating leave:", err);
     res.status(500).json({ error: err.message });
   }
 });
