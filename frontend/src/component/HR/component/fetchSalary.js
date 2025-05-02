@@ -132,15 +132,24 @@ export default function FetchSalary() {
 
 const styles = {
   pageContainer: {
+    width: "calc(100vw - 250px)",
+    marginTop: "70px",
     marginLeft: "250px",
-    padding: "20px",
-    backgroundColor: "#f5f5f5",
-    minHeight: "100vh"
+    padding: "25px",
+    minHeight: "calc(100vh - 70px)",
+    backgroundColor: "#f8f9fa",
+    maxWidth: "calc(100vw - 250px)",
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column"
   },
+
   container: {
-    maxWidth: "1200px",
-    margin: "0 auto"
-  },
+  width: "100%",
+  maxWidth: "calc(100vw - 300px)",  // Slightly narrower than page container
+  margin: "0 auto"
+},
+
   header: {
     color: "#2c3e50",
     marginBottom: "2rem",

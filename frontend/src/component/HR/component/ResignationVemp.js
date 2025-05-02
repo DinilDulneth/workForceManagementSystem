@@ -180,13 +180,16 @@ export default function FetchResignations() {
 
 const styles = {
   mainContent: {
-    marginLeft: "250px",
+    width: "calc(100vw - 250px)",
     marginTop: "70px",
+    marginLeft: "250px",
     padding: "25px",
     minHeight: "calc(100vh - 70px)",
-    maxWidth: "calc(100vw - 250px)",
     backgroundColor: "#f8f9fa",
-    transition: "all 0.3s ease"
+    maxWidth: "calc(100vw - 250px)",
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column"
   },
   gridContainer: {
     display: "flex",

@@ -149,7 +149,7 @@ export default function ApprovedLeaves() {
     });
 
     return (
-        <div className="container" style={{ marginLeft: "250px", paddingTop: "70px", paddingRight: "30px" }}>
+        <div className="container" style={{ marginLeft: "350px", paddingTop: "70px", paddingRight: "30px" }}>
             <Toaster position="top-right" />
 
             <div className="card">

@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFilter, faFilePdf, faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import {
+  faSearch,
+  faFilter,
+  faFilePdf,
+  faTrash,
+  faEdit,
+} from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function FetchManager() {
   const navigate = useNavigate();
@@ -20,45 +26,63 @@ export default function FetchManager() {
 
   const handleStatusChange = (id, currentStatus, newStatus) => {
     if (currentStatus === newStatus) return;
-    
-    if (window.confirm('Are you sure you want to change this manager\'s status?')) {
-      axios.patch(`http://localhost:8070/manager/updateActiveStatus/${id}`, {
-        active: newStatus === 'active'
-      })
+
+    if (
+      window.confirm("Are you sure you want to change this manager's status?")
+    ) {
+      axios
+        .patch(`http://localhost:8070/manager/updateActiveStatus/${id}`, {
+          active: newStatus === "active",
+        })
         .then(() => {
-          toast.success('Manager status updated successfully');
+          toast.success("Manager status updated successfully");
           getManagers(); // Refresh the list
         })
-        .catch(err => {
-          console.error('Status update error:', err);
-          toast.error('Failed to update manager status');
+        .catch((err) => {
+          console.error("Status update error:", err);
+          toast.error("Failed to update manager status");
         });
     }
   };
 
   const cardFields = [
-    { label: 'Department', getValue: (emp) => emp.department },
-    { label: 'Phone', getValue: (emp) => emp.phone },
-    { label: 'Salary', getValue: (emp) => `$${emp.salary ? emp.salary.toLocaleString() : 'N/A'}` },
-    { label: 'Joined', getValue: (emp) => emp.dateOfJoining ? new Date(emp.dateOfJoining).toLocaleDateString() : 'N/A' },
-    { label: 'Email', getValue: (emp) => emp.email },
-    { 
-      label: 'Status', 
+    { label: "Department", getValue: (emp) => emp.department },
+    { label: "Phone", getValue: (emp) => emp.phone },
+    {
+      label: "Salary",
+      getValue: (emp) => `$${emp.salary ? emp.salary.toLocaleString() : "N/A"}`,
+    },
+    {
+      label: "Joined",
+      getValue: (emp) =>
+        emp.dateOfJoining
+          ? new Date(emp.dateOfJoining).toLocaleDateString()
+          : "N/A",
+    },
+    { label: "Email", getValue: (emp) => emp.email },
+    {
+      label: "Status",
       getValue: (emp) => (
         <select
-          value={emp.active ? 'active' : 'inactive'}
-          onChange={(e) => handleStatusChange(emp._id, emp.active ? 'active' : 'inactive', e.target.value)}
+          value={emp.active ? "active" : "inactive"}
+          onChange={(e) =>
+            handleStatusChange(
+              emp._id,
+              emp.active ? "active" : "inactive",
+              e.target.value
+            )
+          }
           style={{
             ...styles.statusSelect,
             backgroundColor: emp.active ? "#2ecc71" : "#e74c3c",
-            color: "white"
+            color: "white",
           }}
         >
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
-      )
-    }
+      ),
+    },
   ];
 
   useEffect(() => {
@@ -70,7 +94,7 @@ export default function FetchManager() {
     setError(null);
 
     const fetchPromise = axios.get("http://localhost:8070/manager/getManager", {
-      timeout: 5000
+      timeout: 5000,
     });
 
     const timeoutPromise = new Promise((_, reject) =>
@@ -119,7 +143,7 @@ export default function FetchManager() {
     try {
       toast.info("Preparing managers list PDF...", {
         position: "top-right",
-        autoClose: 2000
+        autoClose: 2000,
       });
 
       const doc = new jsPDF();
@@ -141,17 +165,21 @@ export default function FetchManager() {
         "Phone",
         "Salary",
         "Join Date",
-        "Status"
+        "Status",
       ];
 
-      const tableRows = filteredManagers.map(manager => [
+      const tableRows = filteredManagers.map((manager) => [
         manager.name || "N/A",
         manager.department || "N/A",
         manager.email || "N/A",
         manager.phone || "N/A",
         manager.salary ? `$${manager.salary.toLocaleString()}` : "N/A",
-        manager.dateOfJoining ? new Date(manager.dateOfJoining).toLocaleDateString() : "N/A",
-        manager.availability === "1" || manager.availability === 1 ? "Active" : "Inactive"
+        manager.dateOfJoining
+          ? new Date(manager.dateOfJoining).toLocaleDateString()
+          : "N/A",
+        manager.availability === "1" || manager.availability === 1
+          ? "Active"
+          : "Inactive",
       ]);
 
       doc.autoTable({
@@ -166,11 +194,11 @@ export default function FetchManager() {
           fillColor: [252, 102, 37],
           textColor: [255, 255, 255],
           fontSize: 9,
-          fontStyle: 'bold',
-          halign: 'center'
+          fontStyle: "bold",
+          halign: "center",
         },
         alternateRowStyles: {
-          fillColor: [245, 245, 245]
+          fillColor: [245, 245, 245],
         },
         columnStyles: {
           0: { cellWidth: 30 },
@@ -180,22 +208,22 @@ export default function FetchManager() {
           4: { cellWidth: 25 },
           5: { cellWidth: 20 },
           6: { cellWidth: 25 },
-          7: { cellWidth: 20 }
+          7: { cellWidth: 20 },
         },
-        margin: { top: 35 }
+        margin: { top: 35 },
       });
 
-      doc.save(`Managers_List_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Managers_List_${new Date().toISOString().split("T")[0]}.pdf`);
 
       toast.success("PDF downloaded successfully!", {
         position: "top-right",
-        autoClose: 2000
+        autoClose: 2000,
       });
     } catch (error) {
-      console.error('PDF Generation Error:', error);
+      console.error("PDF Generation Error:", error);
       toast.error("Failed to generate PDF. Please try again.", {
         position: "top-right",
-        autoClose: 3000
+        autoClose: 3000,
       });
     }
   };
@@ -211,22 +239,25 @@ export default function FetchManager() {
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
-          <p style={{ marginTop: "20px", color: "#666" }}>Loading manager data...</p>
+          <p style={{ marginTop: "20px", color: "#666" }}>
+            Loading manager data...
+          </p>
         </div>
       </div>
     );
   }
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this Manager?')) {
-      axios.delete(`http://localhost:8070/manager/deleteManager/${id}`)
+    if (window.confirm("Are you sure you want to delete this Manager?")) {
+      axios
+        .delete(`http://localhost:8070/manager/deleteManager/${id}`)
         .then(() => {
-          toast.success('Manager deleted successfully');
+          toast.success("Manager deleted successfully");
           getManagers(); // Refresh the list
         })
-        .catch(err => {
-          console.error('Delete error:', err);
-          toast.error('Failed to delete Manager');
+        .catch((err) => {
+          console.error("Delete error:", err);
+          toast.error("Failed to delete Manager");
         });
     }
   };
@@ -244,7 +275,7 @@ export default function FetchManager() {
             style={{
               ...styles.advancedSearchButton,
               backgroundColor: advancedSearch ? "#fc6625" : "#fff",
-              color: advancedSearch ? "#fff" : "#666"
+              color: advancedSearch ? "#fff" : "#666",
             }}
             onClick={() => setAdvancedSearch(!advancedSearch)}
           >
@@ -256,7 +287,9 @@ export default function FetchManager() {
             <FontAwesomeIcon icon={faSearch} style={styles.searchIcon} />
             <input
               type="text"
-              placeholder={`Search ${searchField === "all" ? "managers" : searchField}...`}
+              placeholder={`Search ${
+                searchField === "all" ? "managers" : searchField
+              }...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={styles.searchInput}
@@ -268,7 +301,7 @@ export default function FetchManager() {
             style={{
               ...styles.pdfButton,
               opacity: filteredManagers.length === 0 ? 0.7 : 1,
-              cursor: filteredManagers.length === 0 ? 'not-allowed' : 'pointer'
+              cursor: filteredManagers.length === 0 ? "not-allowed" : "pointer",
             }}
             disabled={filteredManagers.length === 0}
           >
@@ -295,9 +328,17 @@ export default function FetchManager() {
       </div>
 
       {error && (
-        <div className="alert alert-warning alert-dismissible fade show" role="alert">
+        <div
+          className="alert alert-warning alert-dismissible fade show"
+          role="alert"
+        >
           <strong>Note:</strong> {error}
-          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
           <div className="mt-2">
             <button className="btn btn-sm btn-primary" onClick={handleRetry}>
               Retry Connection
@@ -312,21 +353,27 @@ export default function FetchManager() {
             <div
               key={manager._id}
               style={styles.employeeCard}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-5px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
             >
               <div style={styles.cardHeader}>
                 <div style={styles.cardHeaderContent}>
                   <h6 style={{ margin: 0 }}>{manager.name}</h6>
                   <div style={styles.iconContainer}>
-                    <FontAwesomeIcon 
-                      icon={faEdit} 
+                    <FontAwesomeIcon
+                      icon={faEdit}
                       style={styles.editIcon}
-                      onClick={() => navigate(`/HRDashboard/updateManager/${manager._id}`)}
+                      onClick={() =>
+                        navigate(`/HRDashboard/updateManager/${manager._id}`)
+                      }
                       title="Update Manager"
                     />
-                    <FontAwesomeIcon 
-                      icon={faTrash} 
+                    <FontAwesomeIcon
+                      icon={faTrash}
                       style={styles.deleteIcon}
                       onClick={() => handleDelete(manager._id)}
                       title="Delete Manager"
@@ -356,14 +403,16 @@ export default function FetchManager() {
 
 const styles = {
   mainContent: {
-    marginLeft: "250px",
+    width: "calc(100vw - 250px)",
     marginTop: "70px",
+    marginLeft: "250px",
     padding: "25px",
     minHeight: "calc(100vh - 70px)",
-    maxWidth: "calc(100vw - 250px)",
     backgroundColor: "#f8f9fa",
+    maxWidth: "calc(100vw - 250px)",
+    overflow: "auto",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   header: {
     color: "#2c3e50",
@@ -371,7 +420,7 @@ const styles = {
     marginBottom: "30px",
     fontSize: "1.8rem",
     position: "relative",
-    paddingBottom: "15px"
+    paddingBottom: "15px",
   },
   headerUnderline: {
     content: '""',
@@ -381,60 +430,60 @@ const styles = {
     transform: "translateX(-50%)",
     width: "80px",
     height: "3px",
-    backgroundColor: "#fc6625"
+    backgroundColor: "#fc6625",
   },
   cardContainer: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
     gap: "20px",
-    padding: "20px"
+    padding: "20px",
   },
   employeeCard: {
     backgroundColor: "#ffffff",
     borderRadius: "8px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    overflow: "hidden"
+    overflow: "hidden",
   },
   cardHeader: {
     backgroundColor: "#fc6625",
     color: "#ffffff",
     padding: "15px",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   cardBody: {
-    padding: "20px"
+    padding: "20px",
   },
   infoRow: {
     marginBottom: "8px",
     fontSize: "14px",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
   },
   infoLabel: {
     fontWeight: 600,
     display: "inline-block",
     width: "85px",
-    color: "#2c3e50"
+    color: "#2c3e50",
   },
   searchContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     marginBottom: "30px",
-    padding: "0 20px"
+    padding: "0 20px",
   },
   searchControls: {
     display: "flex",
     gap: "15px",
     width: "100%",
     maxWidth: "700px",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   searchWrapper: {
     position: "relative",
     flex: 1,
-    maxWidth: "500px"
+    maxWidth: "500px",
   },
   searchInput: {
     width: "100%",
@@ -445,19 +494,19 @@ const styles = {
     outline: "none",
     transition: "border-color 0.3s ease",
     "&:focus": {
-      borderColor: "#fc6625"
-    }
+      borderColor: "#fc6625",
+    },
   },
   searchIcon: {
     position: "absolute",
     left: "15px",
     top: "50%",
     transform: "translateY(-50%)",
-    color: "#666"
+    color: "#666",
   },
   filterIcon: {
     fontSize: "12px",
-    marginRight: "8px"
+    marginRight: "8px",
   },
   advancedSearchButton: {
     padding: "10px 20px",
@@ -469,7 +518,7 @@ const styles = {
     gap: "8px",
     transition: "all 0.3s ease",
     fontSize: "14px",
-    fontWeight: "500"
+    fontWeight: "500",
   },
   pdfButton: {
     padding: "10px 20px",
@@ -485,13 +534,13 @@ const styles = {
     fontSize: "14px",
     fontWeight: "500",
     "&:hover": {
-      backgroundColor: "#e55a1c"
+      backgroundColor: "#e55a1c",
     },
     "&:disabled": {
       backgroundColor: "#cccccc",
       cursor: "not-allowed",
-      opacity: 0.7
-    }
+      opacity: 0.7,
+    },
   },
   searchOptions: {
     marginTop: "15px",
@@ -499,7 +548,7 @@ const styles = {
     justifyContent: "center",
     gap: "15px",
     width: "100%",
-    maxWidth: "700px"
+    maxWidth: "700px",
   },
   searchSelect: {
     padding: "8px 15px",
@@ -512,35 +561,35 @@ const styles = {
     transition: "border-color 0.3s ease",
     minWidth: "150px",
     "&:focus": {
-      borderColor: "#fc6625"
-    }
+      borderColor: "#fc6625",
+    },
   },
   loadingContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "calc(100vh - 70px)"
+    minHeight: "calc(100vh - 70px)",
   },
   statusIndicator: {
     display: "inline-block",
     width: "10px",
     height: "10px",
     borderRadius: "50%",
-    marginRight: "5px"
+    marginRight: "5px",
   },
   noResults: {
     textAlign: "center",
     padding: "40px",
     color: "#666",
     fontSize: "16px",
-    gridColumn: "1 / -1"
+    gridColumn: "1 / -1",
   },
   cardHeaderContent: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "100%"
+    width: "100%",
   },
   deleteIcon: {
     fontSize: "16px",
@@ -551,40 +600,40 @@ const styles = {
     padding: "4px",
     "&:hover": {
       opacity: "1",
-      transform: "scale(1.1)"
+      transform: "scale(1.1)",
     },
     "&:active": {
-      transform: "scale(0.95)"
-    }
+      transform: "scale(0.95)",
+    },
   },
   statusContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
-    cursor: 'pointer',
-    padding: '5px',
-    borderRadius: '15px',
-    transition: 'background-color 0.2s',
-    '&:hover': {
-      backgroundColor: '#f5f5f5'
-    }
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+    cursor: "pointer",
+    padding: "5px",
+    borderRadius: "15px",
+    transition: "background-color 0.2s",
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
+    },
   },
   statusSelect: {
-    padding: '5px 10px',
-    borderRadius: '15px',
-    border: 'none',
-    cursor: 'pointer',
-    fontWeight: '500',
-    transition: 'all 0.3s ease',
-    outline: 'none',
-    '&:hover': {
-      opacity: '0.9'
-    }
+    padding: "5px 10px",
+    borderRadius: "15px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "500",
+    transition: "all 0.3s ease",
+    outline: "none",
+    "&:hover": {
+      opacity: "0.9",
+    },
   },
   iconContainer: {
     display: "flex",
     gap: "15px",
-    alignItems: "center"
+    alignItems: "center",
   },
   editIcon: {
     fontSize: "16px",
@@ -595,10 +644,10 @@ const styles = {
     padding: "4px",
     "&:hover": {
       opacity: "1",
-      transform: "scale(1.1)"
+      transform: "scale(1.1)",
     },
     "&:active": {
-      transform: "scale(0.95)"
-    }
-  }
+      transform: "scale(0.95)",
+    },
+  },
 };

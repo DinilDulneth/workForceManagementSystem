@@ -196,14 +196,16 @@ export default function AccessF() {
 
 const styles = {
   mainContent: {
-    marginLeft: "250px",
+    width: "calc(100vw - 250px)",
     marginTop: "70px",
+    marginLeft: "250px",
     padding: "25px",
     minHeight: "calc(100vh - 70px)",
     backgroundColor: "#f8f9fa",
+    maxWidth: "calc(100vw - 250px)",
+    overflow: "auto",
     display: "flex",
-    justifyContent: "center",
-    alignItems: "flex-start",
+    flexDirection: "column"
   },
   formContainer: {
     width: "600px",
@@ -211,6 +213,8 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     padding: "2.5rem",
+    maxWidth: "700px",
+    margin: "0 auto",
   },
   header: {
     color: "#2c3e50",
