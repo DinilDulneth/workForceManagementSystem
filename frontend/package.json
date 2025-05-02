@@ -29,6 +29,7 @@
     "express": "^5.1.0",
     "formik": "^2.4.6",
     "framer-motion": "^12.7.4",
+    "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "jwt-decode": "^4.0.0",

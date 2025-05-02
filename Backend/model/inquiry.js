@@ -7,6 +7,7 @@ const inquirySchema = new mongoose.Schema({
   sender: { type: String }, // Changed from ObjectId to String
   date: { type: Date, default: Date.now },
   department: { type: String, required: true }, // Added department field
+  completed: { type: Boolean, default: false }, // Added completed field
 });
 
 const Inquiry = mongoose.model("Inquiry", inquirySchema);

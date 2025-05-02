@@ -25,6 +25,8 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import BusinessIcon from "@mui/icons-material/Business";
 import MessageIcon from "@mui/icons-material/Message";
 import ClearIcon from "@mui/icons-material/Clear";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
@@ -42,6 +44,7 @@ function FetchInquiry() {
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [completionStatus, setCompletionStatus] = useState("all"); // all, completed, pending
 
   useEffect(() => {
     getInquiry();
@@ -90,14 +93,55 @@ function FetchInquiry() {
     return inquiries.filter((inq) => inq.department === selectedDepartment);
   };
 
+  const filterInquiriesByCompletion = (inquiries) => {
+    if (completionStatus === "all") return inquiries;
+    return inquiries.filter((inq) =>
+      completionStatus === "completed" ? inq.completed : !inq.completed
+    );
+  };
+
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === "newest" ? "oldest" : "newest");
+  };
+
+  const toggleInquiryCompletion = (id, currentStatus) => {
+    const newStatus = !currentStatus;
+
+    axios
+      .put(`http://localhost:8070/api/inquiry/updateStatus/${id}`, {
+        completed: newStatus,
+      })
+      .then((res) => {
+        setInquiry(
+          inquiry.map((inq) =>
+            inq._id === id ? { ...inq, completed: newStatus } : inq
+          )
+        );
+
+        setSnackbar({
+          open: true,
+          message: `Inquiry marked as ${newStatus ? "completed" : "pending"}`,
+          severity: "success",
+        });
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message: "Error updating inquiry status: " + err.message,
+          severity: "error",
+        });
+      });
   };
 
   const sortedInquiries = sortInquiries(inquiry);
   const nonHRInquiries = filterNonHRInquiries(sortedInquiries);
   const dateFilteredInquiries = filterInquiriesByDate(nonHRInquiries);
-  const filteredInquiries = filterInquiriesByDepartment(dateFilteredInquiries);
+  const departmentFilteredInquiries = filterInquiriesByDepartment(
+    dateFilteredInquiries
+  );
+  const filteredInquiries = filterInquiriesByCompletion(
+    departmentFilteredInquiries
+  );
 
   const uniqueDepartments = [
     ...new Set(
@@ -201,6 +245,29 @@ function FetchInquiry() {
                 <ClearIcon />
               </IconButton>
             )}
+            <FormControl sx={{ minWidth: 150 }}>
+              <InputLabel id="completion-filter-label">Status</InputLabel>
+              <Select
+                labelId="completion-filter-label"
+                id="completion-filter"
+                value={completionStatus}
+                label="Status"
+                onChange={(e) => setCompletionStatus(e.target.value)}
+                size="small"
+                sx={{
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#fc6625",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#e55a1c",
+                  },
+                }}
+              >
+                <MenuItem value="all">All Inquiries</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Filter by Date"
@@ -272,14 +339,22 @@ function FetchInquiry() {
                   mb: 2,
                   p: 3,
                   borderRadius: 2,
-                  background: "rgba(255, 255, 255, 0.95)",
+                  background: inq.completed
+                    ? "rgba(245, 252, 245, 0.95)"
+                    : "rgba(255, 255, 255, 0.95)",
                   backdropFilter: "blur(10px)",
-                  boxShadow: "0 8px 32px rgba(252, 102, 37, 0.1)",
-                  border: "1px solid rgba(252, 102, 37, 0.1)",
+                  boxShadow: inq.completed
+                    ? "0 8px 32px rgba(80, 180, 80, 0.15)"
+                    : "0 8px 32px rgba(252, 102, 37, 0.1)",
+                  border: inq.completed
+                    ? "1px solid rgba(80, 180, 80, 0.2)"
+                    : "1px solid rgba(252, 102, 37, 0.1)",
                   transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "translateY(-4px)",
-                    boxShadow: "0 12px 40px rgba(252, 102, 37, 0.2)",
+                    boxShadow: inq.completed
+                      ? "0 12px 40px rgba(80, 180, 80, 0.25)"
+                      : "0 12px 40px rgba(252, 102, 37, 0.2)",
                   },
                 }}
               >
@@ -294,13 +369,19 @@ function FetchInquiry() {
                     <Typography
                       variant="h5"
                       sx={{
-                        color: "#fc6625",
+                        color: inq.completed ? "#2e7d32" : "#fc6625",
                         fontWeight: 700,
                         mb: 2,
-                        borderBottom: "2px solid rgba(252, 102, 37, 0.1)",
+                        borderBottom: inq.completed
+                          ? "2px solid rgba(80, 180, 80, 0.2)"
+                          : "2px solid rgba(252, 102, 37, 0.1)",
                         paddingBottom: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
                       }}
                     >
+                      {inq.completed && <TaskAltIcon color="success" />}
                       {inq.title || "Untitled Inquiry"}
                     </Typography>
 
@@ -315,7 +396,9 @@ function FetchInquiry() {
                         gap: 1,
                       }}
                     >
-                      <PersonIcon sx={{ color: "#fc6625" }} />
+                      <PersonIcon
+                        sx={{ color: inq.completed ? "#2e7d32" : "#fc6625" }}
+                      />
                       Employee ID: {inq.employeeId}
                     </Typography>
 
@@ -340,10 +423,12 @@ function FetchInquiry() {
                         label={`Department: ${inq.department}`}
                         size="small"
                         sx={{
-                          backgroundColor: "rgba(252, 102, 37, 0.1)",
-                          color: "#fc6625",
+                          backgroundColor: inq.completed
+                            ? "rgba(80, 180, 80, 0.1)"
+                            : "rgba(252, 102, 37, 0.1)",
+                          color: inq.completed ? "#2e7d32" : "#fc6625",
                           "& .MuiChip-icon": {
-                            color: "#fc6625",
+                            color: inq.completed ? "#2e7d32" : "#fc6625",
                           },
                         }}
                       />
@@ -359,6 +444,53 @@ function FetchInquiry() {
                           },
                         }}
                       />
+                      {inq.completed && (
+                        <Chip
+                          icon={<CheckCircleIcon />}
+                          label="Completed"
+                          size="small"
+                          color="success"
+                          sx={{
+                            backgroundColor: "rgba(80, 180, 80, 0.1)",
+                            "& .MuiChip-icon": {
+                              color: "#2e7d32",
+                            },
+                          }}
+                        />
+                      )}
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        mt: 2,
+                      }}
+                    >
+                      <Button
+                        variant={inq.completed ? "outlined" : "contained"}
+                        color={inq.completed ? "success" : "primary"}
+                        onClick={() =>
+                          toggleInquiryCompletion(inq._id, inq.completed)
+                        }
+                        startIcon={
+                          inq.completed ? <ClearIcon /> : <CheckCircleIcon />
+                        }
+                        sx={{
+                          ...(inq.completed
+                            ? {}
+                            : {
+                                backgroundColor: "#fc6625",
+                                "&:hover": {
+                                  backgroundColor: "#e55a1c",
+                                },
+                              }),
+                        }}
+                      >
+                        {inq.completed
+                          ? "Mark as Pending"
+                          : "Mark as Completed"}
+                      </Button>
                     </Box>
                   </Box>
                 </Box>

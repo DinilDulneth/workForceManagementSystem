@@ -21,6 +21,8 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -58,6 +60,7 @@ function FetchInquiry() {
   });
   const [selectedDate, setSelectedDate] = useState(null); // State for date filter
   const [selectedDepartment, setSelectedDepartment] = useState(""); // State for department filter
+  const [completionStatus, setCompletionStatus] = useState("all"); // all, completed, pending
 
   useEffect(() => {
     getInquiry();
@@ -143,10 +146,56 @@ function FetchInquiry() {
     return inquiries.filter((inq) => inq.department === selectedDepartment);
   };
 
-  // Toggle sort order function
-  const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "newest" ? "oldest" : "newest");
+  // Function to filter inquiries by completion status
+  const filterInquiriesByCompletion = (inquiries) => {
+    if (completionStatus === "all") return inquiries;
+    return inquiries.filter((inq) =>
+      completionStatus === "completed" ? inq.completed : !inq.completed
+    );
   };
+
+  // Handler for sort order change
+  const handleSortChange = (event, newSortOrder) => {
+    if (newSortOrder !== null) {
+      setSortOrder(newSortOrder);
+    }
+  };
+
+  // Handle department filter change - update to handle Select change
+  const handleDepartmentChange = (event) => {
+    setSelectedDepartment(event.target.value);
+  };
+
+  // Function to toggle inquiry completion status
+  function toggleInquiryCompletion(id, currentStatus) {
+    const newStatus = !currentStatus;
+
+    axios
+      .put(`http://localhost:8070/api/inquiry/updateStatus/${id}`, {
+        completed: newStatus,
+      })
+      .then((res) => {
+        // Update local state
+        setInquiry(
+          inquiry.map((inq) =>
+            inq._id === id ? { ...inq, completed: newStatus } : inq
+          )
+        );
+
+        setSnackbar({
+          open: true,
+          message: `Inquiry marked as ${newStatus ? "completed" : "pending"}`,
+          severity: "success",
+        });
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message: "Error updating inquiry status: " + err.message,
+          severity: "error",
+        });
+      });
+  }
 
   function handleDelete(id) {
     if (window.confirm("Are you sure you want to delete this inquiry?")) {
@@ -204,7 +253,12 @@ function FetchInquiry() {
   // Get sorted and filtered inquiries
   const sortedInquiries = sortInquiries(inquiry);
   const dateFilteredInquiries = filterInquiriesByDate(sortedInquiries);
-  const filteredInquiries = filterInquiriesByDepartment(dateFilteredInquiries);
+  const departmentFilteredInquiries = filterInquiriesByDepartment(
+    dateFilteredInquiries
+  );
+  const filteredInquiries = filterInquiriesByCompletion(
+    departmentFilteredInquiries
+  );
 
   // Get unique departments for the filter dropdown and make sure HR is included
   const uniqueDepartments = [
@@ -246,90 +300,225 @@ function FetchInquiry() {
           </Typography>
         </Box>
 
-        {/* Add sort and filter controls */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={
-              sortOrder === "newest" ? (
-                <ArrowDownwardIcon />
-              ) : (
-                <ArrowUpwardIcon />
-              )
-            }
-            onClick={toggleSortOrder}
-            sx={{
-              color: "#fc6625",
-              borderColor: "#fc6625",
-              "&:hover": {
-                borderColor: "#e55a1c",
-                backgroundColor: "rgba(252, 102, 37, 0.1)",
-              },
-            }}
-          >
-            {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </Button>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <FormControl sx={{ minWidth: 150 }}>
+        {/* Modernized filter controls */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "center",
+            gap: 2,
+            mb: 3,
+            backgroundColor: "rgba(252, 102, 37, 0.05)",
+            borderRadius: 2,
+            padding: 2,
+          }}
+        >
+          {/* Sort controls */}
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, textAlign: "center", color: "#666" }}
+            >
+              Sort by Date
+            </Typography>
+            <ToggleButtonGroup
+              value={sortOrder}
+              exclusive
+              onChange={handleSortChange}
+              aria-label="inquiry sort"
+              size="small"
+              sx={{
+                "& .MuiToggleButton-root.Mui-selected": {
+                  backgroundColor: "rgba(252, 102, 37, 0.2)",
+                  color: "#fc6625",
+                  "&:hover": {
+                    backgroundColor: "rgba(252, 102, 37, 0.3)",
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="newest" aria-label="newest first">
+                <ArrowDownwardIcon sx={{ mr: 1, fontSize: "1rem" }} />
+                Newest First
+              </ToggleButton>
+              <ToggleButton value="oldest" aria-label="oldest first">
+                <ArrowUpwardIcon sx={{ mr: 1, fontSize: "1rem" }} />
+                Oldest First
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Department filter - convert to dropdown */}
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, textAlign: "center", color: "#666" }}
+            >
+              Filter by Department
+            </Typography>
+            <FormControl
+              fullWidth
+              size="small"
+              sx={{
+                minWidth: 200,
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "rgba(252, 102, 37, 0.5)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#fc6625",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#fc6625",
+                  },
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#fc6625",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#fc6625",
+                },
+              }}
+            >
               <InputLabel id="department-filter-label">Department</InputLabel>
               <Select
                 labelId="department-filter-label"
                 id="department-filter"
                 value={selectedDepartment}
                 label="Department"
-                onChange={(e) => setSelectedDepartment(e.target.value)}
-                size="small"
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#fc6625",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#e55a1c",
-                  },
-                }}
+                onChange={handleDepartmentChange}
+                startAdornment={
+                  selectedDepartment ? (
+                    <BusinessIcon
+                      sx={{
+                        mr: 1,
+                        ml: -0.5,
+                        color: "#fc6625",
+                        fontSize: "1.2rem",
+                      }}
+                    />
+                  ) : null
+                }
               >
-                <MenuItem value="">All Departments</MenuItem>
+                <MenuItem value="">
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <FilterAltIcon
+                      sx={{ mr: 1, fontSize: "1.2rem", color: "#fc6625" }}
+                    />
+                    All Departments
+                  </Box>
+                </MenuItem>
                 {uniqueDepartments.map((dept) => (
                   <MenuItem key={dept} value={dept}>
-                    {dept}
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <BusinessIcon
+                        sx={{ mr: 1, fontSize: "1.2rem", color: "#fc6625" }}
+                      />
+                      {dept}
+                    </Box>
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            {selectedDepartment && (
-              <IconButton
-                onClick={() => setSelectedDepartment("")}
-                sx={{
-                  color: "#e55a1c",
-                  "&:hover": {
-                    backgroundColor: "rgba(229, 90, 28, 0.1)",
+          </Box>
+
+          {/* Date filter */}
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, textAlign: "center", color: "#666" }}
+            >
+              Filter by Date
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Select Date"
+                  value={selectedDate}
+                  onChange={(newValue) => setSelectedDate(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderColor: "rgba(252, 102, 37, 0.5)",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "#fc6625",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#fc6625",
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+              {selectedDate && (
+                <IconButton
+                  onClick={() => setSelectedDate(null)}
+                  sx={{
+                    color: "#e55a1c",
+                    ml: 1,
+                    "&:hover": {
+                      backgroundColor: "rgba(229, 90, 28, 0.1)",
+                    },
+                  }}
+                >
+                  <ClearIcon />
+                </IconButton>
+              )}
+            </Box>
+          </Box>
+
+          {/* Add Completion Status Filter */}
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, textAlign: "center", color: "#666" }}
+            >
+              Status
+            </Typography>
+            <FormControl
+              fullWidth
+              size="small"
+              sx={{
+                minWidth: 150,
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "rgba(252, 102, 37, 0.5)",
                   },
-                }}
-              >
-                <ClearIcon />
-              </IconButton>
-            )}
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Filter by Date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                renderInput={(params) => <TextField {...params} size="small" />}
-              />
-            </LocalizationProvider>
-            {selectedDate && (
-              <IconButton
-                onClick={() => setSelectedDate(null)}
-                sx={{
-                  color: "#e55a1c",
-                  "&:hover": {
-                    backgroundColor: "rgba(229, 90, 28, 0.1)",
+                  "&:hover fieldset": {
+                    borderColor: "#fc6625",
                   },
-                }}
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#fc6625",
+                  },
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#fc6625",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#fc6625",
+                },
+              }}
+            >
+              <InputLabel id="completion-status-label">Status</InputLabel>
+              <Select
+                labelId="completion-status-label"
+                id="completion-status"
+                value={completionStatus}
+                label="Status"
+                onChange={(e) => setCompletionStatus(e.target.value)}
               >
-                <ClearIcon />
-              </IconButton>
-            )}
+                <MenuItem value="all">All Inquiries</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
 
@@ -380,14 +569,22 @@ function FetchInquiry() {
                   mb: 2,
                   p: 3,
                   borderRadius: 2,
-                  background: "rgba(255, 255, 255, 0.95)",
+                  background: inq.completed
+                    ? "rgba(245, 252, 245, 0.95)"
+                    : "rgba(255, 255, 255, 0.95)",
                   backdropFilter: "blur(10px)",
-                  boxShadow: "0 8px 32px rgba(252, 102, 37, 0.1)",
-                  border: "1px solid rgba(252, 102, 37, 0.1)",
+                  boxShadow: inq.completed
+                    ? "0 8px 32px rgba(80, 180, 80, 0.15)"
+                    : "0 8px 32px rgba(252, 102, 37, 0.1)",
+                  border: inq.completed
+                    ? "1px solid rgba(80, 180, 80, 0.2)"
+                    : "1px solid rgba(252, 102, 37, 0.1)",
                   transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "translateY(-4px)",
-                    boxShadow: "0 12px 40px rgba(252, 102, 37, 0.2)",
+                    boxShadow: inq.completed
+                      ? "0 12px 40px rgba(80, 180, 80, 0.25)"
+                      : "0 12px 40px rgba(252, 102, 37, 0.2)",
                   },
                 }}
               >
@@ -505,7 +702,52 @@ function FetchInquiry() {
                           Delete
                         </Button>
                       </motion.div>
+
+                      {/* Add Toggle Completion Button */}
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          variant={inq.completed ? "outlined" : "contained"}
+                          onClick={() =>
+                            toggleInquiryCompletion(inq._id, inq.completed)
+                          }
+                          sx={{
+                            color: inq.completed ? "#2e7d32" : "white",
+                            backgroundColor: inq.completed
+                              ? "transparent"
+                              : "#2e7d32",
+                            borderColor: "#2e7d32",
+                            "&:hover": {
+                              backgroundColor: inq.completed
+                                ? "rgba(46, 125, 50, 0.1)"
+                                : "#256f29",
+                              borderColor: "#2e7d32",
+                            },
+                          }}
+                        >
+                          {inq.completed
+                            ? "Mark as Pending"
+                            : "Mark as Completed"}
+                        </Button>
+                      </motion.div>
                     </Box>
+
+                    {/* Show completion status chip if completed */}
+                    {inq.completed && (
+                      <Box mt={2}>
+                        <Chip
+                          label="Completed"
+                          color="success"
+                          size="small"
+                          sx={{
+                            backgroundColor: "rgba(46, 125, 50, 0.1)",
+                            color: "#2e7d32",
+                          }}
+                        />
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               </Card>

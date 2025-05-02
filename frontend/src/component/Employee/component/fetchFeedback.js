@@ -10,25 +10,70 @@ import {
   Snackbar,
   Chip,
   LinearProgress,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import PersonIcon from "@mui/icons-material/Person";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import MessageIcon from "@mui/icons-material/Message";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import AllInboxIcon from "@mui/icons-material/AllInbox";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SortIcon from "@mui/icons-material/Sort";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 function FetchFeedback() {
   const navigate = useNavigate();
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterMode, setFilterMode] = useState("all");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
+  const [confirmDelete, setConfirmDelete] = useState({ open: false, id: null });
 
   useEffect(() => {
     getFeedbacks();
   }, []);
+
+  const handleFilterChange = (event, newFilterMode) => {
+    if (newFilterMode !== null) {
+      setFilterMode(newFilterMode);
+    }
+  };
+
+  const handleSortChange = (event, newSortOrder) => {
+    if (newSortOrder !== null) {
+      setSortOrder(newSortOrder);
+    }
+  };
+
+  const filteredFeedbacks = feedbacks
+    .filter((feedback) => {
+      if (filterMode === "all") return true;
+      if (filterMode === "viewed") return feedback.viewed;
+      if (filterMode === "unviewed") return !feedback.viewed;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortOrder === "newest") {
+        return new Date(b.date) - new Date(a.date);
+      } else {
+        return new Date(a.date) - new Date(b.date);
+      }
+    });
 
   function getFeedbacks() {
     setLoading(true);
@@ -44,17 +89,12 @@ function FetchFeedback() {
       return;
     }
 
-    // First validate employee exists in database and get correct ID
     axios
       .get(`http://localhost:8070/employee/getEmpByID/${localEmployeeId}`)
       .then((employeeResponse) => {
         const employeeData = employeeResponse.data;
-        console.log("Employee validated:", employeeData);
-
-        // Get the correct ID from database
         const dbEmployeeId = employeeData.ID || localEmployeeId;
 
-        // Fetch feedback with the validated ID
         return axios.get(
           `http://localhost:8070/api/feedback/getFeedbackByEmployeeId/${dbEmployeeId}`
         );
@@ -69,7 +109,6 @@ function FetchFeedback() {
       .catch((err) => {
         console.error("Error in validation or fetching feedback:", err);
 
-        // Fallback to using localStorage ID if validation fails
         axios
           .get(
             `http://localhost:8070/api/feedback/getFeedbackByEmployeeId/${localEmployeeId}`
@@ -120,6 +159,47 @@ function FetchFeedback() {
       });
   }
 
+  function markAsViewed(id) {
+    axios
+      .put(`http://localhost:8070/api/feedback/markAsViewed/${id}`)
+      .then((res) => {
+        setSnackbar({
+          open: true,
+          message: "Feedback marked as viewed",
+          severity: "success",
+        });
+
+        setFeedbacks(
+          feedbacks.map((feedback) =>
+            feedback._id === id ? { ...feedback, viewed: true } : feedback
+          )
+        );
+      })
+      .catch((err) => {
+        setSnackbar({
+          open: true,
+          message: "Error marking feedback as viewed: " + err.message,
+          severity: "error",
+        });
+        console.error(err);
+      });
+  }
+
+  function handleDeleteClick(id) {
+    setConfirmDelete({ open: true, id });
+  }
+
+  function handleConfirmDelete() {
+    if (confirmDelete.id) {
+      deleteFeedback(confirmDelete.id);
+      setConfirmDelete({ open: false, id: null });
+    }
+  }
+
+  function handleCancelDelete() {
+    setConfirmDelete({ open: false, id: null });
+  }
+
   function formatDate(date) {
     if (!date) return "";
     try {
@@ -166,6 +246,91 @@ function FetchFeedback() {
           </Typography>
         </Box>
 
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "center",
+            gap: 2,
+            mb: 3,
+            backgroundColor: "rgba(252, 102, 37, 0.05)",
+            borderRadius: 2,
+            padding: 2,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, textAlign: "center", color: "#666" }}
+            >
+              Filter by Status
+            </Typography>
+            <ToggleButtonGroup
+              value={filterMode}
+              exclusive
+              onChange={handleFilterChange}
+              aria-label="feedback filter"
+              size="small"
+              sx={{
+                "& .MuiToggleButton-root.Mui-selected": {
+                  backgroundColor: "rgba(252, 102, 37, 0.2)",
+                  color: "#fc6625",
+                  "&:hover": {
+                    backgroundColor: "rgba(252, 102, 37, 0.3)",
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="all" aria-label="all feedback">
+                <AllInboxIcon sx={{ mr: 1 }} />
+                All
+              </ToggleButton>
+              <ToggleButton value="unviewed" aria-label="unviewed feedback">
+                <VisibilityOffIcon sx={{ mr: 1 }} />
+                Unviewed
+              </ToggleButton>
+              <ToggleButton value="viewed" aria-label="viewed feedback">
+                <VisibilityIcon sx={{ mr: 1 }} />
+                Viewed
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          <Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, textAlign: "center", color: "#666" }}
+            >
+              Sort by Date
+            </Typography>
+            <ToggleButtonGroup
+              value={sortOrder}
+              exclusive
+              onChange={handleSortChange}
+              aria-label="feedback sort"
+              size="small"
+              sx={{
+                "& .MuiToggleButton-root.Mui-selected": {
+                  backgroundColor: "rgba(252, 102, 37, 0.2)",
+                  color: "#fc6625",
+                  "&:hover": {
+                    backgroundColor: "rgba(252, 102, 37, 0.3)",
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="newest" aria-label="newest first">
+                <ArrowDownwardIcon sx={{ mr: 1, fontSize: "1rem" }} />
+                Newest First
+              </ToggleButton>
+              <ToggleButton value="oldest" aria-label="oldest first">
+                <ArrowUpwardIcon sx={{ mr: 1, fontSize: "1rem" }} />
+                Oldest First
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        </Box>
+
         {loading && (
           <LinearProgress
             sx={{
@@ -178,8 +343,24 @@ function FetchFeedback() {
           />
         )}
 
+        {!loading && filteredFeedbacks.length === 0 && (
+          <Box
+            sx={{
+              textAlign: "center",
+              my: 4,
+              p: 3,
+              borderRadius: 2,
+              backgroundColor: "rgba(252, 102, 37, 0.05)",
+            }}
+          >
+            <Typography variant="h6" color="text.secondary">
+              No {filterMode === "all" ? "" : filterMode} feedback found
+            </Typography>
+          </Box>
+        )}
+
         <AnimatePresence>
-          {feedbacks.map((feedback, index) => (
+          {filteredFeedbacks.map((feedback, index) => (
             <motion.div
               key={feedback._id}
               initial={{ opacity: 0, y: 20 }}
@@ -201,16 +382,17 @@ function FetchFeedback() {
                     transform: "translateY(-4px)",
                     boxShadow: "0 12px 40px rgba(252, 102, 37, 0.2)",
                   },
+                  opacity: feedback.viewed ? 0.8 : 1,
                 }}
               >
                 <Box
                   sx={{
                     display: "flex",
-                    justifyContent: "flex-start",
+                    justifyContent: "space-between",
                     alignItems: "flex-start",
                   }}
                 >
-                  <Box sx={{ width: "100%" }}>
+                  <Box sx={{ width: "90%" }}>
                     <Typography
                       variant="h5"
                       sx={{
@@ -225,6 +407,21 @@ function FetchFeedback() {
                       }}
                     >
                       {feedback.title}
+                      {feedback.viewed && (
+                        <Chip
+                          size="small"
+                          label="Viewed"
+                          icon={<VisibilityIcon fontSize="small" />}
+                          sx={{
+                            ml: 2,
+                            backgroundColor: "rgba(76, 175, 80, 0.1)",
+                            color: "#4caf50",
+                            "& .MuiChip-icon": {
+                              color: "#4caf50",
+                            },
+                          }}
+                        />
+                      )}
                     </Typography>
 
                     <Typography
@@ -242,7 +439,15 @@ function FetchFeedback() {
                       {feedback.feedback}
                     </Typography>
 
-                    <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        mt: 3,
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                      }}
+                    >
                       <Chip
                         icon={<PersonIcon />}
                         label={`From: ${feedback.sender}`}
@@ -267,7 +472,41 @@ function FetchFeedback() {
                           },
                         }}
                       />
+                      {!feedback.viewed && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => markAsViewed(feedback._id)}
+                          sx={{
+                            borderColor: "#4caf50",
+                            color: "#4caf50",
+                            ml: "auto",
+                            "&:hover": {
+                              backgroundColor: "rgba(76, 175, 80, 0.1)",
+                              borderColor: "#4caf50",
+                            },
+                          }}
+                        >
+                          Mark as Viewed
+                        </Button>
+                      )}
                     </Box>
+                  </Box>
+                  <Box>
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => handleDeleteClick(feedback._id)}
+                      sx={{
+                        color: "#e55a1c",
+                        "&:hover": {
+                          backgroundColor: "rgba(229, 90, 28, 0.1)",
+                          color: "#fc6625",
+                        },
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                   </Box>
                 </Box>
               </Card>
@@ -275,6 +514,37 @@ function FetchFeedback() {
           ))}
         </AnimatePresence>
       </motion.div>
+
+      <Dialog
+        open={confirmDelete.open}
+        onClose={handleCancelDelete}
+        aria-labelledby="delete-dialog-title"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this feedback? This action cannot be
+            undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            sx={{
+              backgroundColor: "#fc6625",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#e55a1c",
+              },
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}
