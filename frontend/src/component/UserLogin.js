@@ -31,7 +31,7 @@ const UserLogin = () => {
       switch (data.role) {
         case "HR":
           await getHrID(email);
-          navigate("/HRDashboard/AccessV");
+          navigate("/HRDashboard");
           break;
 
         case "Manager":

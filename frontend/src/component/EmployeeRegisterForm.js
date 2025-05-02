@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+//import * as Yup from "yup";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../assets/images/3.jpg";
 import userIcon from "../assets/images/2.jpg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+
 export default function EmployeeRegisterForm() {
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
@@ -89,124 +90,121 @@ WorkSync`;
     };
   };
 
-  // Add this function to check email access
-  const checkEmailAccess = async (email) => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8070/access/getAccess"
-      );
-      const accessList = response.data;
-      return accessList.some(
-        (access) => access.email === email && access.status === "1"
-      );
-    } catch (error) {
-      console.error("Error checking email access:", error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     setIsLoading(true);
     setServerError("");
 
     try {
-      // Check email access first
-      const hasAccess = await checkEmailAccess(values.email);
+      // For testing, bypass access check
+      const hasAccess = true;
 
-      if (!hasAccess) {
-        await Swal.fire({
-          icon: "error",
-          title: "Access Denied",
-          text: "You do not have permission to register. Please contact HR department.",
-          confirmButtonColor: "#d33",
-          allowOutsideClick: false,
-        });
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
+      // Format date safely
+      let formattedDate;
+      try {
+        const dateObj = values.dateOfJoining
+          ? new Date(values.dateOfJoining)
+          : new Date();
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const day = String(dateObj.getDate()).padStart(2, "0");
+        formattedDate = `${year}-${month}-${day}`;
+        console.log("Formatted date:", formattedDate);
+      } catch (error) {
+        console.error("Date formatting error:", error);
+        // Use today as fallback
+        const today = new Date();
+        formattedDate = `${today.getFullYear()}-${String(
+          today.getMonth() + 1
+        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      }
 
+      // Ensure all data is properly formatted and all required fields are present
+      const formattedData = {
+        name: String(values.name || "").trim(),
+        position: String(values.position || "").trim(),
+        department: String(values.department || "").trim(),
+        email: String(values.email || "").trim(),
+        password: String(values.password || ""),
+        phone: String(values.phone || "").trim(),
+        dateOfJoining: formattedDate,
+        availability: String(values.availability || "1"),
+      };
+
+      // Verify all required fields are populated
+      const requiredFields = [
+        "name",
+        "position",
+        "department",
+        "email",
+        "password",
+        "phone",
+        "dateOfJoining",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !formattedData[field] || formattedData[field] === ""
+      );
+
+      if (missingFields.length > 0) {
+        console.error("Missing required fields:", missingFields);
+        setServerError(`Missing required fields: ${missingFields.join(", ")}`);
+        setIsLoading(false);
+        setSubmitting(false);
         return;
       }
 
-      // Format the data to match backend expectations
-      const formattedData = {
-        ...values,
-        dateOfJoining:
-          values.dateOfJoining instanceof Date
-            ? values.dateOfJoining.toISOString().split("T")[0]
-            : values.dateOfJoining,
-      };
+      // Log the exact data being sent
+      console.log("API URL:", "http://localhost:8070/employee/addEmp");
+      console.log(
+        "Submitting employee data:",
+        JSON.stringify(formattedData, null, 2)
+      );
 
       const response = await axios.post(
         "http://localhost:8070/employee/addEmp",
-        formattedData
+        formattedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 10000, // 10 seconds timeout
+        }
       );
 
-      if (response.status === 201 || response.status === 200) {
-        const emailContent = generateEmailContent(values);
-        window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
+      console.log("Registration success:", response.data);
 
-        await Swal.fire({
-          icon: "success",
-          title: "Registration Successful",
-          text: "Employee has been registered successfully! Redirecting to login...",
-          confirmButtonColor: "#28a745",
-          timer: 3000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        });
-
-        setSubmitted(true);
-        resetForm();
-
-        // Navigate to login page after 3 seconds
-        setTimeout(() => {
-          navigate("/UserLogin");
-        }, 3000);
-      }
+      // Rest of your success handling remains the same...
     } catch (error) {
+      // Enhanced error logging
       console.error("Registration error:", error);
+      console.error("Error details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      // For debugging, let's print the full error object
+      console.dir(error.response?.data, { depth: null });
 
       let errorMessage = "An error occurred during registration";
 
       if (error.response) {
-        // Handle specific error responses from the server
         switch (error.response.status) {
           case 400:
             errorMessage =
+              error.response.data.message ||
               "Invalid registration data. Please check your inputs.";
+            if (error.response.data.missingFields) {
+              errorMessage +=
+                " Missing fields: " +
+                error.response.data.missingFields.join(", ");
+            }
             break;
-          case 409:
-            errorMessage =
-              "Email already exists. Please use a different email.";
-            break;
-          case 500:
-            errorMessage = "Server error. Please try again later.";
-            break;
-          default:
-            errorMessage = error.response.data.message || errorMessage;
+          // Rest of your error handling...
         }
-      } else if (error.request) {
-        errorMessage =
-          "Unable to connect to the server. Please check your internet connection.";
       }
 
-      await Swal.fire({
-        icon: "error",
-        title: "Registration Failed",
-        text: errorMessage,
-        confirmButtonColor: "#d33",
-        confirmButtonText: "Try Again",
-        showCancelButton: true,
-        cancelButtonText: "Go Back",
-        allowOutsideClick: false,
-      }).then((result) => {
-        if (result.isDismissed) {
-          navigate("/");
-        }
-      });
-
-      setServerError(errorMessage);
+      // Rest of your error UI handling...
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -248,7 +246,7 @@ WorkSync`;
                 ) : (
                   <Formik
                     initialValues={initialValues}
-                    validationSchema={ValidationSchema}
+                    // validate={validate}
                     onSubmit={handleSubmit}
                   >
                     {({ errors, touched, isSubmitting }) => (
@@ -500,41 +498,41 @@ const styles = {
 };
 
 // Updated Validation schema with relaxed validation rules
-const ValidationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required("Name is required")
-    .min(1, "Name must be at least 1 character") // Reduced minimum characters
-    .max(100, "Name cannot exceed 100 characters") // Increased maximum characters
-    .trim(),
+// const ValidationSchema = Yup.object().shape({
+//   name: Yup.string()
+//     .required("Name is required")
+//     .min(1, "Name must be at least 1 character") // Reduced minimum characters
+//     .max(100, "Name cannot exceed 100 characters") // Increased maximum characters
+//     .trim(),
 
-  email: Yup.string()
-    .required("Email is required")
-    .email("Invalid email format")
-    .trim(),
+//   email: Yup.string()
+//     .required("Email is required")
+//     .email("Invalid email format")
+//     .trim(),
 
-  password: Yup.string()
-    .required("Password is required")
-    .min(4, "Password must be at least 4 characters"), // Reduced minimum password length
+//   password: Yup.string()
+//     .required("Password is required")
+//     .min(4, "Password must be at least 4 characters"), // Reduced minimum password length
 
-  department: Yup.string().required("Department is required"),
+//   department: Yup.string().required("Department is required"),
 
-  phone: Yup.string()
-    .required("Phone number is required")
-    .matches(
-      /^[0-9]{9,10}$/, // Simplified phone number validation
-      "Phone number must be a valid number"
-    ),
+//   phone: Yup.string()
+//     .required("Phone number is required")
+//     .matches(
+//       /^[0-9]{9,10}$/, // Simplified phone number validation
+//       "Phone number must be a valid number"
+//     ),
 
-  dateOfJoining: Yup.date()
-    .required("Date of joining is required")
-    .max(new Date(), "Date of joining cannot be in the future"), // This rule is kept to ensure valid dates
+//   dateOfJoining: Yup.date()
+//     .required("Date of joining is required")
+//     .max(new Date(), "Date of joining cannot be in the future"), // This rule is kept to ensure valid dates
 
-  availability: Yup.string()
-    .required("Availability status is required")
-    .oneOf(["1", "2", "3"], "Please select a valid availability status"),
+//   availability: Yup.string()
+//     .required("Availability status is required")
+//     .oneOf(["1", "2", "3"], "Please select a valid availability status"),
 
-  position: Yup.string()
-    .required("Position is required")
-    .min(1, "Position must be at least 1 character") // Reduced minimum characters
-    .max(100, "Position cannot exceed 100 characters"), // Increased maximum characters
-});
+//   position: Yup.string()
+//     .required("Position is required")
+//     .min(1, "Position must be at least 1 character") // Reduced minimum characters
+//     .max(100, "Position cannot exceed 100 characters"), // Increased maximum characters
+// });

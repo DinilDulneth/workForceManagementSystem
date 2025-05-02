@@ -13,6 +13,7 @@ Dear ${userData.name},
 Welcome to WorkSync! Your account has been successfully created.
 
 Your login credentials are:
+Email: ${userData.email}
 Password: ${userData.password}
 
 Role Details:
@@ -46,6 +47,7 @@ export default function AccessF() {
 
   const initialValues = {
     name: "",
+    email: "",
     password: "",
     department: "",
     salary: "",
@@ -80,6 +82,7 @@ export default function AccessF() {
 
   const formFields = [
     { name: "name", label: "Name", type: "text" },
+    { name: "email", label: "Email", type: "email" },
     { name: "password", label: "Password", type: "password" },
     { name: "department", label: "Department", type: "text" },
     { name: "salary", label: "Salary", type: "text" },
@@ -205,7 +208,7 @@ const styles = {
     maxWidth: "calc(100vw - 250px)",
     overflow: "auto",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   formContainer: {
     width: "600px",
@@ -333,6 +336,10 @@ const ValidationSchema = Yup.object().shape({
       /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
       "Name can only contain letters, spaces and simple punctuation"
     ),
+
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
 
   password: Yup.string()
     .required("Password is required")
