@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function UpdateFeedback() {
   const { id } = useParams(); // Get feedback ID from URL params
@@ -25,7 +26,11 @@ function UpdateFeedback() {
         }
       })
       .catch((err) => {
-        alert("Error fetching feedback: " + err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Error fetching feedback: " + err.message,
+          icon: "error",
+        });
       });
   }, [id]);
 
@@ -44,11 +49,19 @@ function UpdateFeedback() {
         updatedFeedback
       )
       .then(() => {
-        alert("Feedback Updated Successfully! ✅");
+        Swal.fire({
+          title: "Success",
+          text: "Feedback Updated Successfully! ✅",
+          icon: "success",
+        });
         navigate(`/employee-feedback/${feedback.employeeId}`); // Redirect back to employee's feedback list
       })
       .catch((err) => {
-        alert("Error updating feedback: " + err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Error updating feedback: " + err.message,
+          icon: "error",
+        });
       });
   }
 

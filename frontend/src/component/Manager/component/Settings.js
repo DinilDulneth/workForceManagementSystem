@@ -10,6 +10,7 @@ import {
   Button,
   Box,
 } from "@mui/material";
+import Swal from "sweetalert2";
 
 function Settings() {
   const [settings, setSettings] = useState({
@@ -29,7 +30,7 @@ function Settings() {
   const handleSave = () => {
     // Save settings to localStorage or backend
     localStorage.setItem("managerSettings", JSON.stringify(settings));
-    alert("Settings saved successfully!");
+    Swal.fire("Settings saved successfully!");
   };
 
   return (

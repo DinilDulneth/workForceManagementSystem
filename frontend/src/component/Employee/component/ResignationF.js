@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function ResignationF() {
   const ID = localStorage.getItem("ID");
@@ -21,14 +22,22 @@ export default function ResignationF() {
     axios
       .post("http://localhost:8070/resignation/addempRes", newResignation)
       .then((res) => {
-        alert("Resignation Added Successfully!✅");
+        Swal.fire({
+          icon: 'success',
+          title: 'Resignation Added Successfully!✅',
+          text: 'Your resignation has been successfully submitted.'
+        });
         setsubmitted(true);
         setempID("");
         setreason("");
         setendDate("");
       })
       .catch((err) => {
-        alert("Error adding Task: " + err.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error adding Task: ' + err.message
+        });
       });
     console.log(newResignation);
   }

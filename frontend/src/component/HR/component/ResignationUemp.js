@@ -56,7 +56,11 @@ export default function UpdateResignation() {
         navigate("/HRDashboard/ResignationVemp");
       })
       .catch((err) => {
-        alert("Error updating resignation: " + err.message);
+        Swal.fire(
+          "Error",
+          "Error updating resignation: " + err.message,
+          "error"
+        );
       });
   }
 

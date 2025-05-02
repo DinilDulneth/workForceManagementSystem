@@ -19,6 +19,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 // Import the logo directly
 import companyLogoImg from "../../../public/logo1.png";
+import Swal from "sweetalert2";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -154,11 +155,11 @@ export default function AccessView() {
       axios
         .delete(`http://localhost:8070/access/deleteAccess/${id}`)
         .then(() => {
-          alert("Access record deleted successfully");
+          Swal.fire("Access record deleted successfully");
           setAccessRecords(accessRecords.filter((record) => record._id !== id));
         })
         .catch((err) => {
-          alert("Error deleting record: " + err.message);
+          Swal.fire("Error deleting record: " + err.message);
         });
     }
   }
@@ -168,11 +169,11 @@ export default function AccessView() {
       axios
         .patch(`http://localhost:8070/access/revokeAccess/${id}`)
         .then(() => {
-          alert("Access revoked successfully");
+          Swal.fire("Access revoked successfully");
           getAccessRecords(); // Refresh the records
         })
         .catch((err) => {
-          alert("Error revoking access: " + err.message);
+          Swal.fire("Error revoking access: " + err.message);
         });
     }
   }
@@ -187,11 +188,11 @@ export default function AccessView() {
           status: "1",
         })
         .then(() => {
-          alert("Access restored successfully");
+          Swal.fire("Access restored successfully");
           getAccessRecords();
         })
         .catch((err) => {
-          alert("Error restoring access: " + err.message);
+          Swal.fire("Error restoring access: " + err.message);
         });
     }
   }
@@ -344,7 +345,7 @@ export default function AccessView() {
       doc.save(fileName);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF. Please try again.");
+      Swal.fire("Failed to generate PDF. Please try again.");
     } finally {
       setIsGeneratingPDF(false);
     }
