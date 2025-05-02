@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
+import Swal from "sweetalert2";
 
 // Add email generation function
 const generateEmailContent = (userData) => {
@@ -37,7 +38,7 @@ WorkSync`;
 
   return {
     subject: encodeURIComponent(subject),
-    body: encodeURIComponent(body),
+    body: encodeURIComponent(body)
   };
 };
 
@@ -51,10 +52,12 @@ export default function AccessF() {
     password: "",
     department: "",
     salary: "",
-    status: "",
+    status: ""
   };
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+    console.log("Form values:", values);
+    console.log("hello...");
     setIsLoading(true);
     try {
       const response = await axios.post(
@@ -67,12 +70,17 @@ export default function AccessF() {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
 
-        alert("Access Added Successfully and email notification prepared!✅");
+        Swal("Success!", "Access granted successfully!", "success");
         setSubmitted(true);
         resetForm();
       }
     } catch (err) {
-      alert("Error adding access: " + err.message);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to grant access. Please try again.",
+        confirmButtonText: "OK"
+      });
       console.error("Submission error:", err);
     } finally {
       setIsLoading(false);
@@ -93,9 +101,9 @@ export default function AccessF() {
       options: [
         { value: "1", label: "employee" },
         { value: "2", label: "manager" },
-        { value: "3", label: "hr" },
-      ],
-    },
+        { value: "3", label: "hr" }
+      ]
+    }
   ];
 
   return (
@@ -155,7 +163,7 @@ export default function AccessF() {
                           borderColor:
                             errors[field.name] && touched[field.name]
                               ? "#dc3545"
-                              : "#ced4da",
+                              : "#ced4da"
                         }}
                       />
                     )}
@@ -173,7 +181,7 @@ export default function AccessF() {
                     type="submit"
                     style={{
                       ...styles.submitButton,
-                      opacity: isSubmitting ? 0.7 : 1,
+                      opacity: isSubmitting ? 0.7 : 1
                     }}
                     disabled={isSubmitting || isLoading}
                   >
@@ -208,7 +216,7 @@ const styles = {
     maxWidth: "calc(100vw - 250px)",
     overflow: "auto",
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   formContainer: {
     width: "600px",
@@ -217,7 +225,7 @@ const styles = {
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     padding: "2.5rem",
     maxWidth: "700px",
-    margin: "0 auto",
+    margin: "0 auto"
   },
   header: {
     color: "#2c3e50",
@@ -225,7 +233,7 @@ const styles = {
     marginBottom: "2rem",
     fontSize: "1.8rem",
     position: "relative",
-    paddingBottom: "0.75rem",
+    paddingBottom: "0.75rem"
   },
   headerUnderline: {
     content: '""',
@@ -235,16 +243,16 @@ const styles = {
     transform: "translateX(-50%)",
     width: "80px",
     height: "3px",
-    backgroundColor: "#fc6625",
+    backgroundColor: "#fc6625"
   },
   formGroup: {
-    marginBottom: "1.5rem",
+    marginBottom: "1.5rem"
   },
   label: {
     display: "block",
     marginBottom: "0.5rem",
     color: "#474747",
-    fontWeight: 500,
+    fontWeight: 500
   },
   input: {
     width: "100%",
@@ -254,18 +262,18 @@ const styles = {
     transition: "all 0.2s ease-in-out",
     "&:focus": {
       borderColor: "#fc6625",
-      outline: "none",
-    },
+      outline: "none"
+    }
   },
   errorMessage: {
     color: "#dc3545",
     fontSize: "0.875rem",
-    marginTop: "0.25rem",
+    marginTop: "0.25rem"
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "2rem",
+    marginTop: "2rem"
   },
   submitButton: {
     flex: 1,
@@ -277,12 +285,12 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     "&:hover": {
-      backgroundColor: "#e55a1c",
+      backgroundColor: "#e55a1c"
     },
     "&:disabled": {
       backgroundColor: "#ffa07a",
-      cursor: "not-allowed",
-    },
+      cursor: "not-allowed"
+    }
   },
   cancelButton: {
     flex: 1,
@@ -294,16 +302,16 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     "&:hover": {
-      backgroundColor: "#f8f9fa",
+      backgroundColor: "#f8f9fa"
     },
     "&:disabled": {
       opacity: 0.7,
-      cursor: "not-allowed",
-    },
+      cursor: "not-allowed"
+    }
   },
   successContainer: {
     textAlign: "center",
-    padding: "2rem",
+    padding: "2rem"
   },
   successIcon: {
     width: "70px",
@@ -315,17 +323,17 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     color: "white",
-    fontSize: "2rem",
+    fontSize: "2rem"
   },
   successTitle: {
     color: "#474747",
     fontSize: "1.5rem",
-    marginBottom: "1rem",
+    marginBottom: "1rem"
   },
   successText: {
     color: "#8f9491",
-    marginBottom: "1.5rem",
-  },
+    marginBottom: "1.5rem"
+  }
 };
 
 const ValidationSchema = Yup.object().shape({
@@ -364,5 +372,5 @@ const ValidationSchema = Yup.object().shape({
 
   status: Yup.string()
     .required("Status is required")
-    .oneOf(["1", "2", "3"], "Status must be 1, 2, or 3"),
+    .oneOf(["1", "2", "3"], "Status must be 1, 2, or 3")
 });

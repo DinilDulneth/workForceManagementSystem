@@ -18,7 +18,7 @@ const ValidationSchema = Yup.object().shape({
     .matches(/^\d+$/, "Salary must be a number"),
   status: Yup.string()
     .required("Status is required")
-    .oneOf(["1", "2", "3"], "Invalid status value"),
+    .oneOf(["1", "2", "3"], "Invalid status value")
 });
 
 export default function AccessUpdate() {
@@ -30,7 +30,7 @@ export default function AccessUpdate() {
     position: "",
     department: "",
     salary: "",
-    status: "",
+    status: ""
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -57,7 +57,7 @@ export default function AccessUpdate() {
       );
       if (response.status === 200) {
         alert("Access record updated successfully!");
-        navigate("/HRDashboard/AccessView");
+        navigate("/HRDashboard/");
       }
     } catch (err) {
       alert("Error updating record: " + err.message);
@@ -81,10 +81,7 @@ export default function AccessUpdate() {
       <div style={styles.errorContainer}>
         <h3>Error</h3>
         <p>{error}</p>
-        <button
-          onClick={() => navigate("/HRDashboard/AccessView")}
-          style={styles.button}
-        >
+        <button onClick={() => navigate("/HRDashboard/")} style={styles.button}>
           Go Back
         </button>
       </div>
@@ -120,9 +117,9 @@ export default function AccessUpdate() {
                   options: [
                     { value: "1", label: "Active" },
                     { value: "2", label: "On Leave" },
-                    { value: "3", label: "Inactive" },
-                  ],
-                },
+                    { value: "3", label: "Inactive" }
+                  ]
+                }
               ].map((field) => (
                 <div key={field.name} style={styles.formGroup}>
                   <label htmlFor={field.name} style={styles.label}>
@@ -165,7 +162,7 @@ export default function AccessUpdate() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate("/HRDashboard/AccessView")}
+                  onClick={() => navigate("/HRDashboard/")}
                   style={styles.cancelButton}
                 >
                   Cancel
@@ -187,21 +184,21 @@ const styles = {
     minHeight: "calc(100vh - 70px)",
     backgroundColor: "#f8f9fa",
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "center"
   },
   formContainer: {
     width: "600px",
     backgroundColor: "#ffffff",
     borderRadius: "10px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    padding: "2.5rem",
+    padding: "2.5rem"
   },
   header: {
     color: "#2c3e50",
     textAlign: "center",
     marginBottom: "2rem",
     position: "relative",
-    paddingBottom: "0.75rem",
+    paddingBottom: "0.75rem"
   },
   headerUnderline: {
     content: '""',
@@ -211,33 +208,33 @@ const styles = {
     transform: "translateX(-50%)",
     width: "80px",
     height: "3px",
-    backgroundColor: "#fc6625",
+    backgroundColor: "#fc6625"
   },
   formGroup: {
-    marginBottom: "1.5rem",
+    marginBottom: "1.5rem"
   },
   label: {
     display: "block",
     marginBottom: "0.5rem",
     color: "#474747",
-    fontWeight: 500,
+    fontWeight: 500
   },
   input: {
     width: "100%",
     padding: "0.75rem",
     borderRadius: "6px",
     border: "1px solid #ced4da",
-    transition: "border-color 0.2s ease-in-out",
+    transition: "border-color 0.2s ease-in-out"
   },
   errorMessage: {
     color: "#dc3545",
     fontSize: "0.875rem",
-    marginTop: "0.25rem",
+    marginTop: "0.25rem"
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "2rem",
+    marginTop: "2rem"
   },
   submitButton: {
     flex: 1,
@@ -247,7 +244,7 @@ const styles = {
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
-    transition: "background-color 0.2s ease",
+    transition: "background-color 0.2s ease"
   },
   cancelButton: {
     flex: 1,
@@ -257,17 +254,17 @@ const styles = {
     border: "1px solid #6c757d",
     borderRadius: "6px",
     cursor: "pointer",
-    transition: "all 0.2s ease",
+    transition: "all 0.2s ease"
   },
   loadingContainer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
+    height: "100vh"
   },
   errorContainer: {
     textAlign: "center",
     padding: "2rem",
-    color: "#dc3545",
-  },
+    color: "#dc3545"
+  }
 };

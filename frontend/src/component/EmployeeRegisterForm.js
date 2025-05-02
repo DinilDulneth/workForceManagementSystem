@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Formik, Form, Field } from "formik";
-//import * as Yup from "yup";
+import * as Yup from "yup";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../assets/images/3.jpg";
 import userIcon from "../assets/images/2.jpg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css";
 
 export default function EmployeeRegisterForm() {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ export default function EmployeeRegisterForm() {
     phone: "",
     dateOfJoining: "",
     availability: "1", // Default to active
-    position: "",
+    position: ""
   };
 
   const formFields = [
@@ -41,8 +40,8 @@ export default function EmployeeRegisterForm() {
         { value: "IT", label: "IT" },
         { value: "Finance", label: "Finance" },
         { value: "Operations", label: "Operations" },
-        { value: "General Employee", label: "General Employee" },
-      ],
+        { value: "General Employee", label: "General Employee" }
+      ]
     },
     { type: "text", id: "phone", placeholder: "Phone (e.g., 0771234567)" },
     { type: "date", id: "dateOfJoining", placeholder: "Date of Joining" },
@@ -54,10 +53,10 @@ export default function EmployeeRegisterForm() {
         { value: "", label: "Select Availability" },
         { value: "1", label: "Active" },
         { value: "2", label: "On Leave" },
-        { value: "3", label: "Inactive" },
-      ],
+        { value: "3", label: "Inactive" }
+      ]
     },
-    { type: "text", id: "position", placeholder: "Position" },
+    { type: "text", id: "position", placeholder: "Position" }
   ];
 
   // Email content generator
@@ -86,8 +85,24 @@ WorkSync`;
 
     return {
       subject: encodeURIComponent(subject),
-      body: encodeURIComponent(body),
+      body: encodeURIComponent(body)
     };
+  };
+
+  // Add this function to check email access
+  const checkEmailAccess = async (email) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8070/access/getAccess"
+      );
+      const accessList = response.data;
+      return accessList.some(
+        (access) => access.email === email && access.status === "1"
+      );
+    } catch (error) {
+      console.error("Error checking email access:", error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
@@ -95,116 +110,103 @@ WorkSync`;
     setServerError("");
 
     try {
-      // For testing, bypass access check
-      const hasAccess = true;
+      // Check email access first
+      const hasAccess = await checkEmailAccess(values.email);
 
-      // Format date safely
-      let formattedDate;
-      try {
-        const dateObj = values.dateOfJoining
-          ? new Date(values.dateOfJoining)
-          : new Date();
-        const year = dateObj.getFullYear();
-        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-        const day = String(dateObj.getDate()).padStart(2, "0");
-        formattedDate = `${year}-${month}-${day}`;
-        console.log("Formatted date:", formattedDate);
-      } catch (error) {
-        console.error("Date formatting error:", error);
-        // Use today as fallback
-        const today = new Date();
-        formattedDate = `${today.getFullYear()}-${String(
-          today.getMonth() + 1
-        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-      }
+      if (!hasAccess) {
+        await Swal.fire({
+          icon: "error",
+          title: "Access Denied",
+          text: "You do not have permission to register. Please contact HR department.",
+          confirmButtonColor: "#d33",
+          allowOutsideClick: false
+        });
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
 
-      // Ensure all data is properly formatted and all required fields are present
-      const formattedData = {
-        name: String(values.name || "").trim(),
-        position: String(values.position || "").trim(),
-        department: String(values.department || "").trim(),
-        email: String(values.email || "").trim(),
-        password: String(values.password || ""),
-        phone: String(values.phone || "").trim(),
-        dateOfJoining: formattedDate,
-        availability: String(values.availability || "1"),
-      };
-
-      // Verify all required fields are populated
-      const requiredFields = [
-        "name",
-        "position",
-        "department",
-        "email",
-        "password",
-        "phone",
-        "dateOfJoining",
-      ];
-      const missingFields = requiredFields.filter(
-        (field) => !formattedData[field] || formattedData[field] === ""
-      );
-
-      if (missingFields.length > 0) {
-        console.error("Missing required fields:", missingFields);
-        setServerError(`Missing required fields: ${missingFields.join(", ")}`);
-        setIsLoading(false);
-        setSubmitting(false);
         return;
       }
 
-      // Log the exact data being sent
-      console.log("API URL:", "http://localhost:8070/employee/addEmp");
-      console.log(
-        "Submitting employee data:",
-        JSON.stringify(formattedData, null, 2)
-      );
+      // Format the data to match backend expectations
+      const formattedData = {
+        ...values,
+        dateOfJoining:
+          values.dateOfJoining instanceof Date
+            ? values.dateOfJoining.toISOString().split("T")[0]
+            : values.dateOfJoining
+      };
 
       const response = await axios.post(
         "http://localhost:8070/employee/addEmp",
-        formattedData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          timeout: 10000, // 10 seconds timeout
-        }
+        formattedData
       );
 
-      console.log("Registration success:", response.data);
+      if (response.status === 201 || response.status === 200) {
+        const emailContent = generateEmailContent(values);
+        window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
 
-      // Rest of your success handling remains the same...
+        await Swal.fire({
+          icon: "success",
+          title: "Registration Successful",
+          text: "Employee has been registered successfully! Redirecting to login...",
+          confirmButtonColor: "#28a745",
+          timer: 3000,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+
+        setSubmitted(true);
+        resetForm();
+
+        // Navigate to login page after 3 seconds
+        setTimeout(() => {
+          navigate("/UserLogin");
+        }, 3000);
+      }
     } catch (error) {
-      // Enhanced error logging
       console.error("Registration error:", error);
-      console.error("Error details:", {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message,
-      });
-
-      // For debugging, let's print the full error object
-      console.dir(error.response?.data, { depth: null });
 
       let errorMessage = "An error occurred during registration";
 
       if (error.response) {
+        // Handle specific error responses from the server
         switch (error.response.status) {
           case 400:
             errorMessage =
-              error.response.data.message ||
               "Invalid registration data. Please check your inputs.";
-            if (error.response.data.missingFields) {
-              errorMessage +=
-                " Missing fields: " +
-                error.response.data.missingFields.join(", ");
-            }
             break;
-          // Rest of your error handling...
+          case 409:
+            errorMessage =
+              "Email already exists. Please use a different email.";
+            break;
+          case 500:
+            errorMessage = "Server error. Please try again later.";
+            break;
+          default:
+            errorMessage = error.response.data.message || errorMessage;
         }
+      } else if (error.request) {
+        errorMessage =
+          "Unable to connect to the server. Please check your internet connection.";
       }
 
-      // Rest of your error UI handling...
+      await Swal.fire({
+        icon: "error",
+        title: "Registration Failed",
+        text: errorMessage,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Try Again",
+        showCancelButton: true,
+        cancelButtonText: "Go Back",
+        allowOutsideClick: false
+      }).then((result) => {
+        if (result.isDismissed) {
+          navigate("/");
+        }
+      });
+
+      setServerError(errorMessage);
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -246,7 +248,7 @@ WorkSync`;
                 ) : (
                   <Formik
                     initialValues={initialValues}
-                    // validate={validate}
+                    validationSchema={ValidationSchema}
                     onSubmit={handleSubmit}
                   >
                     {({ errors, touched, isSubmitting }) => (
@@ -271,7 +273,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc",
+                                      : "#ccc"
                                 }}
                               >
                                 {field.options.map((option) => (
@@ -298,7 +300,7 @@ WorkSync`;
                                   borderColor:
                                     errors[field.id] && touched[field.id]
                                       ? "red"
-                                      : "#ccc",
+                                      : "#ccc"
                                 }}
                               />
                             )}
@@ -346,14 +348,14 @@ const styles = {
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center"
   },
   errorMessage: {
     color: "red",
     fontSize: "0.75rem",
     marginTop: "-10px",
     marginBottom: "10px",
-    paddingLeft: "5px",
+    paddingLeft: "5px"
   },
   serverError: {
     color: "white",
@@ -361,7 +363,7 @@ const styles = {
     padding: "10px",
     borderRadius: "5px",
     marginBottom: "20px",
-    textAlign: "center",
+    textAlign: "center"
   },
   formContainer: {
     backgroundColor: "#fff",
@@ -370,27 +372,27 @@ const styles = {
     overflow: "hidden",
     display: "flex",
     width: "100%",
-    maxWidth: "900px",
+    maxWidth: "900px"
   },
   imageSection: {
     width: "50%",
     display: "none",
     backgroundColor: "#e6e6e6",
     "@media (min-width: 768px)": {
-      display: "block",
-    },
+      display: "block"
+    }
   },
   image: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "cover"
   },
   formSection: {
     width: "100%",
     padding: "40px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "center"
   },
   userIconWrapper: {
     width: "100px",
@@ -398,21 +400,21 @@ const styles = {
     marginBottom: "20px",
     borderRadius: "50%",
     overflow: "hidden",
-    border: "3px solid #333",
+    border: "3px solid #333"
   },
   userIcon: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "cover"
   },
   title: {
     color: "#333",
     marginBottom: "20px",
     paddingBottom: "10px",
-    borderBottom: "3px solid #fc6625",
+    borderBottom: "3px solid #fc6625"
   },
   form: {
-    width: "100%",
+    width: "100%"
   },
   input: {
     width: "100%",
@@ -426,14 +428,14 @@ const styles = {
       borderColor: "red",
       "&:focus": {
         borderColor: "red",
-        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)",
-      },
-    },
+        boxShadow: "0 0 0 0.2rem rgba(255, 0, 0, 0.25)"
+      }
+    }
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "1rem",
+    marginTop: "1rem"
   },
   submitButton: {
     width: "100%",
@@ -445,12 +447,12 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#555",
+      backgroundColor: "#555"
     },
     "&:disabled": {
       backgroundColor: "#999",
-      cursor: "not-allowed",
-    },
+      cursor: "not-allowed"
+    }
   },
   cancelButton: {
     width: "100%",
@@ -462,16 +464,16 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
     "&:hover": {
-      backgroundColor: "#f5f5f5",
+      backgroundColor: "#f5f5f5"
     },
     "&:disabled": {
       backgroundColor: "#eee",
-      cursor: "not-allowed",
-    },
+      cursor: "not-allowed"
+    }
   },
   successMessage: {
     textAlign: "center",
-    padding: "2rem 1rem",
+    padding: "2rem 1rem"
   },
   checkmark: {
     width: "70px",
@@ -483,56 +485,56 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "2rem",
-    margin: "0 auto 1.5rem",
+    margin: "0 auto 1.5rem"
   },
   successTitle: {
     color: "#474747",
     fontSize: "1.5rem",
-    marginBottom: "1rem",
+    marginBottom: "1rem"
   },
   successText: {
     color: "#8f9491",
     fontSize: "1rem",
-    marginBottom: "1.5rem",
-  },
+    marginBottom: "1.5rem"
+  }
 };
 
-// Updated Validation schema with relaxed validation rules
-// const ValidationSchema = Yup.object().shape({
-//   name: Yup.string()
-//     .required("Name is required")
-//     .min(1, "Name must be at least 1 character") // Reduced minimum characters
-//     .max(100, "Name cannot exceed 100 characters") // Increased maximum characters
-//     .trim(),
+// Validation schema simplified to match exactly with your MongoDB model
+const ValidationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required("Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name cannot exceed 50 characters")
+    .trim(),
 
-//   email: Yup.string()
-//     .required("Email is required")
-//     .email("Invalid email format")
-//     .trim(),
+  email: Yup.string()
+    .required("Email is required")
+    .email("Invalid email format")
+    .trim(),
 
-//   password: Yup.string()
-//     .required("Password is required")
-//     .min(4, "Password must be at least 4 characters"), // Reduced minimum password length
+  password: Yup.string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
 
-//   department: Yup.string().required("Department is required"),
+  department: Yup.string().required("Department is required"),
 
-//   phone: Yup.string()
-//     .required("Phone number is required")
-//     .matches(
-//       /^[0-9]{9,10}$/, // Simplified phone number validation
-//       "Phone number must be a valid number"
-//     ),
+  phone: Yup.string()
+    .required("Phone number is required")
+    .matches(
+      /^(?:\+94|0)?[0-9]{9,10}$/,
+      "Phone number must be a valid Sri Lankan number"
+    ),
 
-//   dateOfJoining: Yup.date()
-//     .required("Date of joining is required")
-//     .max(new Date(), "Date of joining cannot be in the future"), // This rule is kept to ensure valid dates
+  dateOfJoining: Yup.date()
+    .required("Date of joining is required")
+    .max(new Date(), "Date of joining cannot be in the future"),
 
-//   availability: Yup.string()
-//     .required("Availability status is required")
-//     .oneOf(["1", "2", "3"], "Please select a valid availability status"),
+  availability: Yup.string()
+    .required("Availability status is required")
+    .oneOf(["1", "2", "3"], "Please select a valid availability status"),
 
-//   position: Yup.string()
-//     .required("Position is required")
-//     .min(1, "Position must be at least 1 character") // Reduced minimum characters
-//     .max(100, "Position cannot exceed 100 characters"), // Increased maximum characters
-// });
+  position: Yup.string()
+    .required("Position is required")
+    .min(2, "Position must be at least 2 characters")
+    .max(50, "Position cannot exceed 50 characters")
+});

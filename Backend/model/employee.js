@@ -7,7 +7,7 @@ const Counter =
     "Counter",
     new mongoose.Schema({
       _id: { type: String, required: true },
-      seq: { type: Number, default: 0 },
+      seq: { type: Number, default: 0 }
     })
   );
 
@@ -18,7 +18,7 @@ const EmployeeSchema = new mongoose.Schema({
   ID: {
     type: String,
     required: false,
-    unique: true,
+    unique: true
   },
   name: { type: String, required: true },
   position: { type: String, required: true },
@@ -26,8 +26,8 @@ const EmployeeSchema = new mongoose.Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   phone: { type: String, required: true },
-  dateOfJoining: { type: String, required: true },
-  availability: { type: String, required: true },
+  dateOfJoining: { type: String, required: false },
+  availability: { type: String, required: false }
 });
 
 // Pre-save middleware to auto-generate employee ID
