@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
+import Swal from "sweetalert2";
 
 const ValidationSchema = Yup.object().shape({
   name: Yup.string()
@@ -56,11 +57,11 @@ export default function AccessUpdate() {
         values
       );
       if (response.status === 200) {
-        alert("Access record updated successfully!");
+        Swal.fire("Access record updated successfully!");
         navigate("/HRDashboard/");
       }
     } catch (err) {
-      alert("Error updating record: " + err.message);
+      Swal.fire("Error updating record: " + err.message);
     } finally {
       setSubmitting(false);
     }

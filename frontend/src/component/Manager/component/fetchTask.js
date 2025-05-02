@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 // import { useNavigate } from "react-router-dom";
 
 export default function FetchTask() {
@@ -18,7 +19,11 @@ export default function FetchTask() {
         setTasks(res.data);
       })
       .catch((err) => {
-        alert(err.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message
+        });
       });
   }
 

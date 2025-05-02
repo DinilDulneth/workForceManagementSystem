@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
+import Swal from "sweetalert2";
 
 const AddSalary = () => {
   const navigate = useNavigate();
@@ -30,11 +31,19 @@ const AddSalary = () => {
       };
 
       const response = await axios.post('http://localhost:8070/salary/add', salaryData);
-      alert('Salary record added successfully!✅');
+      Swal.fire({
+        icon: 'success',
+        title: 'Salary Record Added',
+        text: 'The salary record has been successfully added to the system.'
+      });
       setSubmitted(true);
       resetForm();
     } catch (error) {
-      alert('Error adding salary record: ' + error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error adding salary record: ' + error.message
+      });
       console.error('Error adding salary:', error);
     } finally {
       setIsLoading(false);
@@ -54,7 +63,11 @@ const AddSalary = () => {
       }
     } catch (error) {
       console.error('Error fetching employee details:', error);
-      alert('Employee not found with this ID');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Employee not found with this ID'
+      });
       // Clear form fields if employee is not found
       setFieldValue('name', '');
       setFieldValue('department', '');

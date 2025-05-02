@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Swal from "sweetalert2";
 
 export default function FetchResignations() {
   const navigate = useNavigate();
@@ -35,13 +36,13 @@ export default function FetchResignations() {
     axios
       .delete(`http://localhost:8070/resignation/deleteempRes/${id}`)
       .then(() => {
-        alert("Resignation deleted successfully");
+        Swal.fire("Resignation deleted successfully");
         setResignations(
           resignations.filter((resignation) => resignation._id !== id)
         ); // Update UI
       })
       .catch((err) => {
-        alert(err.message);
+        Swal.fire(err.message);
       });
   }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function UpdateResignation() {
   const { id } = useParams();
@@ -46,7 +47,12 @@ export default function UpdateResignation() {
         console.error("Error fetching resignation:", err);
         setError(err.message);
         setLoading(false);
-        alert("Error fetching resignation: " + err.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error fetching resignation: ' + err.message,
+          confirmButtonText: 'OK'
+        });
       });
   }, [id]);
 
@@ -70,12 +76,22 @@ export default function UpdateResignation() {
       )
       .then((response) => {
         console.log("Update response:", response.data);
-        alert("Resignation Updated Successfully! ✅");
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Resignation Updated Successfully!',
+          confirmButtonText: 'OK'
+        });
         navigate("/EmployeeHome/ResignationV");
       })
       .catch((err) => {
         console.error("Error updating resignation:", err);
-        alert("Error updating resignation: " + err.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error updating resignation: ' + err.message,
+          confirmButtonText: 'OK'
+        });
       })
       .finally(() => {
         setIsSubmitting(false);

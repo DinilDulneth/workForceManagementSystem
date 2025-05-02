@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { Container, Row, Col, FormGroup, Button } from "reactstrap";
 import registerImg from "../../../assets/images/3.jpg";
 import userIcon from "../../../assets/images/2.jpg";
+import Swal from "sweetalert2";
 //import { ValidationSchema } from "../../../validation/validationSchema";
 
 export default function EmployeeRegister() {
@@ -94,12 +95,20 @@ WorkSync`;
       if (response.status === 200 || response.status === 201) {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
-        alert("Employee Registered Successfully!✅");
+        Swal.fire({
+          icon: 'success',
+          title: 'Employee Registered',
+          text: 'The employee has been successfully registered and an email has been sent with their credentials.',
+        });
         setSubmitted(true);
         resetForm();
       }
     } catch (err) {
-      alert("Error registering employee: " + err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error registering employee: ' + err.message,
+      });
       console.error("Registration error:", err);
     } finally {
       setIsLoading(false);
