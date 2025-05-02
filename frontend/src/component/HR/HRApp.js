@@ -16,6 +16,9 @@ import ResignationUemp from "./component/ResignationUemp";
 import ResignationVemp from "./component/ResignationVemp";
 import DashboardTemp from "../../component/DashboardTemp";
 import ApprovedLeaves from "./component/ApprovedLeaves";
+import AddFeedback from "./component/addFeedback";
+import FetchFeedback from "./component/fetchFeedback";
+import UpdateFeedback from "./component/UpdateFeedback";
 
 import FetchInquiry from "./component/fetchinquiry";
 import FetchAnnouncement from "./component/fetchAnnouncement";
@@ -60,6 +63,11 @@ export default function HRApp() {
       link: "/HRDashboard/fetchAnnouncement",
       name: "Announcements",
       icon: "bi-megaphone",
+    },
+    {
+      link: "/HRDashboard/addFeedback",
+      name: "Send Feedback",
+      icon: "bi-chat-dots",
     },
 
     {
@@ -127,6 +135,9 @@ export default function HRApp() {
         <Route path="/fetchInquiry" element={<FetchInquiry />} />
         <Route path="/fetchAnnouncement" element={<FetchAnnouncement />} />
         <Route path="/accessF" element={<AccessF />} />
+        <Route path="/addFeedback" element={<AddFeedback />} />
+        <Route path="/fetchFeedback" element={<FetchFeedback />} />
+        <Route path="/UpdateFeedback/:id" element={<UpdateFeedback />} />
 
         <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
         <Route path="/approved-leaves" element={<ApprovedLeaves />} />
