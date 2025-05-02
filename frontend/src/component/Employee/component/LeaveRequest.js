@@ -40,7 +40,7 @@ export default function LeaveRequest() {
   const [leaves, setLeaves] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
-  const employeeId = localStorage.getItem("ID");
+  const [employeeId, setEmployeeId] = useState("");
   const formikRef = useRef(null);
   const [leaveBalance, setLeaveBalance] = useState({
     labels: ['Sick Leave', 'Casual Leave', 'Annual Leave', 'Half Day'],
@@ -144,7 +144,7 @@ export default function LeaveRequest() {
 
       const response = await axios.post("/leave/add", {
         ...values,
-        id: employeeId
+        employeeId: employeeId
       });
 
       if (response.data) {
@@ -244,8 +244,21 @@ export default function LeaveRequest() {
   };
 
   useEffect(() => {
+    fetchEmployeeId();
     fetchLeaves();
   }, []);
+
+  const fetchEmployeeId = async () => {
+    try {
+      const response = await axios.get(`/employee/getEmpByID/${localStorage.getItem("ID")}`);
+      if (response.data && response.data.ID) {
+        setEmployeeId(response.data.ID);
+      }
+    } catch (error) {
+      console.error("Error fetching employee ID:", error);
+      toast.error("Failed to fetch employee ID");
+    }
+  };
 
   const fetchLeaves = async () => {
     try {
@@ -549,7 +562,7 @@ export default function LeaveRequest() {
               <tbody>
                 {leaves.map((leave) => (
                   <tr key={leave._id}>
-                    <td><span className="fw-bold">#{leave.id}</span></td>
+                    <td><span className="fw-bold">#{leave.employeeId}</span></td>
                     <td>{leave.department}</td>
                     <td>{leave.leavetype}</td>
                     <td>{leave.leavetype === "Half Day" ? leave.session : "-"}</td>

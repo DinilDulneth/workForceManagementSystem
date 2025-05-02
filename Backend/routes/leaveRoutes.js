@@ -4,10 +4,10 @@ const Leave = require("../model/leave");
 
 // Add new leave request
 router.route("/add").post((req, res) => {
-  const { id, department, leavetype, date, session, medicalCertificate } = req.body;
+  const { employeeId, department, leavetype, date, session, medicalCertificate } = req.body;
 
   const newLeave = new Leave({
-    id,
+    employeeId,
     department,
     leavetype,
     date,
@@ -51,11 +51,11 @@ router.route("/update/:id").put(async (req, res) => {
       return res.status(403).json({ error: "Cannot update leave after 24 hours of creation" });
     }
 
-    const { id, department, leavetype, date, session, medicalCertificate } = req.body;
+    const { employeeId, department, leavetype, date, session, medicalCertificate } = req.body;
 
     const updatedLeave = await Leave.findByIdAndUpdate(
       req.params.id,
-      { id, department, leavetype, date, session, medicalCertificate },
+      { employeeId, department, leavetype, date, session, medicalCertificate },
       { new: true }
     );
 
@@ -68,16 +68,36 @@ router.route("/update/:id").put(async (req, res) => {
 // Update leave status
 router.route("/status/:id").put(async (req, res) => {
   try {
+    const { status } = req.body;
+
+    // Validate status
+    if (!status || !["approved", "rejected", "pending"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
     const leave = await Leave.findById(req.params.id);
     if (!leave) {
       return res.status(404).json({ error: "Leave request not found" });
     }
 
-    leave.status = req.body.status;
-    await leave.save();
-    res.json({ message: "Leave status updated successfully" });
+    // Update the status
+    const updatedLeave = await Leave.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedLeave) {
+      return res.status(404).json({ error: "Failed to update leave status" });
+    }
+
+    res.json({
+      message: "Leave status updated successfully",
+      leave: updatedLeave
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error updating leave status:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
