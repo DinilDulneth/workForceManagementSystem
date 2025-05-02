@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 import {
   Container,
   Paper,
@@ -10,6 +11,7 @@ import {
   Box,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import SendIcon from "@mui/icons-material/Send";
@@ -35,15 +37,53 @@ export default function AddFeedback() {
     severity: "success",
   });
 
-  useEffect(() => {
-    const managerId = localStorage.getItem("ID");
+  const [loading, setLoading] = useState(false);
 
-    setFormData((prev) => ({
-      ...prev,
-      date: new Date().toISOString(),
-      sender: managerId || "",
-    }));
-  }, []);
+  useEffect(() => {
+    const localManagerId = localStorage.getItem("ID");
+
+    if (!localManagerId) {
+      setSnackbar({
+        open: true,
+        message: "Please log in to submit feedback",
+        severity: "error",
+      });
+      setTimeout(() => navigate("/ManagerLogin"), 2000);
+      return;
+    }
+
+    setLoading(true);
+
+    axios
+      .get(`http://localhost:8070/manager/getManagerByID/${localManagerId}`)
+      .then((response) => {
+        const managerData = response.data;
+        console.log("Manager data from DB:", managerData);
+
+        setFormData((prev) => ({
+          ...prev,
+          date: new Date().toISOString(),
+          sender: managerData.ID,
+          senderName: managerData.name || "Manager",
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching manager data:", error);
+
+        setFormData((prev) => ({
+          ...prev,
+          date: new Date().toISOString(),
+          sender: localManagerId,
+        }));
+
+        setSnackbar({
+          open: true,
+          message: "Error fetching manager data. Using local ID instead.",
+          severity: "warning",
+        });
+      })
+      .finally(() => setLoading(false));
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -60,6 +100,17 @@ export default function AddFeedback() {
       });
       return;
     }
+
+    if (!formData.sender) {
+      setSnackbar({
+        open: true,
+        message: "Missing sender ID. Please log in again.",
+        severity: "error",
+      });
+      return;
+    }
+
+    setLoading(true);
 
     axios
       .post("http://localhost:8070/api/feedback/addFeedback", formData)
@@ -86,11 +137,30 @@ export default function AddFeedback() {
           message: "Error adding Feedback: " + err.message,
           severity: "error",
         });
-      });
+      })
+      .finally(() => setLoading(false));
   }
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
+      {loading && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(255,255,255,0.7)",
+            zIndex: 9999,
+          }}
+        >
+          <CircularProgress sx={{ color: "#fc6625" }} />
+        </Box>
+      )}
       <motion.div
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

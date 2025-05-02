@@ -33,18 +33,62 @@ export default function FetchAnnouncement() {
 
   function getAnnouncement() {
     setLoading(true);
+
+    // Check if user is logged in
+    const localEmployeeId = localStorage.getItem("ID");
+
+    if (!localEmployeeId) {
+      setSnackbar({
+        open: true,
+        message: "Please log in to view announcements",
+        severity: "error",
+      });
+      setTimeout(() => navigate("/UserLogin"), 2000);
+      return;
+    }
+
+    // First validate employee exists in database
     axios
-      .get("http://localhost:8070/api/announcement/getAnnouncement")
+      .get(`http://localhost:8070/employee/getEmpByID/${localEmployeeId}`)
+      .then((employeeResponse) => {
+        const employeeData = employeeResponse.data;
+        console.log("Employee validated:", employeeData.ID);
+
+        // After validation, fetch all announcements (no filtering needed)
+        return axios.get(
+          "http://localhost:8070/api/announcement/getAnnouncement"
+        );
+      })
       .then((res) => {
         setAnnouncement(res.data);
       })
       .catch((err) => {
-        console.error("Error fetching announcements:", err);
-        setSnackbar({
-          open: true,
-          message: "Error fetching announcements: " + err.message,
-          severity: "error",
-        });
+        console.error("Error:", err);
+
+        // If employee validation fails, still try to fetch announcements
+        if (err.message && !err.message.includes("Network Error")) {
+          console.log("Attempting to fetch announcements without validation");
+
+          axios
+            .get("http://localhost:8070/api/announcement/getAnnouncement")
+            .then((res) => {
+              setAnnouncement(res.data);
+            })
+            .catch((annErr) => {
+              console.error("Error fetching announcements:", annErr);
+              setSnackbar({
+                open: true,
+                message: "Error fetching announcements: " + annErr.message,
+                severity: "error",
+              });
+            });
+        } else {
+          setSnackbar({
+            open: true,
+            message: "Error fetching announcements: " + err.message,
+            severity: "error",
+          });
+        }
       })
       .finally(() => setLoading(false));
   }
@@ -168,7 +212,9 @@ export default function FetchAnnouncement() {
                     <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
                       <Chip
                         icon={<PersonIcon />}
-                        label={`From: ${ann.sender || "Admin"}`}
+                        label={`From: ${
+                          ann.senderName || ann.sender || "Admin"
+                        }`}
                         size="small"
                         sx={{
                           backgroundColor: "rgba(252, 102, 37, 0.1)",

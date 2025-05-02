@@ -8,7 +8,7 @@ export default function UpdateResignation() {
   const [resignation, setResignation] = useState({
     empId: "",
     Reason: "",
-    endDate: "",
+    endDate: ""
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +20,9 @@ export default function UpdateResignation() {
 
     // Direct fetch by _id instead of empId
     axios
-      .get(`http://localhost:8070/resignation/getResById/${id}`)
+
+      .get(`http://localhost:8070/resignation/getempResByEmpId/${id}`)
+
       .then((res) => {
         console.log("API Response:", res.data);
         const resignationData = res.data;
@@ -56,14 +58,14 @@ export default function UpdateResignation() {
 
     const updatedResignation = {
       Reason: resignation.Reason,
-      endDate: resignation.endDate,
+      endDate: resignation.endDate
     };
 
     console.log("Updating resignation with ID:", id);
 
     axios
       .put(
-        `http://localhost:8070/resignation/updateempRes/${id}`,
+        `http://localhost:8070/resignation/updateempRes/${resignation._id}`,
         updatedResignation
       )
       .then((response) => {
@@ -84,7 +86,7 @@ export default function UpdateResignation() {
     const { name, value } = e.target;
     setResignation({
       ...resignation,
-      [name]: value,
+      [name]: value
     });
   }
 
@@ -200,7 +202,7 @@ const styles = {
     backgroundColor: "#f8f9fa",
     display: "flex",
     justifyContent: "center",
-    alignItems: "flex-start",
+    alignItems: "flex-start"
   },
   formContainer: {
     width: "600px",
@@ -208,7 +210,7 @@ const styles = {
     borderRadius: "10px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
     padding: "2.5rem",
-    marginTop: "20px",
+    marginTop: "20px"
   },
   header: {
     color: "#2c3e50",
@@ -216,7 +218,7 @@ const styles = {
     marginBottom: "2rem",
     fontSize: "1.8rem",
     position: "relative",
-    paddingBottom: "0.75rem",
+    paddingBottom: "0.75rem"
   },
   headerUnderline: {
     content: '""',
@@ -226,18 +228,18 @@ const styles = {
     transform: "translateX(-50%)",
     width: "80px",
     height: "3px",
-    backgroundColor: "#fc6625",
+    backgroundColor: "#fc6625"
   },
   formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "0.5rem",
-    marginBottom: "1.5rem",
+    marginBottom: "1.5rem"
   },
   label: {
     color: "#474747",
     fontWeight: 500,
-    fontSize: "0.95rem",
+    fontSize: "0.95rem"
   },
   input: {
     width: "100%",
@@ -247,20 +249,20 @@ const styles = {
     fontSize: "1rem",
     color: "#474747",
     transition: "all 0.3s ease",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#f8f9fa"
   },
   readOnlyInput: {
     backgroundColor: "#e9ecef",
-    cursor: "not-allowed",
+    cursor: "not-allowed"
   },
   textarea: {
     minHeight: "120px",
-    resize: "vertical",
+    resize: "vertical"
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "2rem",
+    marginTop: "2rem"
   },
   updateButton: {
     flex: 1,
@@ -297,4 +299,5 @@ const styles = {
     padding: "2rem",
     color: "#dc3545",
   },
+
 };
