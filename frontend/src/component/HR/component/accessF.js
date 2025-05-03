@@ -70,12 +70,16 @@ export default function AccessF() {
         const emailContent = generateEmailContent(values);
         window.location.href = `mailto:${values.email}?subject=${emailContent.subject}&body=${emailContent.body}`;
 
-        Swal("Success!", "Access granted successfully!", "success");
+        await Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Access granted successfully!"
+        });
         setSubmitted(true);
         resetForm();
       }
     } catch (err) {
-      Swal.fire({
+      await Swal.fire({
         icon: "error",
         title: "Error",
         text: "Failed to grant access. Please try again.",
