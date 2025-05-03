@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ValidationSchema = Yup.object().shape({
   name: Yup.string()
@@ -16,8 +16,7 @@ const ValidationSchema = Yup.object().shape({
     .required("Position is required")
     .min(2, "Position must be at least 2 characters"),
 
-  department: Yup.string()
-    .required("Department is required"),
+  department: Yup.string().required("Department is required"),
 
   email: Yup.string()
     .email("Invalid email address")
@@ -41,7 +40,7 @@ const ValidationSchema = Yup.object().shape({
 
   availability: Yup.string()
     .required("Status is required")
-    .oneOf(["0", "1"], "Invalid status value")
+    .oneOf(["0", "1"], "Invalid status value"),
 });
 
 export default function UpdateEmployee() {
@@ -54,7 +53,7 @@ export default function UpdateEmployee() {
     email: "",
     phone: "",
     dateOfJoining: "",
-    availability: ""
+    availability: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,8 +69,10 @@ export default function UpdateEmployee() {
           department: res.data.department || "",
           email: res.data.email || "",
           phone: res.data.phone || "",
-          dateOfJoining: res.data.dateOfJoining ? res.data.dateOfJoining.split('T')[0] : "",
-          availability: res.data.availability || "1"
+          dateOfJoining: res.data.dateOfJoining
+            ? res.data.dateOfJoining.split("T")[0]
+            : "",
+          availability: res.data.availability || "1",
         });
         setLoading(false);
       })
@@ -146,35 +147,41 @@ export default function UpdateEmployee() {
               {[
                 { name: "name", label: "Name", type: "text" },
                 { name: "position", label: "Position", type: "text" },
-                { 
-                  name: "department", 
-                  label: "Department", 
+                {
+                  name: "department",
+                  label: "Department",
                   type: "select",
                   options: [
                     { value: "", label: "Select Department" },
                     { value: "IT", label: "IT" },
                     { value: "HR", label: "HR" },
                     { value: "Finance", label: "Finance" },
-                    { value: "Marketing", label: "Marketing" }
-                  ]
+                    { value: "Marketing", label: "Marketing" },
+                  ],
                 },
                 { name: "email", label: "Email", type: "email" },
                 { name: "phone", label: "Phone", type: "text" },
-                { name: "dateOfJoining", label: "Date of Joining", type: "date" },
-                { 
-                  name: "availability", 
-                  label: "Status", 
+                {
+                  name: "dateOfJoining",
+                  label: "Date of Joining",
+                  type: "date",
+                },
+                {
+                  name: "availability",
+                  label: "Status",
                   type: "select",
                   options: [
                     { value: "1", label: "Active" },
-                    { value: "0", label: "Inactive" }
-                  ]
-                }
+                    { value: "0", label: "Inactive" },
+                  ],
+                },
               ].map((field) => (
                 <div key={field.name} style={styles.formGroup}>
                   <label htmlFor={field.name} style={styles.label}>
                     {field.label}
-                    <span style={{ color: "#fc6625", marginLeft: "4px" }}>*</span>
+                    <span style={{ color: "#fc6625", marginLeft: "4px" }}>
+                      *
+                    </span>
                   </label>
 
                   {field.type === "select" ? (
@@ -229,7 +236,7 @@ const styles = {
     marginTop: "70px",
     padding: "20px",
     backgroundColor: "#f8f9fa",
-    minHeight: "calc(100vh - 70px)"
+    minHeight: "calc(100vh - 70px)",
   },
   formContainer: {
     maxWidth: "800px",
@@ -237,7 +244,7 @@ const styles = {
     backgroundColor: "#ffffff",
     padding: "2rem",
     borderRadius: "10px",
-    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)"
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
   },
   header: {
     color: "#2c3e50",
@@ -245,7 +252,7 @@ const styles = {
     marginBottom: "2rem",
     fontSize: "1.8rem",
     position: "relative",
-    paddingBottom: "0.75rem"
+    paddingBottom: "0.75rem",
   },
   headerUnderline: {
     content: '""',
@@ -255,17 +262,17 @@ const styles = {
     transform: "translateX(-50%)",
     width: "80px",
     height: "3px",
-    backgroundColor: "#fc6625"
+    backgroundColor: "#fc6625",
   },
   formGroup: {
-    marginBottom: "1.5rem"
+    marginBottom: "1.5rem",
   },
   label: {
     color: "#474747",
     marginBottom: "0.5rem",
     display: "block",
     fontSize: "0.95rem",
-    fontWeight: "500"
+    fontWeight: "500",
   },
   input: {
     width: "100%",
@@ -274,17 +281,17 @@ const styles = {
     borderRadius: "6px",
     fontSize: "1rem",
     color: "#474747",
-    transition: "border-color 0.3s ease"
+    transition: "border-color 0.3s ease",
   },
   errorMessage: {
     color: "#e74c3c",
     fontSize: "0.8rem",
-    marginTop: "0.25rem"
+    marginTop: "0.25rem",
   },
   buttonGroup: {
     display: "flex",
     gap: "1rem",
-    marginTop: "2rem"
+    marginTop: "2rem",
   },
   submitButton: {
     flex: 1,
@@ -298,8 +305,8 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s ease",
     "&:hover": {
-      backgroundColor: "#e55a1c"
-    }
+      backgroundColor: "#e55a1c",
+    },
   },
   cancelButton: {
     flex: 1,
@@ -313,20 +320,20 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     "&:hover": {
-      backgroundColor: "#f5f5f5"
-    }
+      backgroundColor: "#f5f5f5",
+    },
   },
   loadingContainer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     height: "calc(100vh - 70px)",
-    marginLeft: "250px"
+    marginLeft: "250px",
   },
   errorContainer: {
     marginLeft: "250px",
     marginTop: "70px",
     padding: "2rem",
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 };
