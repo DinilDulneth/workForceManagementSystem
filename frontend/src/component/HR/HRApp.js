@@ -25,6 +25,7 @@ import FetchAnnouncement from "./component/fetchAnnouncement";
 import AccessF from "./component/accessF";
 import AccessV from "./component/accessV";
 import AccessUpdate from "./component/accessU";
+import UpdateEmployee from "./component/UpdateEmployee";
 
 export default function HRApp() {
   const links = [
@@ -138,6 +139,7 @@ export default function HRApp() {
         <Route path="/addFeedback" element={<AddFeedback />} />
         <Route path="/fetchFeedback" element={<FetchFeedback />} />
         <Route path="/UpdateFeedback/:id" element={<UpdateFeedback />} />
+        <Route path="/updateEmployee/:id" element={<UpdateEmployee />} />
 
         <Route path="/AccessUpdate/:id" element={<AccessUpdate />} />
         <Route path="/approved-leaves" element={<ApprovedLeaves />} />
